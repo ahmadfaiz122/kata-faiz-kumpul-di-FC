@@ -25,6 +25,7 @@ Should you later need the extended capabilities and extensibility provided by Sv
 
 Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
 
+
 **Why enable `checkJs` in the JS template?**
 
 It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
