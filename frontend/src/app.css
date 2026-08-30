@@ -1,13 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Bitcount+Prop+Single:wght@100..900&family=Cal+Sans&family=Imperial+Script&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,100..900;1,100..900&family=Bitcount+Prop+Single:wght@100..900&family=Cal+Sans&family=Imperial+Script&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,100..900;1,100..900&family=Bitcount+Prop+Single:wght@100..900&family=Cal+Sans&family=Imperial+Script&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
 @import "tailwindcss";
 
 @theme {
+  --font-mono: "Space Mono", sans-serif;
   --font-archivo: "Archivo", sans-serif;
-  --font-anton: "Anton", sans-serif
+  --font-anton: "Anton", sans-serif;
+  --color-pale-purple: #a388ee;
   --color-laser-pink: #ff006e;
   --color-electric-cyan: #00d9ff;
   --color-cyber-lime: #ccff00;
+  --color-pale-red: #fd0b40;
   --color-off-white: #fffdf5;
   --color-pitch-black: #000000;
   --color-neon-yellow: #ccff00
