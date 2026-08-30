@@ -1,7 +1,11 @@
 <script>
-    import Card from "./lib/Card.svelte";
+    import Router from "svelte-spa-router";
+    import Dashboard from "./assets/pages/Dashboard.svelte";
+    import Profile from "./assets/pages/Profile.svelte";
+    const routes = {
+      "/" : Dashboard,
+      "/profile" : Profile
+    }
 </script>
 
-<div>
-  <Card />
-</div>
+<Router {routes} />
