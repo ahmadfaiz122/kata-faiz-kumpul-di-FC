@@ -16,3 +16,48 @@
   --color-neon-yellow: #ccff00
 }
 
+@keyframes dashboard-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: #d8d8d8;
+    color: var(--color-pitch-black);
+    font-family: "Archivo", sans-serif;
+  }
+}
+
+@layer components {
+  .dashboard-enter {
+    animation: dashboard-enter 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .dashboard-enter-delay-1 { animation-delay: 90ms; }
+  .dashboard-enter-delay-2 { animation-delay: 180ms; }
+  .dashboard-enter-delay-3 { animation-delay: 270ms; }
+
+  .button-lift {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .button-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 0 var(--button-complement, #ff006e);
+  }
+
+  .button-lift:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+}
+

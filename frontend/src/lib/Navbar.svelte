@@ -3,50 +3,22 @@
     const menus = [
         {
             name: 'Beranda',
-            href: '/'
+            href: '/#/'
         },
         {
             name: 'Barter Skill',
-            href: '/barter'
+            href: '/#/timeline'
         },
         {
             name: 'Leaderboard',
-            href: '/leaderboard'
+            href: '/#/leaderboard'
         }
     ];
 </script>
 
-<nav
-    class="flex items-center
-           h-20
-           rounded-full
-           border-2 border-black
-           bg-neon-yellow
-           shadow-[7px_7px_0_#000]"
->
-    {#each menus as menu}
-        <a
-            href={menu.href}
-            onclick={() => active = menu.name}
-            class="
-                h-full
-                flex items-center
-                rounded-full
-                px-8
+<nav class="flex h-14 items-center rounded-full border-2 border-black bg-neon-yellow shadow-[6px_6px_0_#000] sm:h-16">
 
-                font-archivo
-                text-xl
-                text-black
-                underline
-
-                transition-colors
-                duration-300
-                ease-out
-
-                hover:bg-laser-pink
-            "
-        >
-            {menu.name}
-        </a>
+    {#each menus as menu}   
+    <a href={menu.href} onclick={() => active = menu.name} class:active={active === menu.name} class="button-lift flex h-full items-center rounded-full px-4 font-mono text-xs text-black sm:px-7 sm:text-base" style="--button-complement: #ff006e">{menu.name}</a>
     {/each}
 </nav>
