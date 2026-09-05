@@ -1,7 +1,10 @@
 <script>
+    import { editPage } from "../lib/sharedvar.svelte.js";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import TimelinePost from "../lib/TimelinePost.svelte";
+
+    editPage("Barter Skill");
 
     const posts = [
         {
@@ -19,7 +22,7 @@
     <header class="dashboard-enter mx-auto grid max-w-255 grid-cols-[1fr_auto_1fr] items-center gap-4 border-t border-pitch-black pt-7">
         <a href="/#/" aria-label="Faiz home" class="h-10 w-24 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] sm:h-12 sm:w-32"></a>
         <Navbar />
-        <div class="justify-self-end"><ProfileDropdown /></div>
+        <div class="justify-self-end dashboard-enter"><ProfileDropdown /></div>
     </header>
 
     <div class="mx-auto mt-8 grid max-w-255 gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">

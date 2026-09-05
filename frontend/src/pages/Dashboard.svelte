@@ -1,8 +1,13 @@
 <script>
+    import { editPage } from "../lib/sharedvar.svelte.js";
+    import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import CategoryBar from "../lib/CategoryBar.svelte";
     import Navbar from "../lib/Navbar.svelte";
-    import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import SkillCard from "../lib/SkillCard.svelte";
+
+    editPage("Beranda");
+
+    
 
     const skillOffers = [
         { duration: "2 HOUR", mentor: "Reinzal", skill: "Svelte Anjay", category: "Design", university: "University of Surabaya", credit: 2 },
@@ -21,9 +26,10 @@
 
     <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-320 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <CategoryBar />
-        <div class="flex min-h-20 items-center justify-center rounded-full border-2 border-pitch-black bg-laser-pink px-8 text-center shadow-[6px_6px_0_#000] lg:w-80">
-            <p class="font-mono text-sm text-off-white sm:text-base">Lagi penasaran sama apa?</p>
-        </div>
+        <button type="button" class="button-lift flex lg:w-100 items-center justify-between rounded-full border-2 border-pitch-black bg-laser-pink px-8 py-4 font-archivo text-sm text-off-white shadow-[6px_6px_0_#000]" style="--button-complement: #00d9ff">
+                <span class="mx-auto">Lagi penasaran sama apa nih?</span>
+                <span aria-hidden="true" class="text-xl">⌕</span>
+            </button>
     </section>
 
     <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-320" aria-labelledby="offers-title">
@@ -47,4 +53,7 @@
             <button type="button" class="button-lift border-2 border-pitch-black bg-off-white px-7 py-3 font-mono text-xs uppercase shadow-[4px_4px_0_#000]" style="--button-complement: #00d9ff">Load More</button>
         </div>
     </section>
+    <script>
+        state.editPage("Beranda");
+    </script>
 </main>
