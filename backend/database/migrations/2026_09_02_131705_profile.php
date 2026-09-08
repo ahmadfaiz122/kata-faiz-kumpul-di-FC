@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $table->id();
-        $table->string('name');
-        $table->string('email')->unique();
+        // Profile fields are created by the later profiles table migration.
     }
 
     /**
@@ -21,6 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        // Nothing to reverse; this migration is retained for existing databases.
     }
 };

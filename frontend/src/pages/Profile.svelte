@@ -83,16 +83,17 @@
             <div class="flex min-h-40 flex-col justify-center bg-[#ffa174] px-8 py-7 shadow-[10px_10px_0_#000]">
                 <span class="font-archivo text-6xl leading-none text-[#3d6cff] h-[30px] mb-3">“</span>
                 <p class="font-mono text-sm font-bold">You can also call me by</p>
-                <p class="mt-1 font-anton text-3xl uppercase">Kastama</p>
+                <p class="mt-1 font-anton text-3xl uppercase">{user.profile?.alias || user.profile?.username || user.name}</p>
             </div>
-            <Achievement />
+            <Achievement achievements={user.profile?.achievements || []} />
         </section>
 
         <section class="dashboard-enter dashboard-enter-delay-3 mt-7 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000]">
             <h2 class="inline-block bg-pitch-black px-10 py-1 font-mono text-sm font-bold text-off-white">Skills</h2>
             <div class="mt-4 flex flex-wrap gap-3">
-                <span class="border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">Javascript</span>
-                <span class="border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">Figma</span>
+                {#each user.profile?.skills || [] as skill}
+                    <span class="border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">{skill}</span>
+                {/each}
             </div>
         </section>
         {/if}

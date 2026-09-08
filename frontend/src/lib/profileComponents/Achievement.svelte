@@ -1,5 +1,5 @@
 <script>
-	const achievements = ['Prestasi Menang Coding', 'Juara 1 WebTech GAYATAMA', 'Something'];
+	export let achievements = [];
 </script>
 
 <div class="min-h-40 border-2 border-black bg-off-white p-4 shadow-[7px_7px_0_#000] sm:p-5">

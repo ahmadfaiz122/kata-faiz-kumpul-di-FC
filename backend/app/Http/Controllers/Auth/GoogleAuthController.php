@@ -89,8 +89,6 @@ class GoogleAuthController extends Controller
         // Membutuhkan Laravel Sanctum (php artisan install:api atau composer require laravel/sanctum)
         $token = $user->createToken('auth_token')->plainTextToken;
 
-<<<<<<< HEAD
-=======
         if ($request->expectsJson()) {
             return response()->json([
                 'message' => 'Autentikasi Google berhasil.',
@@ -106,7 +104,6 @@ class GoogleAuthController extends Controller
             ]);
         }
 
->>>>>>> 91d68c62182c6dc22389ea3c913a0d033132cebf
         return redirect()->away($this->frontendUrl . '/#/login?token=' . urlencode($token));
     }
 
