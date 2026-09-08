@@ -6,10 +6,19 @@
     import Credentials from "../lib/profileComponents/Credentials.svelte";
     import Index from "../lib/profileComponents/Index.svelte";
     import Achievement from "../lib/profileComponents/Achievement.svelte";
+    import Navbar from "../lib/Navbar.svelte";
+    import ProfileDropdown from "../lib/ProfileDropdown.svelte";
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-7 sm:px-10 lg:px-14">
-    <div class="mx-auto max-w-320">
+    <header class="dashboard-enter mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"></a>
+        <Navbar />
+        <div class="justify-self-end">
+            <ProfileDropdown />
+        </div>
+    </header>
+    <div class="mx-auto mt-14 max-w-320">
         <div class="dashboard-enter relative z-100">
             <Credentials />
         </div>
@@ -25,7 +34,7 @@
 
         <section class="dashboard-enter dashboard-enter-delay-2 mt-5 grid gap-7 lg:grid-cols-[minmax(280px,1fr)_minmax(0,2fr)]">
             <div class="flex min-h-40 flex-col justify-center bg-[#ffa174] px-8 py-7 shadow-[10px_10px_0_#000]">
-                <span class="font-archivo text-6xl leading-none text-[#3d6cff]">“</span>
+                <span class="font-archivo text-6xl leading-none text-[#3d6cff] h-[30px] mb-3">“</span>
                 <p class="font-mono text-sm font-bold">You can also call me by</p>
                 <p class="mt-1 font-anton text-3xl uppercase">Kastama</p>
             </div>

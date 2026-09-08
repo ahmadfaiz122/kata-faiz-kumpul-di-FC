@@ -9,7 +9,7 @@
     ];
 </script>
 
-<article class="overflow-hidden border-2 border-pitch-black bg-off-white shadow-[10px_10px_0_#000]">
+<article class="border-2 border-pitch-black bg-off-white shadow-[10px_10px_0_#000]">
     <header class="flex items-center justify-between bg-[#2fc7b8] px-3 py-2">
         <div class="flex items-center gap-3">
             <span class="flex h-5 w-5 items-center justify-center rounded-full border-2 border-pitch-black bg-off-white text-xs">●</span>

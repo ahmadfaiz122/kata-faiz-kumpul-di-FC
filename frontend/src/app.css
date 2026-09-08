@@ -39,7 +39,7 @@
 
 @layer components {
   .dashboard-enter {
-    animation: dashboard-enter 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: dashboard-enter 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dashboard-enter-delay-1 { animation-delay: 90ms; }

@@ -101,7 +101,7 @@
 
 
     <!-- Bottom Right -->
-    <div class="flex items-center justify-between gap-4">
+    <div class="flex items-center justify-between gap-4 md:mt-0 mt-2">
 
       <span
         class="
