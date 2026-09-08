@@ -13,9 +13,13 @@
   }
 
   onMount(() => {
+<<<<<<< HEAD
     const hashQuery = window.location.hash.includes('?')
       ? window.location.hash.slice(window.location.hash.indexOf('?') + 1)
       : '';
+=======
+    const hashQuery = window.location.hash.split('?')[1] || '';
+>>>>>>> 91d68c62182c6dc22389ea3c913a0d033132cebf
     const params = new URLSearchParams(window.location.search || hashQuery);
     const token = params.get('token');
     const errParam = params.get('error');
@@ -28,7 +32,7 @@
     }
 
     if (errParam) {
-      error = decodeURIComponent(errParam);
+      error = errParam;
       // Bersihkan query string agar pesan tidak muncul lagi saat refresh
       window.history.replaceState({}, document.title, '/#/login');
     }

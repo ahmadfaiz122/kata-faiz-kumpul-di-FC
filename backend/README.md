@@ -14,8 +14,8 @@ backend/database/migrations/...      # Migration kolom google_id & avatar
 ## 1. Setup Backend (Laravel)
 
 ```bash
-composer require laravel/socialite
-php artisan install:api   # jika Sanctum belum terpasang, untuk token auth
+composer require laravel/socialite laravel/sanctum
+php artisan install:api   # publish migration/config Sanctum jika belum tersedia
 ```
 
 1. Salin isi `GoogleAuthController.php` ke `app/Http/Controllers/Auth/GoogleAuthController.php`.
@@ -80,6 +80,8 @@ npm install
 
 ## Alur token di frontend
 Setelah Laravel redirect ke `http://localhost:5173/login?token=xxx`, `Login.svelte` otomatis menyimpan token ke `localStorage` (key `auth_token`) lalu redirect ke `/dashboard`. Sesuaikan tujuan redirect dan penyimpanan token (misal pakai cookie httpOnly + endpoint `/api/me` untuk keamanan lebih baik) sesuai kebutuhan production kamu.
+
+Untuk menerima hasil autentikasi sebagai JSON, panggil callback dengan header `Accept: application/json`. Respons sukses berisi `user` (`id`, `name`, `email`, `avatar`, `google_id`) dan token Sanctum. Browser biasa tetap diarahkan ke frontend agar alur login Svelte berjalan.
 
 ## Catatan keamanan
 - Ganti `localStorage` dengan **httpOnly cookie** kalau butuh proteksi XSS lebih ketat untuk production.

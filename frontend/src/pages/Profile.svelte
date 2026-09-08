@@ -1,4 +1,5 @@
 <script>
+    import { onMount } from "svelte";
     import indexImage1 from "../assets/star.png";
     import indexImage2 from "../assets/stats.png";
     import indexImage3 from "../assets/rank.png";
@@ -8,6 +9,45 @@
     import Achievement from "../lib/profileComponents/Achievement.svelte";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
+
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    let user = null;
+    let loading = true;
+    let error = "";
+
+    onMount(async () => {
+        const token = localStorage.getItem("auth_token");
+
+        if (!token) {
+            window.location.href = "/#/login";
+            return;
+        }
+
+        try {
+            const response = await fetch(`${backendUrl}/api/user`, {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem("auth_token");
+                window.location.href = "/#/login";
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("Gagal mengambil data profile.");
+            }
+
+            user = await response.json();
+        } catch (requestError) {
+            error = requestError.message;
+        } finally {
+            loading = false;
+        }
+    });
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-7 sm:px-10 lg:px-14">
@@ -20,11 +60,18 @@
     </header>
     <div class="mx-auto mt-14 max-w-320">
         <div class="dashboard-enter relative z-100">
-            <Credentials />
+            {#if loading}
+                <p class="border-y border-pitch-black py-10 text-center font-mono text-sm">Memuat profile...</p>
+            {:else if error}
+                <p class="border-y border-pitch-black py-10 text-center font-mono text-sm text-laser-pink">{error}</p>
+            {:else}
+                <Credentials user={user} />
+            {/if}
         </div>
 
+        {#if user}
         <section class="dashboard-enter dashboard-enter-delay-1 mt-7 grid gap-7 lg:grid-cols-[minmax(280px,1fr)_minmax(0,2fr)]">
-            <Bio />
+            <Bio user={user} />
             <div class="grid gap-5 sm:grid-cols-3">
                 <Index photo={indexImage1} index="4.5/5.0" title="Rating" color="neon-yellow" />
                 <Index photo={indexImage2} index="100" title="Reputation" color="laser-pink" />
@@ -48,5 +95,6 @@
                 <span class="border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">Figma</span>
             </div>
         </section>
+        {/if}
     </div>
 </main>
