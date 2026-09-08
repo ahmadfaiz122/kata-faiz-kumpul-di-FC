@@ -1,18 +1,19 @@
 <script>
-    const photo = 'https://i.pravatar.cc/150?img=12';
+    export let user;
+    const fallbackPhoto = 'https://i.pravatar.cc/150?img=12';
 </script>
 
 
 <div class="relative flex min-h-40 items-center justify-between overflow-hidden border-y border-pitch-black py-7">
     <div class="relative z-10 flex items-center">
         <div class="h-28 w-28 shrink-0 border-2 border-black bg-off-white shadow-[6px_6px_0_#000] sm:h-40 sm:w-40">
-            <img src={photo} class="h-full w-full object-cover" alt="Kastama profile">
+            <img src={user.avatar || fallbackPhoto} class="h-full w-full object-cover" alt={`${user.name} profile`}>
         </div>
         <div class="ml-5 sm:ml-7">
             <p class="mb-3 w-max border-2 border-black bg-electric-cyan px-2 py-1 font-medium shadow-[4px_4px_0_#000]">SELAMAT DATANG</p>
-            <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">KASTAMA SHOLEH ABI NUGRAHA</h1>
+            <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{user.name}</h1>
             <div class="mt-4 flex flex-wrap items-center gap-3 font-archivo text-xs sm:text-sm">
-                <p>University of Surabaya</p>
+                <p>{user.email}</p>
                 <div class="hidden h-6 border-l border-black sm:block"></div>
                 <div class="flex gap-2">
                     <span class="h-4 w-4 rounded-full border border-black bg-off-white"></span>

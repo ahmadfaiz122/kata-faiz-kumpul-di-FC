@@ -13,21 +13,22 @@
   }
 
   onMount(() => {
-    const params = new URLSearchParams(window.location.search);
+    const hashQuery = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(window.location.search || hashQuery);
     const token = params.get('token');
     const errParam = params.get('error');
 
     if (token) {
       localStorage.setItem('auth_token', token);
       // Bersihkan query string lalu arahkan ke halaman utama/dashboard
-      window.location.href = '/dashboard';
+      window.location.href = '/#/';
       return;
     }
 
     if (errParam) {
-      error = decodeURIComponent(errParam);
+      error = errParam;
       // Bersihkan query string agar pesan tidak muncul lagi saat refresh
-      window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState({}, document.title, '/#/login');
     }
   });
 </script>

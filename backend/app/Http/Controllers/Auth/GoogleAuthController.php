@@ -47,7 +47,7 @@ class GoogleAuthController extends Controller
     {
         if ($request->filled('error')) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode('Autentikasi Google dibatalkan.')
+                $this->frontendUrl . '/#/login?error=' . urlencode('Autentikasi Google dibatalkan.')
             );
         }
 
@@ -55,7 +55,7 @@ class GoogleAuthController extends Controller
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Throwable $e) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode('Gagal melakukan autentikasi dengan Google. Silakan coba lagi.')
+                $this->frontendUrl . '/#/login?error=' . urlencode('Gagal melakukan autentikasi dengan Google. Silakan coba lagi.')
             );
         }
 
@@ -63,7 +63,7 @@ class GoogleAuthController extends Controller
 
         if (! $email || ! $this->isEmailDomainAllowed($email)) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode(
+                $this->frontendUrl . '/#/login?error=' . urlencode(
                     'Login gagal. Hanya email mahasiswa UNESA (@mhs.unesa.ac.id) yang diizinkan.'
                 )
             );
@@ -72,7 +72,7 @@ class GoogleAuthController extends Controller
         // Google mengirim flag ini pada payload user; domain saja tidak cukup.
         if (isset($googleUser->user['verified_email']) && ! $googleUser->user['verified_email']) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode('Email Google kamu belum terverifikasi.')
+                $this->frontendUrl . '/#/login?error=' . urlencode('Email Google kamu belum terverifikasi.')
             );
         }
 
@@ -104,7 +104,7 @@ class GoogleAuthController extends Controller
             ]);
         }
 
-        return redirect()->away($this->frontendUrl . '/login?token=' . urlencode($token));
+        return redirect()->away($this->frontendUrl . '/#/login?token=' . urlencode($token));
     }
 
     /**
