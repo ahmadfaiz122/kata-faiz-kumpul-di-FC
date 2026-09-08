@@ -55,7 +55,7 @@
     <div class="pointer-events-none absolute -left-24 -top-24 h-52 w-52 rounded-full border-2 border-pitch-black bg-[#ffe477] sm:h-64 sm:w-64"></div>
     <div class="pointer-events-none absolute right-[-45px] top-0 h-24 w-24 rounded-full border-2 border-pitch-black bg-[#2fc7b8]"></div>
     <div class="relative mx-auto max-w-255">
-        <header class="dashboard-enter flex items-center justify-between border-t border-pitch-black pt-5">
+        <header class="dashboard-enter relative z-30 flex items-center justify-between border-t border-pitch-black pt-5">
             <a href="/#/" aria-label="Faiz home" class="h-9 w-20 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] sm:h-11 sm:w-28"></a>
             <Navbar />
             <ProfileDropdown />

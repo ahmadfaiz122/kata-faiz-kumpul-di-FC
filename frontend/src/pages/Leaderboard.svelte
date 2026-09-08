@@ -16,7 +16,7 @@
 </script>
 
 <main class="min-h-screen overflow-hidden bg-[#ffa174] px-5 py-7 sm:px-10 lg:px-18">
-    <header class="dashboard-enter mx-auto grid max-w-255 grid-cols-[1fr_auto_1fr] items-center gap-4 pt-0 sm:pt-1">
+    <header class="dashboard-enter relative z-30 mx-auto grid max-w-255 grid-cols-[1fr_auto_1fr] items-center gap-4 pt-0 sm:pt-1">
         <a href="/#/" aria-label="Faiz home" class="h-10 w-24 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] sm:h-12 sm:w-32"></a>
         <Navbar />
         <div class="justify-self-end"><ProfileDropdown /></div>

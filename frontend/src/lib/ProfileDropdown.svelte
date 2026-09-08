@@ -20,7 +20,7 @@
 
 </script>
 
-<div class=" relative ">
+<div class="relative z-50">
     <button type="button" onclick={toggleMenu} class="flex items-center gap-2 rounded-full border-2 border-black bg-electric-cyan px-3 py-2 shadow-[6px_6px_0_#000] sm:gap-4 sm:px-6 sm:py-3" title="buttondropdown">
         <img src={user.profile_photo} alt={user.name} class="h-10 w-10 rounded-full object-cover border-2 border-black">
         <span class=" font-archivo text-xl">{user.name}</span>
@@ -35,7 +35,7 @@
                 <span class="text-center ml-1 text-2xl ">♙</span>
                 <span class=" font-archivo text-2xl ml-2 font-bold">Profile</span>
             </a>
-            
+
             <div class=" border-t-2 border-white"></div>
 
             <a href="/#/settings" onclick={closeMenu} class="flex items-center gap-5 px-3 py-2 text-white hover:bg-neon-yellow">
@@ -56,5 +56,5 @@
             </button>
 
         </div>
-    {/if}  
+    {/if}
 </div>
