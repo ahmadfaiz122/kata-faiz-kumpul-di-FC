@@ -33,7 +33,7 @@ class GoogleAuthController extends Controller
         return Socialite::driver('google')
             // 'hd' hanya HINT ke Google agar akun @unesa.ac.id lebih mudah dipilih,
             // BUKAN validasi sesungguhnya — validasi wajib tetap dilakukan di callback().
-            ->with(['hd' => 'unesa.ac.id'])
+            ->with(['hd' => 'mhs.unesa.ac.id'])
             ->redirect();
     }
 
