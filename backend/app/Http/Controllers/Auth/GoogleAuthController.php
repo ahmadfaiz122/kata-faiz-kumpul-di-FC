@@ -47,7 +47,7 @@ class GoogleAuthController extends Controller
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Throwable $e) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode('Gagal melakukan autentikasi dengan Google. Silakan coba lagi.')
+                $this->frontendUrl . '/#/login?error=' . urlencode('Gagal melakukan autentikasi dengan Google. Silakan coba lagi.')
             );
         }
 
@@ -55,7 +55,7 @@ class GoogleAuthController extends Controller
 
         if (! $email || ! $this->isEmailDomainAllowed($email)) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode(
+                $this->frontendUrl . '/#/login?error=' . urlencode(
                     'Login gagal. Hanya email mahasiswa UNESA (@mhs.unesa.ac.id) yang diizinkan.'
                 )
             );
@@ -64,7 +64,7 @@ class GoogleAuthController extends Controller
         // Opsional tapi disarankan: pastikan Google sudah verifikasi email tsb.
         if (method_exists($googleUser, 'user') && isset($googleUser->user['email_verified']) && ! $googleUser->user['email_verified']) {
             return redirect()->away(
-                $this->frontendUrl . '/login?error=' . urlencode('Email Google kamu belum terverifikasi.')
+                $this->frontendUrl . '/#/login?error=' . urlencode('Email Google kamu belum terverifikasi.')
             );
         }
 
@@ -81,7 +81,7 @@ class GoogleAuthController extends Controller
         // Membutuhkan Laravel Sanctum (php artisan install:api atau composer require laravel/sanctum)
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return redirect()->away($this->frontendUrl . '/login?token=' . urlencode($token));
+        return redirect()->away($this->frontendUrl . '/#/login?token=' . urlencode($token));
     }
 
     /**
