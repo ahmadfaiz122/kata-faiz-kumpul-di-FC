@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -33,7 +34,8 @@ class GoogleAuthController extends Controller
         return Socialite::driver('google')
             // 'hd' hanya HINT ke Google agar akun @unesa.ac.id lebih mudah dipilih,
             // BUKAN validasi sesungguhnya — validasi wajib tetap dilakukan di callback().
-            ->with(['hd' => 'unesa.ac.id'])
+            ->scopes(['openid', 'profile', 'email'])
+            ->with(['hd' => 'mhs.unesa.ac.id'])
             ->redirect();
     }
 
@@ -41,8 +43,14 @@ class GoogleAuthController extends Controller
      * Callback dari Google setelah user memberi izin.
      * GET /auth/google/callback
      */
-    public function callback()
+    public function callback(Request $request)
     {
+        if ($request->filled('error')) {
+            return redirect()->away(
+                $this->frontendUrl . '/login?error=' . urlencode('Autentikasi Google dibatalkan.')
+            );
+        }
+
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Throwable $e) {
@@ -51,7 +59,7 @@ class GoogleAuthController extends Controller
             );
         }
 
-        $email = $googleUser->getEmail();
+        $email = strtolower(trim((string) $googleUser->getEmail()));
 
         if (! $email || ! $this->isEmailDomainAllowed($email)) {
             return redirect()->away(
@@ -61,8 +69,8 @@ class GoogleAuthController extends Controller
             );
         }
 
-        // Opsional tapi disarankan: pastikan Google sudah verifikasi email tsb.
-        if (method_exists($googleUser, 'user') && isset($googleUser->user['email_verified']) && ! $googleUser->user['email_verified']) {
+        // Google mengirim flag ini pada payload user; domain saja tidak cukup.
+        if (isset($googleUser->user['verified_email']) && ! $googleUser->user['verified_email']) {
             return redirect()->away(
                 $this->frontendUrl . '/login?error=' . urlencode('Email Google kamu belum terverifikasi.')
             );
@@ -80,6 +88,21 @@ class GoogleAuthController extends Controller
 
         // Membutuhkan Laravel Sanctum (php artisan install:api atau composer require laravel/sanctum)
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Autentikasi Google berhasil.',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'avatar' => $user->avatar,
+                    'google_id' => $user->google_id,
+                ],
+                'google_profile' => $googleUser->user,
+                'token' => $token,
+            ]);
+        }
 
         return redirect()->away($this->frontendUrl . '/login?token=' . urlencode($token));
     }
