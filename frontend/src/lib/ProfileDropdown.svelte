@@ -32,6 +32,8 @@
                 <span class=" font-archivo text-xl font-bold">Profile</span>
             </a>
 
+            <div class=" border-t-2 border-white"></div>
+
             <a href="/#/edit-profile" onclick={state.closeProfileMenu} class="flex items-center gap-5 px-3 py-2 text-white hover:bg-neon-yellow hover:text-black">
                 <span class="text-center text-2xl">⚙</span>
                 <span class="font-archivo text-xl font-bold">Settings</span>
@@ -48,13 +50,5 @@
             </button>
 
         </div>
-    {/if}  
-    {#if !state.appState.isProfileDropOpen}
-    <style>
-        .profile-dropdown{
-            transition: transform 0.3s ease-in-out;
-            transform: rotate(0deg);
-        }
-    </style>
     {/if}
 </div>
