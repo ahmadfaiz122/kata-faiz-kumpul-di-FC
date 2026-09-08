@@ -38,7 +38,7 @@
       class="absolute right-0 z-102 mt-4 w-47 overflow-hidden rounded-3xl border-2 border-black bg-pitch-black shadow-[10px_10px_0_#000]"
 >
       <div class="py-1" role="none">
-        <a href="/profile" class="mb-1 transition duration-180 ease-in-out hover:-translate-y-1 flex items-center gap-5 px-3 py-2 text-sm text-white hover:bg-laser-pink hover:text-black" onclick={state.closeNavbarMenu} role="menuitem" tabindex="-1">
+        <a href="/#/profile" class="mb-1 transition duration-180 ease-in-out hover:-translate-y-1 flex items-center gap-5 px-3 py-2 text-sm text-white hover:bg-laser-pink hover:text-black" onclick={state.closeNavbarMenu} role="menuitem" tabindex="-1">
             <svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="browser" class="svg-inline--fa fa-browser w-[20px] h-[20px]" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#ffffff" d="M.3 89.5C.1 91.6 0 93.8 0 96l0 64L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256 0-64c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 160l416 0 0 256c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-256z"></path></svg>
           <span class=" font-archivo text-xl font-bold">Beranda</span>
         </a>

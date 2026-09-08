@@ -53,7 +53,4 @@
             <button type="button" class="button-lift border-2 border-pitch-black bg-off-white px-7 py-3 font-mono text-xs uppercase shadow-[4px_4px_0_#000]" style="--button-complement: #00d9ff">Load More</button>
         </div>
     </section>
-    <script>
-        state.editPage("Beranda");
-    </script>
 </main>
