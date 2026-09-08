@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
 
 Route::get('/user', function (Request $request) {
     $user = $request->user()->load('profile.skillRecords', 'profile.achievementRecords');

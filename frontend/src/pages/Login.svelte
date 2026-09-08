@@ -13,7 +13,9 @@
   }
 
   onMount(() => {
-    const hashQuery = window.location.hash.split('?')[1] || '';
+    const hashQuery = window.location.hash.includes('?')
+      ? window.location.hash.slice(window.location.hash.indexOf('?') + 1)
+      : '';
     const params = new URLSearchParams(window.location.search || hashQuery);
     const token = params.get('token');
     const errParam = params.get('error');
