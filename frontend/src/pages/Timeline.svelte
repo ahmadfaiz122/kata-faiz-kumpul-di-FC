@@ -8,7 +8,7 @@
     editPage("Barter Skill");
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-    /** @type {Array<{content: string, user?: {name?: string}, created_at: string}>} */
+    /** @type {Array<{content: string, user?: {name?: string}, created_at: string, updated_at?: string}>} */
     let posts = [];
     let content = "";
     let loading = true;
@@ -63,6 +63,10 @@
         return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date));
     }
 
+    function isEdited(post) {
+        return Boolean(post.updated_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime());
+    }
+
     onMount(loadPosts);
 
     const leaderboard = ["Kastama", "Ibna", "Reinzal"];
@@ -95,7 +99,7 @@
                     <p class="font-mono text-xs font-bold">Belum ada post. Jadilah yang pertama berbagi.</p>
                 {:else}
                     {#each posts as post, index}
-                        <div class="dashboard-enter" style="animation-delay: {index * 100}ms"><TimelinePost content={post.content} author={post.user?.name ?? "Unknown user"} createdAt={formatDate(post.created_at)} /></div>
+                        <div class="dashboard-enter" style="animation-delay: {index * 100}ms"><TimelinePost content={post.content} author={post.user?.name ?? "Unknown user"} createdAt={formatDate(post.created_at)} edited={isEdited(post)} /></div>
                     {/each}
                 {/if}
             </div>

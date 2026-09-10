@@ -3,6 +3,10 @@
     export let content = "";
     export let author = "Unknown user";
     export let createdAt = "";
+    export let edited = false;
+    export let canManage = false;
+    export let onEdit = () => {};
+    export let onDelete = () => {};
 
     const actions = [
         { label: "Like", icon: "♥" },
@@ -28,10 +32,14 @@
         {#if type === "text"}
             <p class="mx-auto max-w-140 text-center font-mono text-[10px] font-bold leading-relaxed sm:text-xs">{content}</p>
         {/if}
-        {#if createdAt}<p class="mt-4 text-center font-mono text-[9px] text-pitch-black/60">{createdAt}</p>{/if}
+        {#if createdAt}<p class="mt-4 text-center font-mono text-[9px] text-pitch-black/60">{createdAt}{#if edited} (edited){/if}</p>{/if}
     </div>
 
     <footer class="flex justify-end gap-2 px-3 pb-3 sm:gap-3 sm:px-5 sm:pb-4">
+        {#if canManage}
+            <button type="button" onclick={onEdit} class="button-lift border-2 border-pitch-black bg-[#ffe477] px-3 py-1 font-mono text-[10px] font-bold shadow-[3px_3px_0_#000] sm:text-xs">Edit</button>
+            <button type="button" onclick={onDelete} class="button-lift border-2 border-pitch-black bg-laser-pink px-3 py-1 font-mono text-[10px] font-bold text-off-white shadow-[3px_3px_0_#000] sm:text-xs">Hapus</button>
+        {/if}
         {#each actions as action}
             <button type="button" class="button-lift flex min-w-23 items-center justify-center gap-2 border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-[10px] font-bold shadow-[3px_3px_0_#000] sm:min-w-24 sm:text-xs" style="--button-complement: #ff006e">
                 <span aria-hidden="true">{action.icon}</span>{action.label}

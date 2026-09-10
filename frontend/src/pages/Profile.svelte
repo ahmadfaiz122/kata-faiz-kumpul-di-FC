@@ -9,11 +9,90 @@
     import Achievement from "../lib/profileComponents/Achievement.svelte";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
+    import TimelinePost from "../lib/TimelinePost.svelte";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, user?: {name?: string}}} ProfilePost */
+    /** @type {{id: number, name?: string}|null} */
     let user = null;
+    /** @type {ProfilePost[]} */
+    let posts = [];
     let loading = true;
     let error = "";
+    /** @type {number|null} */
+    let editingPostId = null;
+    let editContent = "";
+    let savingPost = false;
+
+    /** @param {string} date */
+    function formatDate(date) {
+        return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date));
+    }
+
+    /** @param {ProfilePost} post */
+    function isEdited(post) {
+        return Boolean(post.updated_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime());
+    }
+
+    /** @param {ProfilePost} post */
+    function startEditing(post) {
+        editingPostId = post.id;
+        editContent = post.content;
+    }
+
+    function cancelEditing() {
+        editingPostId = null;
+        editContent = "";
+    }
+
+    /** @param {number} postId */
+    async function updatePost(postId) {
+        const trimmedContent = editContent.trim();
+        if (!trimmedContent || savingPost) return;
+
+        savingPost = true;
+        error = "";
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${postId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}`,
+                },
+                body: JSON.stringify({ content: trimmedContent }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Post gagal diedit.");
+            posts = posts.map((post) => post.id === postId ? data : post);
+            cancelEditing();
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Post gagal diedit.";
+        } finally {
+            savingPost = false;
+        }
+    }
+
+    /** @param {number} postId */
+    async function deletePost(postId) {
+        if (!window.confirm("Hapus post ini?")) return;
+
+        error = "";
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${postId}`, {
+                method: "DELETE",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}`,
+                },
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Post gagal dihapus.");
+            posts = posts.filter((post) => post.id !== postId);
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Post gagal dihapus.";
+        }
+    }
 
     onMount(async () => {
         const token = localStorage.getItem("auth_token");
@@ -42,8 +121,17 @@
             }
 
             user = await response.json();
+
+            const postsResponse = await fetch(`${backendUrl}/api/user/posts`, {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!postsResponse.ok) throw new Error("Post profile gagal dimuat.");
+            posts = (await postsResponse.json()).data ?? [];
         } catch (requestError) {
-            error = requestError.message;
+            error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profile.";
         } finally {
             loading = false;
         }
@@ -94,6 +182,35 @@
                 <span class="border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">Javascript</span>
                 <span class="border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">Figma</span>
             </div>
+        </section>
+
+        <section class="dashboard-enter dashboard-enter-delay-3 mt-7">
+            <div class="mb-4 flex items-end justify-between border-b-2 border-pitch-black pb-2">
+                <h2 class="font-anton text-3xl uppercase">My Posts</h2>
+                <span class="font-mono text-xs font-bold">{posts.length} post</span>
+            </div>
+            {#if posts.length === 0}
+                <p class="border-2 border-pitch-black bg-off-white p-5 font-mono text-xs font-bold shadow-[6px_6px_0_#000]">Belum ada post di profile kamu.</p>
+            {:else}
+                <div class="space-y-7">
+                    {#each posts as post, index}
+                        {#if editingPostId === post.id}
+                            <form class="border-2 border-pitch-black bg-off-white p-4 shadow-[10px_10px_0_#000]" onsubmit={(event) => { event.preventDefault(); updatePost(post.id); }}>
+                                <label for={`edit-post-${post.id}`} class="font-mono text-xs font-bold">Edit post</label>
+                                <textarea id={`edit-post-${post.id}`} bind:value={editContent} maxlength="2000" rows="4" class="mt-3 w-full resize-y border-2 border-pitch-black bg-white p-3 font-mono text-xs outline-none focus:bg-[#fff7c7]"></textarea>
+                                <div class="mt-3 flex justify-end gap-3">
+                                    <button type="button" onclick={cancelEditing} class="border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-xs font-bold">Batal</button>
+                                    <button type="submit" disabled={savingPost || !editContent.trim()} class="button-lift border-2 border-pitch-black bg-laser-pink px-4 py-1 font-mono text-xs font-bold text-off-white shadow-[3px_3px_0_#000] disabled:opacity-50">{savingPost ? "Menyimpan..." : "Simpan"}</button>
+                                </div>
+                            </form>
+                        {:else}
+                            <div class="dashboard-enter" style="animation-delay: {index * 100}ms">
+                                <TimelinePost content={post.content} author={post.user?.name ?? user.name} createdAt={formatDate(post.created_at)} edited={isEdited(post)} canManage={true} onEdit={() => startEditing(post)} onDelete={() => deletePost(post.id)} />
+                            </div>
+                        {/if}
+                    {/each}
+                </div>
+            {/if}
         </section>
         {/if}
     </div>
