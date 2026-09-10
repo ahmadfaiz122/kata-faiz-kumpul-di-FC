@@ -13,6 +13,15 @@
     let skillCategory = "";
     let achievementName = "";
     let achievementOrganization = "";
+    let achievementDatetgl = "";
+    let achievementDateTahun = "";
+    let achievementExpirytgl = "";
+    let achievementExpiryTahun = "";
+    let achievementLevel = "";
+    let achievementSubmitting = false;
+    let achievementError = "";
+    let skillSubmitting = false;
+    let skillError = "";
     let profile = { name: "", username: "", alias: "", bio: "", email: "", nim: "", photo: "", linkedin: "", github: "", twitter: "" };
 
     let achievements = [];
@@ -49,8 +58,8 @@
                 github: stored.github || "",
                 twitter: stored.twitter || "",
             };
-            skills = stored.skills || [];
-            achievements = stored.achievements || [];
+            skills = stored.skill_records || [];
+            achievements = stored.achievement_records || [];
         } catch (requestError) {
             error = requestError.message;
         } finally {
@@ -73,10 +82,9 @@
                 body: JSON.stringify({
                     ...profile,
                     avatar: profile.photo || null,
-                    skills,
-                    achievements,
                 }),
             });
+            
             if (response.status === 401) {
                 localStorage.removeItem("auth_token");
                 window.location.href = "/#/login";
@@ -99,29 +107,106 @@
         skillName = "";
         skillCategory = "";
         achievementName = "";
-        achievementOrganization = "";
+        achievementDateTahun = "";
+        achievementDateTgl = "";
+        achievementExpiryTahun = "";
+        achievementExpiryTgl = "";
+        achievementLevel = "";
     }
 
-    function addSkill() {
-        if (skillName.trim()) {
-            skills = [...skills, skillName.trim()];
+    async function addSkill() {
+        if (!skillName.trim() || skillSubmitting) return;
+        skillSubmitting = true;
+        skillError = "";
+        try {
+            const result = await fetch(`${backendUrl}/api/skills`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+                body: JSON.stringify({
+                    name: skillName.trim(),
+                    category_skills: skillCategory || null,
+                }),
+            });
+            const data = await result.json();
+            skills = [...skills, data.data];
             closeModal();
+        } catch (requestError) {
+            if (requestError instanceof ApiError && requestError.status === 401) return;
+            skillError = requestError.message;
+        } finally {
+            skillSubmitting = false;
         }
     }
 
-    function addAchievement() {
-        if (achievementName.trim()) {
-            achievements = [...achievements, achievementName.trim()];
+    async function addAchievement() {
+        if (!achievementName.trim() || achievementSubmitting) return;
+        achievementSubmitting = true;
+        achievementError = "";
+        try {
+            const result = await fetch(`${backendUrl}/api/achievements`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+                body: JSON.stringify({
+                    name: achievementName.trim(),
+                    tanggal_terbit: parseInt(String(achievementDateTahun) + String(achievementDatetgl), 10) || null,
+                    kadaluwarsa: parseInt(String(achievementExpiryTahun) + String(achievementExpirytgl), 10) || null,
+                    levels: achievementLevel.trim() || null,
+                }),
+            });
+            const data = await result.json();
+            achievements = [...achievements, data.data];
             closeModal();
+        } catch (requestError) {
+            if (requestError instanceof ApiError && requestError.status === 401) return;
+            achievementError = requestError.message;
+        } finally {
+            achievementSubmitting = false;
         }
     }
 
-    function removeSkill(skill) {
-        skills = skills.filter((item) => item !== skill);
+    async function removeSkill(skillId, skillName) {
+        error = "";
+        try {
+            const response = await fetch(`${backendUrl}/api/skills/${skillId}`, {
+                method: "DELETE",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+            });
+            skills = skills.filter((item) => item.name !== skillName);
+        } catch (requestError) {
+            if (!(requestError instanceof ApiError && requestError.status === 401)) {
+                error = requestError.message;
+            }
+        }
     }
 
-    function removeAchievement(index) {
-        achievements = achievements.filter((_, itemIndex) => itemIndex !== index);
+    async function removeAchievement(achievementId, index) {
+        try {
+            const result = await fetch(`${backendUrl}/api/achievements/${achievementId}`, {
+                method: "DELETE",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+            });
+            const data = await result.json();
+            achievements = achievements.filter((_, itemIndex) => itemIndex !== index);
+        } catch (requestError) {
+            if (requestError instanceof ApiError && requestError.status === 401) return;
+            achievementError = requestError.message;
+        }
     }
 </script>
 
@@ -171,16 +256,16 @@
                         {#each achievements as achievement, index}
                             <div class="flex items-center gap-3 {index > 0 ? 'border-t border-pitch-black/50 pt-3 mt-3' : ''}">
                                 <div class="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-pitch-black bg-[#ffe477] text-xl">🏅</div>
-                                <div class="flex-1 font-archivo text-[9px]"><p>{achievement}</p><p class="mt-2 text-[8px]">Dibuat 09/2026 | Kedaluwarsa 03/2030</p></div>
-                                <span class="bg-[#ffa174] px-2 py-1 text-[8px]">INTERNASIONAL</span>
-                                <button type="button" aria-label="Delete achievement" onclick={() => removeAchievement(index)} class="text-sm">♙</button>
+                                <div class="flex-1 font-archivo text-[9px]"><p>{achievement.name}</p><p class="mt-2 text-[8px]">Dibuat {String(achievement.tanggal_terbit).slice(-2)}/20{Math.floor(achievement.tanggal_terbit / 100)} | Kedaluwarsa {String(achievement.kadaluwarsa).slice(-2)}/20{Math.floor(achievement.kadaluwarsa / 100)}</p></div>
+                                <span class="bg-[#ffa174] px-2 py-1 text-[8px]">{achievement.levels}</span>
+                                <button type="button" aria-label="Delete achievement" onclick={() => removeAchievement(parseInt(achievement.id, 10), index)} class="text-sm">♙</button>
                             </div>
                         {/each}
                     </div>
                 </div>
                 <div class="mt-8">
                     <div class="flex items-center justify-between font-mono text-[10px] font-bold"><span>Skill dan Kemampuan</span><button type="button" onclick={() => activeModal = "skill"} class="button-lift bg-electric-cyan px-3 py-1 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">＋ Tambah</button></div>
-                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]"><p class="font-mono text-[9px]">Skills I Can Teach</p>{#each skills as skill}<button type="button" onclick={() => removeSkill(skill)} class="mr-2 mt-2 inline-block rounded-full border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-[9px]">{skill} ×</button>{/each}</div>
+                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]"><p class="font-mono text-[9px]">Skills I Can Teach</p>{#each skills as skill}<button type="button" onclick={() => removeSkill(skill.id, skill.name)} class="mr-2 mt-2 inline-block rounded-full border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-[9px]">{skill.name} ×</button>{/each}</div>
                 </div>
             </section>
 
@@ -222,9 +307,40 @@
                     <div class="grid gap-6">
                         <label class="grid gap-2 font-archivo text-lg">Nama Prestasi<input bind:value={achievementName} required placeholder="Masukkan Nama Prestasi.." class="modal-input" /></label>
                         <label class="grid gap-2 font-archivo text-lg">Organisasi Penerbit<input bind:value={achievementOrganization} placeholder="Nama Organisasi Penerbit..." class="modal-input" /></label>
-                        <div class="grid gap-4 sm:grid-cols-2"><label class="grid gap-2 font-archivo text-lg">Tanggal Terbit<select class="modal-input"><option>Bulan</option><option>09</option></select></label><select aria-label="Tahun terbit" class="modal-input self-end"><option>Tahun</option><option>2026</option></select></div>
-                        <label class="grid gap-2 font-archivo text-lg">Tingkat<select class="modal-input"><option>Nasional</option><option>Internasional</option></select></label>
-                        <div class="flex justify-end"><button type="submit" class="button-lift bg-[#48b3cf] px-7 py-2 font-archivo text-lg shadow-[4px_4px_0_#000]" style="--button-complement: #ccff00">Validasi</button></div>
+                        <div class="grid gap-4 sm:grid-cols-2"><label class="grid gap-2 font-archivo text-lg">Tanggal Terbit<select bind:value={achievementDatetgl} class="modal-input"><option>Bulan</option>
+                            <option>01</option>
+                            <option>02</option>
+                            <option>03</option>
+                            <option>04</option>
+                            <option>05</option>
+                            <option>06</option>
+                            <option>07</option>
+                            <option>08</option>
+                            <option>09</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select></label><input bind:value={achievementDateTahun} aria-label="Tahun terbit" class="modal-input self-end" type="number" placeholder="2 Digit Tahun" min="10" max="26"/></div>
+                        <div class="grid gap-4 sm:grid-cols-2"><label class="grid gap-2 font-archivo text-lg">Kadaluwarsa<select bind:value={achievementExpirytgl} class="modal-input"><option>Bulan</option>
+                            <option>01</option>
+                            <option>02</option>
+                            <option>03</option>
+                            <option>04</option>
+                            <option>05</option>
+                            <option>06</option>
+                            <option>07</option>
+                            <option>08</option>
+                            <option>09</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select></label><input bind:value={achievementExpiryTahun} aria-label="Tahun Kadaluwarsa" class="modal-input self-end" type="number" placeholder="2 Digit Tahun" min="14" max="99"/></div>
+                        <label class="grid gap-2 font-archivo text-lg">Tingkat<select bind:value={achievementLevel} class="modal-input"><option>Nasional</option><option>Internasional</option></select></label>
+                        <div class="flex justify-end">{#if achievementError}<p class="font-archivo text-lg text-[#b3261e]">{achievementError}</p>{/if}
+        <div class="flex justify-end">
+            <button type="submit" disabled={achievementSubmitting} class="button-lift bg-[#48b3cf] px-7 py-2 font-archivo text-lg shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ccff00">
+                {achievementSubmitting ? "Menyimpan..." : "Validasi"}
+            </button>
                     </div>
                 </form>
             </dialog>

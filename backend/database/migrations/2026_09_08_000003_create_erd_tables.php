@@ -48,6 +48,8 @@ return new class extends Migration
                 $table->string('levels')->nullable();
                 $table->string('category')->nullable();
                 $table->boolean('validated_upload')->default(false);
+                $table->integer('tanggal_terbit');
+                $table->integer('kadaluwarsa');
                 $table->timestamps();
             });
         }

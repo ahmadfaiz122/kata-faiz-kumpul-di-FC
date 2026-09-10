@@ -11,7 +11,7 @@
 
     const skillOffers = [
         { duration: "2 HOUR", mentor: "Reinzal", skill: "Svelte Anjay", category: "Design", university: "University of Surabaya", credit: 2 },
-        { duration: "1 HOUR", mentor: "Alya", skill: "Brand Strategy", category: "Business", university: "Institut Teknologi Sepuluh Nopember", credit: 1 }
+        { duration: "1 HOUR", mentor: "Alya", skill: "Brand Strategy", category: "Business", university: "University of Surabaya", credit: 1 }
     ];
 </script>
 
