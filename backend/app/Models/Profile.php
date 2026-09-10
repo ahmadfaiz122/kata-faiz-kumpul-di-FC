@@ -14,7 +14,7 @@ class Profile extends Model
         'nim',
         'linkedin',
         'github',
-        'twitter',
+        'instagram',
         'rating',
         'reputation',
         'leaderboard',
