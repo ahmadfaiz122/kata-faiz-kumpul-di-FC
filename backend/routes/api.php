@@ -18,11 +18,13 @@ Route::get('/user', function (Request $request) {
     return $user;
 })->middleware('auth:sanctum');
 
+Route::get('/posts', [PostController::class, 'index']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
 
-    Route::post('/posts', [PostController::class, 'store']);
+    // Route::post('/posts', [PostController::class, 'store']);
 
     Route::get('/skills', [SkillController::class, 'index']);
     Route::post('/skills', [SkillController::class, 'store']);
@@ -31,4 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/achievements', [AchievementController::class, 'index']);
     Route::post('/achievements', [AchievementController::class, 'store']);
     Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::get('/user/posts', [PostController::class, 'mine']);
+    Route::put('/posts/{post}', [PostController::class, 'update']);
+    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
 });

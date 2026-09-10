@@ -56,12 +56,12 @@
                 nim: stored.nim || "",
                 linkedin: stored.linkedin || "",
                 github: stored.github || "",
-                twitter: stored.twitter || "",
+                instagram: stored.instagram || "",
             };
             skills = stored.skill_records || [];
             achievements = stored.achievement_records || [];
         } catch (requestError) {
-            error = requestError.message;
+            error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profile.";
         } finally {
             loading = false;
         }
@@ -72,11 +72,31 @@
         saved = false;
         error = "";
         try {
+            const body = new FormData();
+            body.append("_method", "PUT");
+            body.append("name", profile.name);
+            body.append("username", profile.username);
+            body.append("bio", profile.bio);
+            body.append("email", profile.email);
+            body.append("nim", profile.nim);
+            for (const [field, value] of [["linkedin", profile.linkedin], ["instagram", profile.instagram], ["github", profile.github]]) {
+                const link = value.trim();
+                if (!link) continue;
+                try {
+                    const parsedLink = new URL(link);
+                    if (!['http:', 'https:'].includes(parsedLink.protocol)) throw new Error();
+                } catch {
+                    const label = field === "instagram" ? "Instagram" : field[0].toUpperCase() + field.slice(1);
+                    throw new Error(`${label} harus berupa URL lengkap, contoh: https://...`);
+                }
+                body.append(field, link);
+            }
+            if (avatarFile) body.append("avatar", avatarFile);
+
             const response = await fetch(`${backendUrl}/api/profile`, {
-                method: "PUT",
+                method: "POST",
                 headers: {
                     Accept: "application/json",
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
                 },
                 body: JSON.stringify({
@@ -94,9 +114,9 @@
                 const data = await response.json().catch(() => ({}));
                 throw new Error(data.message || "Profile gagal disimpan.");
             }
-            saved = true;
+            window.location.href = "/#/profile";
         } catch (requestError) {
-            error = requestError.message;
+            error = requestError instanceof Error ? requestError.message : "Profile gagal disimpan.";
         } finally {
             saving = false;
         }
@@ -223,6 +243,9 @@
         {#if loading}
             <p class="py-20 text-center font-mono text-sm">Memuat profile...</p>
         {:else}
+        <div class="mt-10">
+            <a href="/#/profile" aria-label="Kembali ke profile" title="Kembali ke profile" class="button-lift inline-flex h-11 w-11 items-center justify-center border-2 border-pitch-black bg-off-white text-xl font-bold shadow-[4px_4px_0_#000]">←</a>
+        </div>
         <form onsubmit={(event) => { event.preventDefault(); saveProfile(); }} class="pb-10">
             <section class="dashboard-enter dashboard-enter-delay-1 mt-12 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000] sm:p-9">
                 <h1 class="font-mono text-xl font-bold sm:text-2xl">General Information</h1>
@@ -231,8 +254,9 @@
                         <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000]">
                             {#if profile.photo}<img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
                         </div>
-                        <button type="button" class="button-lift bg-electric-cyan px-3 py-2 font-mono text-[10px] font-bold shadow-[3px_3px_0_#000]" style="--button-complement: #ff006e">Upload Avatar</button>
-                        <span class="font-mono text-[8px]">Max size 1MB</span>
+                        <input bind:this={avatarInput} onchange={selectAvatar} type="file" accept="image/*" class="hidden" />
+                        <button type="button" onclick={() => avatarInput?.click()} class="button-lift bg-electric-cyan px-3 py-2 font-mono text-[10px] font-bold shadow-[3px_3px_0_#000]" style="--button-complement: #ff006e">Upload Avatar</button>
+                        <span class="font-mono text-[8px]">Image only, max 2 MB</span>
                     </div>
                     <div class="grid gap-5">
                         <div class="grid gap-4 sm:grid-cols-2">
@@ -242,7 +266,7 @@
                         <label class="grid gap-1 font-mono text-[10px]">About<textarea bind:value={profile.bio} placeholder="Story about yourself..." rows="5" class="form-input resize-none"></textarea></label>
                         <div class="grid gap-4 sm:grid-cols-2">
                             <label class="grid gap-1 font-mono text-[10px]">Email<input type="email" bind:value={profile.email} class="form-input" /></label>
-                            <label class="grid gap-1 font-mono text-[10px]">NIM<input bind:value={profile.nim} class="form-input" /></label>
+                            <label class="grid gap-1 font-mono text-[10px]">NIM<input value={profile.nim} readonly class="form-input cursor-not-allowed bg-[#e8e8e8]" /></label>
                         </div>
                     </div>
                 </div>
@@ -272,14 +296,13 @@
             <section class="dashboard-enter dashboard-enter-delay-3 mt-9 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000] sm:p-9">
                 <h2 class="font-mono text-xl font-bold sm:text-2xl">Social Media</h2>
                 <div class="mt-8 grid gap-6">
-                    <label class="grid gap-1 font-mono text-[10px]">LinkedIn Account<input bind:value={profile.linkedin} class="form-input" /></label>
-                    <label class="grid gap-1 font-mono text-[10px]">Github Account<input bind:value={profile.github} class="form-input" /></label>
-                    <label class="grid gap-1 font-mono text-[10px]">X Account<input bind:value={profile.twitter} class="form-input" /></label>
+                    <label class="grid gap-1 font-mono text-[10px]">LinkedIn Account<input type="text" inputmode="url" placeholder="https://linkedin.com/in/..." bind:value={profile.linkedin} class="form-input" /></label>
+                    <label class="grid gap-1 font-mono text-[10px]">Instagram Account<input type="text" inputmode="url" placeholder="https://instagram.com/..." bind:value={profile.instagram} class="form-input" /></label>
+                    <label class="grid gap-1 font-mono text-[10px]">Github Account (optional)<input type="text" inputmode="url" placeholder="https://github.com/..." bind:value={profile.github} class="form-input" /></label>
                 </div>
             </section>
 
             <div class="mt-10 flex items-center justify-center gap-4">
-                {#if saved}<span class="font-mono text-xs font-bold text-[#168f56]">Saved!</span>{/if}
                 {#if error}<span class="font-mono text-xs font-bold text-[#b3261e]">{error}</span>{/if}
                 <button type="submit" disabled={saving} class="button-lift bg-pale-purple px-6 py-3 font-mono text-xs font-bold shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ff006e">{saving ? "SAVING..." : "SAVE CHANGES"}</button>
             </div>

@@ -35,7 +35,10 @@ class GoogleAuthController extends Controller
             // 'hd' hanya HINT ke Google agar akun @unesa.ac.id lebih mudah dipilih,
             // BUKAN validasi sesungguhnya — validasi wajib tetap dilakukan di callback().
             ->scopes(['openid', 'profile', 'email'])
-            ->with(['hd' => 'mhs.unesa.ac.id'])
+            ->with([
+                'hd' => 'mhs.unesa.ac.id',
+                'prompt' => 'select_account', // selalu minta pilih akun, agar user bisa ganti akun jika salah login
+            ])
             ->redirect();
     }
 

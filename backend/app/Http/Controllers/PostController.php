@@ -30,6 +30,30 @@ class PostController extends Controller
         return response()->json($post, 201);
     }
 
+    public function mine(Request $request): JsonResponse
+    {
+        $posts = $request->user()->posts()
+            ->with('user:id,name')
+            ->latest('id')
+            ->get();
+
+        return response()->json(['data' => $posts]);
+    }
+
+    public function update(Request $request, Post $post): JsonResponse
+    {
+        abort_unless($request->user()->is($post->user), 403);
+
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $post->update($validated);
+        $post->load('user:id,name');
+
+        return response()->json($post);
+    }
+
     public function destroy(Request $request, Post $post): JsonResponse
     {
         abort_unless($request->user()->is($post->user), 403);
