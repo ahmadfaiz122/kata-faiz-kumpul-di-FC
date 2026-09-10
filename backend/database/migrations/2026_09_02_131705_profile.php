@@ -9,7 +9,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Profile schema is created by the following migration.
+        // Profile fields are created by the later profiles table migration.
     }
 
     /**
@@ -17,6 +17,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        // Nothing to reverse; this migration is retained for existing databases.
     }
 };

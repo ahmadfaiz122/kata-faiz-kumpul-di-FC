@@ -5,5 +5,5 @@
 
 <div class=" w-auto lg:w-96 h-max shadow-[10px_10px_0_#000] bg-pale-purple border-2 border-black p-7">
     <p class=" font-mono font-medium text-off-white bg-pitch-black px-4 py-2 w-max">About Me!</p>
-    <p class=" font-semibold text-lg font-mono text-pitch-black mt-5">{user.bio || shortBio}</p>
+    <p class=" font-semibold text-lg font-mono text-pitch-black mt-5">{user.profile?.bio || shortBio}</p>
 </div>

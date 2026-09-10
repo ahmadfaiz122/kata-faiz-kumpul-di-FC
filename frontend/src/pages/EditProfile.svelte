@@ -1,31 +1,97 @@
 <script>
+    import { onMount } from "svelte";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
 
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let saved = false;
+    let loading = true;
+    let saving = false;
+    let error = "";
     let activeModal = "";
     let skillName = "";
     let skillCategory = "";
     let achievementName = "";
     let achievementOrganization = "";
-    let profile = {
-        name: "Kastama Sholeh Abi Nugraha",
-        username: "Kastama",
-        alias: "Kastama",
-        bio: "",
-        email: "394539530530@mhs.unesa.ac.id",
-        nim: "48086980506442",
-        photo: "https://i.pravatar.cc/150?img=12",
-        linkedin: "linkedin.com/username",
-        github: "github.com/username",
-        twitter: "x.com/username"
-    };
+    let profile = { name: "", username: "", alias: "", bio: "", email: "", nim: "", photo: "", linkedin: "", github: "", twitter: "" };
 
-    let achievements = ["Organisasi Penerbit", "Organisasi Penerbit"];
-    let skills = ["Figma"];
+    let achievements = [];
+    let skills = [];
 
-    function saveProfile() {
-        saved = true;
+    onMount(async () => {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+            window.location.href = "/#/login";
+            return;
+        }
+
+        try {
+            const response = await fetch(`${backendUrl}/api/profile`, {
+                headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+            });
+            if (response.status === 401) {
+                localStorage.removeItem("auth_token");
+                window.location.href = "/#/login";
+                return;
+            }
+            if (!response.ok) throw new Error("Gagal mengambil data profile.");
+            const data = await response.json();
+            const stored = data.profile || {};
+            profile = {
+                name: data.name || "",
+                email: data.email || "",
+                photo: data.avatar || "",
+                username: stored.username || "",
+                alias: stored.alias || "",
+                bio: stored.bio || "",
+                nim: stored.nim || "",
+                linkedin: stored.linkedin || "",
+                github: stored.github || "",
+                twitter: stored.twitter || "",
+            };
+            skills = stored.skills || [];
+            achievements = stored.achievements || [];
+        } catch (requestError) {
+            error = requestError.message;
+        } finally {
+            loading = false;
+        }
+    });
+
+    async function saveProfile() {
+        saving = true;
+        saved = false;
+        error = "";
+        try {
+            const response = await fetch(`${backendUrl}/api/profile`, {
+                method: "PUT",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+                body: JSON.stringify({
+                    ...profile,
+                    avatar: profile.photo || null,
+                    skills,
+                    achievements,
+                }),
+            });
+            if (response.status === 401) {
+                localStorage.removeItem("auth_token");
+                window.location.href = "/#/login";
+                return;
+            }
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || "Profile gagal disimpan.");
+            }
+            saved = true;
+        } catch (requestError) {
+            error = requestError.message;
+        } finally {
+            saving = false;
+        }
     }
 
     function closeModal() {
@@ -49,6 +115,14 @@
             closeModal();
         }
     }
+
+    function removeSkill(skill) {
+        skills = skills.filter((item) => item !== skill);
+    }
+
+    function removeAchievement(index) {
+        achievements = achievements.filter((_, itemIndex) => itemIndex !== index);
+    }
 </script>
 
 <main class="relative min-h-screen overflow-hidden bg-[#d8d8d8] px-5 py-5 sm:px-10 lg:px-18">
@@ -61,13 +135,16 @@
             <ProfileDropdown />
         </header>
 
-        <form onsubmit={(event) => { event.preventDefault(); saved = true; }} class="pb-10">
+        {#if loading}
+            <p class="py-20 text-center font-mono text-sm">Memuat profile...</p>
+        {:else}
+        <form onsubmit={(event) => { event.preventDefault(); saveProfile(); }} class="pb-10">
             <section class="dashboard-enter dashboard-enter-delay-1 mt-12 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000] sm:p-9">
                 <h1 class="font-mono text-xl font-bold sm:text-2xl">General Information</h1>
                 <div class="mt-6 grid gap-7 sm:grid-cols-[120px_1fr]">
                     <div class="flex flex-col items-center gap-3">
                         <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000]">
-                            <img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />
+                            {#if profile.photo}<img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
                         </div>
                         <button type="button" class="button-lift bg-electric-cyan px-3 py-2 font-mono text-[10px] font-bold shadow-[3px_3px_0_#000]" style="--button-complement: #ff006e">Upload Avatar</button>
                         <span class="font-mono text-[8px]">Max size 1MB</span>
@@ -96,14 +173,14 @@
                                 <div class="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-pitch-black bg-[#ffe477] text-xl">🏅</div>
                                 <div class="flex-1 font-archivo text-[9px]"><p>{achievement}</p><p class="mt-2 text-[8px]">Dibuat 09/2026 | Kedaluwarsa 03/2030</p></div>
                                 <span class="bg-[#ffa174] px-2 py-1 text-[8px]">INTERNASIONAL</span>
-                                <button type="button" aria-label="Delete achievement" class="text-sm">♙</button>
+                                <button type="button" aria-label="Delete achievement" onclick={() => removeAchievement(index)} class="text-sm">♙</button>
                             </div>
                         {/each}
                     </div>
                 </div>
                 <div class="mt-8">
                     <div class="flex items-center justify-between font-mono text-[10px] font-bold"><span>Skill dan Kemampuan</span><button type="button" onclick={() => activeModal = "skill"} class="button-lift bg-electric-cyan px-3 py-1 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">＋ Tambah</button></div>
-                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]"><p class="font-mono text-[9px]">Skills I Can Teach</p>{#each skills as skill}<span class="mr-2 mt-2 inline-block rounded-full border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-[9px]">{skill} ×</span>{/each}</div>
+                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]"><p class="font-mono text-[9px]">Skills I Can Teach</p>{#each skills as skill}<button type="button" onclick={() => removeSkill(skill)} class="mr-2 mt-2 inline-block rounded-full border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-[9px]">{skill} ×</button>{/each}</div>
                 </div>
             </section>
 
@@ -118,9 +195,11 @@
 
             <div class="mt-10 flex items-center justify-center gap-4">
                 {#if saved}<span class="font-mono text-xs font-bold text-[#168f56]">Saved!</span>{/if}
-                <button type="submit" class="button-lift bg-pale-purple px-6 py-3 font-mono text-xs font-bold shadow-[4px_4px_0_#000]" style="--button-complement: #ff006e">SAVE CHANGES</button>
+                {#if error}<span class="font-mono text-xs font-bold text-[#b3261e]">{error}</span>{/if}
+                <button type="submit" disabled={saving} class="button-lift bg-pale-purple px-6 py-3 font-mono text-xs font-bold shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ff006e">{saving ? "SAVING..." : "SAVE CHANGES"}</button>
             </div>
         </form>
+        {/if}
     </div>
 </main>
 
