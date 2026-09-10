@@ -1,6 +1,12 @@
 <script>
     export let user;
     const fallbackPhoto = 'https://i.pravatar.cc/150?img=12';
+    $: socialLinks = [
+        { label: 'LinkedIn', icon: 'in', href: user.profile?.linkedin },
+        { label: 'Instagram', icon: 'IG', href: user.profile?.instagram },
+        { label: 'GitHub', icon: 'GH', href: user.profile?.github },
+    ].filter((social) => social.href);
+    $: profileComplete = Boolean(user.profile?.username || user.profile?.bio || user.profile?.nim || socialLinks.length);
 </script>
 
 
@@ -16,15 +22,15 @@
                 <p>{user.email}</p>
                 <div class="hidden h-6 border-l border-black sm:block"></div>
                 <div class="flex gap-2">
-                    <span class="h-4 w-4 rounded-full border border-black bg-off-white"></span>
-                    <span class="h-4 w-4 rounded-full border border-black bg-off-white"></span>
-                    <span class="h-4 w-4 rounded-full border border-black bg-off-white"></span>
+                    {#each socialLinks as social}
+                        <a href={social.href} target="_blank" rel="noreferrer" aria-label={social.label} title={social.label} class="flex h-6 min-w-6 items-center justify-center border-2 border-black bg-off-white px-1 font-mono text-[8px] font-bold hover:bg-neon-yellow">{social.icon}</a>
+                    {/each}
                 </div>
             </div>
         </div>
     </div>
 
     <div class="absolute bottom-0 right-0 h-full md:w-1/3 w-[190px] bg-[#ffa174] [clip-path:polygon(35%_0,100%_0,100%_100%,0_100%,0_78%,15%_78%,15%_58%,30%_58%,30%_35%,45%_35%,45%_0)]"></div>
-    <a href="/#/edit-profile" title="Edit profile" class="button-lift relative z-10 mr-1 shrink-0 border-2 border-black bg-off-white px-2 py-1 font-mono text-xs font-bold md:shadow-[5px_5px_0_#000] shadow-[2px_2px_0_#000] sm:mr-7 sm:px-7 sm:py-4 sm:text-sm" style="--button-complement: #ff006e">Edit Profile</a>
+    <a href="/#/edit-profile" title={profileComplete ? "Edit profile" : "Lengkapi profile"} class="button-lift relative z-10 mr-1 shrink-0 border-2 border-black bg-off-white px-2 py-1 font-mono text-xs font-bold md:shadow-[5px_5px_0_#000] shadow-[2px_2px_0_#000] sm:mr-7 sm:px-7 sm:py-4 sm:text-sm" style="--button-complement: #ff006e">{profileComplete ? "Edit Profile" : "Lengkapi Profile"}</a>
 </div>
 

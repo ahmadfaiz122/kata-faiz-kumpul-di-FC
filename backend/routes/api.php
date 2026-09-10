@@ -19,6 +19,8 @@ Route::get('/user', function (Request $request) {
 Route::get('/posts', [PostController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
     Route::post('/posts', [PostController::class, 'store']);
     Route::get('/user/posts', [PostController::class, 'mine']);
     Route::put('/posts/{post}', [PostController::class, 'update']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
@@ -17,15 +18,15 @@ class ProfileController extends Controller
     {
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
-            'avatar' => ['sometimes', 'nullable', 'url', 'max:2048'],
+            'avatar' => ['sometimes', 'nullable', 'image', 'max:2048'],
             'username' => ['sometimes', 'nullable', 'string', 'max:50'],
             'alias' => ['sometimes', 'nullable', 'string', 'max:100'],
             'bio' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
             'nim' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'linkedin' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'github' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'twitter' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'linkedin' => ['sometimes', 'nullable', 'url', 'max:255'],
+            'github' => ['sometimes', 'nullable', 'url', 'max:255'],
+            'instagram' => ['sometimes', 'nullable', 'url', 'max:255'],
             'skills' => ['sometimes', 'array'],
             'skills.*' => ['string', 'max:100'],
             'achievements' => ['sometimes', 'array'],
@@ -33,12 +34,21 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar && str_contains($user->avatar, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', parse_url($user->avatar, PHP_URL_PATH)));
+            }
+
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = $request->getSchemeAndHttpHost() . Storage::url($validated['avatar']);
+        }
+
         $user->fill(array_intersect_key($validated, array_flip(['name', 'email', 'avatar'])));
         $user->save();
 
         $profile = $user->profile()->updateOrCreate([], array_intersect_key(
             $validated,
-            array_flip(['username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'twitter', 'skills', 'achievements'])
+            array_flip(['username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'skills', 'achievements'])
         ));
 
         if (array_key_exists('skills', $validated)) {
