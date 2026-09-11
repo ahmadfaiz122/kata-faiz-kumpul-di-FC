@@ -4,6 +4,7 @@
     import CategoryBar from "../lib/CategoryBar.svelte";
     import Navbar from "../lib/Navbar.svelte";
     import SkillCard from "../lib/SkillCard.svelte";
+    import logo from "../assets/logo.png";
 
     editPage("Beranda");
 
@@ -17,7 +18,9 @@
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"></a>
+        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full object-contain p-1">
+        </a>
         <Navbar />
         <div class="justify-self-end">
             <ProfileDropdown />

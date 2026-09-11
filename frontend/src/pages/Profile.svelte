@@ -10,6 +10,7 @@
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import TimelinePost from "../lib/TimelinePost.svelte";
+    import logo from "../assets/logo.png";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, user?: {name?: string}}} ProfilePost */
@@ -23,6 +24,11 @@
     let editingPostId = null;
     let editContent = "";
     let savingPost = false;
+
+    function logout() {
+        localStorage.removeItem("auth_token");
+        window.location.href = "/#/login";
+    }
 
     /** @param {string} date */
     function formatDate(date) {
@@ -140,13 +146,18 @@
 
 <main class="min-h-screen overflow-hidden px-5 py-7 sm:px-10 lg:px-14">
     <header class="dashboard-enter mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"></a>
+        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full object-contain p-1">
+        </a>
         <Navbar />
         <div class="justify-self-end">
             <ProfileDropdown />
         </div>
     </header>
     <div class="mx-auto mt-14 max-w-320">
+        <div class="mb-5 flex justify-end">
+            <button type="button" onclick={logout} class="button-lift border-2 border-pitch-black bg-laser-pink px-5 py-2 font-mono text-xs font-bold text-off-white shadow-[4px_4px_0_#000]" style="--button-complement: #00d9ff">Logout <span aria-hidden="true">→</span></button>
+        </div>
         <div class="dashboard-enter relative z-100">
             {#if loading}
                 <p class="border-y border-pitch-black py-10 text-center font-mono text-sm">Memuat profile...</p>

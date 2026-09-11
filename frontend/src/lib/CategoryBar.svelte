@@ -147,7 +147,7 @@
             min-h-[123px]
             bg-white
             border-2 border-pitch-black
-            overflow-x-auto px-5 py-4 sm:px-8
+            overflow-hidden px-5 py-4 sm:px-8
             shadow-[5px_5px_0px_#000]
         "
     >
@@ -155,13 +155,13 @@
         <div class="absolute left-0 top-0 bottom-0 w-[22px] bg-neon-yellow"></div>
 
         <!-- Categories -->
-        <div class="flex-1 flex items-center justify-evenly gap-5 ml-6 mr-5">
+        <div class="category-list flex-1 flex items-center justify-evenly ml-6 mr-5">
             {#each categories as category}
                 <button
                     type="button"
                     title={category.name}
                     on:click={() => selectCategory(category)}
-                    class="button-lift
+                    class="category-button button-lift
                         group
                         flex items-center
                         h-[77px]
@@ -178,8 +178,6 @@
                         transition-all
                         duration-300
                         ease-out
-
-                        hover:w-[235px]
                     "
                     style="--button-complement: {category.complement}"
                 >
@@ -218,6 +216,31 @@
             <span class="w-[15px] h-[15px] bg-[#4ade80] border-2 border-pitch-black"></span>
         </div>
     </div>
+
+    <style>
+        .category-list {
+            gap: 1.25rem;
+            min-width: 0;
+            transition: gap 300ms ease;
+        }
+
+        .category-button {
+            width: 77px;
+            flex: 0 1 77px;
+            transition: width 300ms ease, flex-basis 300ms ease, transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        .category-button:hover,
+        .category-button:focus-visible {
+            width: 235px;
+            flex-basis: 235px;
+        }
+
+        .category-list:has(.category-button:hover),
+        .category-list:has(.category-button:focus-visible) {
+            gap: 0;
+        }
+    </style>
 
     <!-- ============================================================ -->
     <!-- MOBILE — dropdown menu, visible < 640px                      -->
