@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { push } from "svelte-spa-router";
     import indexImage1 from "../assets/star.png";
     import indexImage2 from "../assets/stats.png";
     import indexImage3 from "../assets/rank.png";
@@ -98,7 +99,7 @@
         const token = localStorage.getItem("auth_token");
 
         if (!token) {
-            window.location.href = "/#/login";
+            push("/login");
             return;
         }
 
@@ -112,7 +113,7 @@
 
             if (response.status === 401) {
                 localStorage.removeItem("auth_token");
-                window.location.href = "/#/login";
+                push("/login");
                 return;
             }
 
