@@ -176,7 +176,7 @@
                         {category.color}
 
                         transition-all
-                        duration-300
+                        duration-700
                         ease-out
                     "
                     style="--button-complement: {category.complement}"
