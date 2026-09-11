@@ -11,13 +11,13 @@
 
     const skillOffers = [
         { duration: "2 HOUR", mentor: "Reinzal", skill: "Svelte Anjay", category: "Design", university: "University of Surabaya", credit: 2 },
-        { duration: "1 HOUR", mentor: "Alya", skill: "Brand Strategy", category: "Business", university: "Institut Teknologi Sepuluh Nopember", credit: 1 }
+        { duration: "1 HOUR", mentor: "Alya", skill: "Brand Strategy", category: "Business", university: "University of Surabaya", credit: 1 }
     ];
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"></a>
+        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full object-contain" /></a>
         <Navbar />
         <div class="justify-self-end">
             <ProfileDropdown />

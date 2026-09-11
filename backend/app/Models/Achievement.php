@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Achievement extends Model
 {
-    protected $fillable = ['profile_id', 'name', 'levels', 'category', 'validated_upload'];
+    protected $fillable = ['profile_id', 'name', 'levels', 'category', 'validated_upload', 'tanggal_terbit', 'kadaluwarsa'];
 
     protected function casts(): array
     {
