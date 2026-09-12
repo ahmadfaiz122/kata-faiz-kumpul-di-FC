@@ -6,9 +6,13 @@
     import SkillCard from "../lib/SkillCard.svelte";
     import logo from "../assets/logo.png";
 
-    editPage("Beranda");
+    editPage("Swapp");
 
-    
+    let searchQuery = "";
+
+    function submitSearch() {
+        searchQuery = searchQuery.trim();
+    }
 
     const skillOffers = [
         { duration: "2 HOUR", mentor: "Reinzal", skill: "Svelte Anjay", category: "Design", university: "University of Surabaya", credit: 2 },
@@ -18,7 +22,9 @@
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full object-contain" /></a>
+        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
+        </a>
         <Navbar />
         <div class="justify-self-end">
             <ProfileDropdown />
@@ -27,10 +33,11 @@
 
     <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-320 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <CategoryBar />
-        <button type="button" class="button-lift flex lg:w-100 items-center justify-between rounded-full border-2 border-pitch-black bg-laser-pink px-8 py-4 font-archivo text-sm text-off-white shadow-[6px_6px_0_#000]" style="--button-complement: #00d9ff">
-                <span class="mx-auto">Lagi penasaran sama apa nih?</span>
-                <span aria-hidden="true" class="text-xl">⌕</span>
-            </button>
+        <form class="search-bar relative flex lg:w-100 items-center rounded-full border-2 border-pitch-black bg-white shadow-[6px_6px_0_#000]" onsubmit={(event) => { event.preventDefault(); submitSearch(); }}>
+            <label for="skill-search" class="sr-only">Cari skill</label>
+            <input id="skill-search" bind:value={searchQuery} type="search" placeholder="Lagi penasaran sama apa nih?" class="relative z-10 min-w-0 flex-1 bg-transparent px-8 py-4 font-archivo text-sm text-pitch-black outline-none placeholder:text-pitch-black" />
+            <button type="submit" aria-label="Cari" class="relative z-10 px-6 py-4 text-xl text-pitch-black">⌕</button>
+        </form>
     </section>
 
     <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-320" aria-labelledby="offers-title">

@@ -17,14 +17,14 @@
     ];
 </script>
 
-<main class="min-h-screen overflow-hidden bg-[#ffa174] px-5 py-7 sm:px-10 lg:px-18">
-    <header class="dashboard-enter relative z-30 mx-auto grid max-w-255 grid-cols-[1fr_auto_1fr] items-center gap-4 pt-0 sm:pt-1">
-        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full object-contain" /></a>
+<main class="min-h-screen overflow-hidden bg-[#ffa174] px-5 py-6 sm:px-10 lg:px-14">
+    <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
         <Navbar />
         <div class="justify-self-end"><ProfileDropdown /></div>
     </header>
 
-    <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-10 max-w-255 text-center">
+    <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 max-w-320 text-center">
         <h1 class="font-mono text-4xl font-bold tracking-[0.16em] sm:text-5xl">LEADERBOARDS</h1>
         <p class="font-mono text-lg tracking-[0.2em] sm:text-xl">(by Rating)</p>
 
@@ -66,7 +66,7 @@
         </div>
     </section>
 
-    <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-255 space-y-7 pb-10">
+    <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-320 space-y-7 pb-10">
         {#each users as user, index}
             <article class="flex min-h-24 items-center gap-4 border-2 border-pitch-black px-5 py-4 shadow-[7px_7px_0_#000] {user.color} sm:gap-6 sm:px-10">
                 <span class="font-mono text-2xl font-bold sm:block">0{index + 4}</span>

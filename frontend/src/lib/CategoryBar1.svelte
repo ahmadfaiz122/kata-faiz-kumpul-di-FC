@@ -91,7 +91,7 @@
                     {category.color}
 
                     transition-all
-                    duration-300
+                    duration-700
                     ease-out
 
                     hover:w-[235px]

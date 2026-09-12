@@ -177,6 +177,7 @@
 
                         transition-all
                         duration-700
+                        
                         ease-out
                     "
                     style="--button-complement: {category.complement}"

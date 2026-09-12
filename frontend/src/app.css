@@ -60,5 +60,23 @@
     transform: translateY(0);
     box-shadow: none;
   }
+
+  .search-bar {
+    overflow: hidden;
+  }
+
+  .search-bar::before {
+    position: absolute;
+    inset: 0;
+    background: var(--color-off-white);
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .search-bar:focus-within::before {
+    transform: scaleX(1);
+  }
 }
 

@@ -7,7 +7,8 @@
     import Leaderboard from "./pages/Leaderboard.svelte";
     import EditProfile from "./pages/EditProfile.svelte";
     const routes = {
-      "/" : Dashboard,
+      "/" : Timeline,
+      "/swapp" : Dashboard,
       "/timeline" : Timeline,
       "/leaderboard" : Leaderboard,
       "/profile" : Profile,

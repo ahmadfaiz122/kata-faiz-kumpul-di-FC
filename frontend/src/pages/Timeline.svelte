@@ -5,7 +5,7 @@
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import TimelinePost from "../lib/TimelinePost.svelte";
 
-    editPage("Barter Skill");
+    editPage("Beranda");
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     /** @type {Array<{content: string, user?: {name?: string}, created_at: string, updated_at?: string}>} */
@@ -72,14 +72,14 @@
     const leaderboard = ["Kastama", "Ibna", "Reinzal"];
 </script>
 
-<main class="min-h-screen bg-[#d8d8d8] px-5 py-7 sm:px-10 lg:px-18">
-    <header class="dashboard-enter relative z-30 mx-auto grid max-w-255 grid-cols-[1fr_auto_1fr] items-center gap-4 border-t border-pitch-black pt-7">
-        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full object-contain" /></a>
+<main class="min-h-screen bg-[#d8d8d8] px-5 py-6 sm:px-10 lg:px-14">
+    <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
         <Navbar />
         <div class="justify-self-end dashboard-enter"><ProfileDropdown /></div>
     </header>
 
-    <div class="mx-auto mt-8 grid max-w-255 gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">
+    <div class="mx-auto mt-14 grid max-w-320 gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">
         <section>
             <form class="border-2 border-pitch-black bg-off-white p-4 shadow-[6px_6px_0_#000]" on:submit|preventDefault={submitPost}>
                 <label for="post-content" class="font-mono text-xs font-bold">Lagi penasaran sama apa nih?</label>

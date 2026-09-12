@@ -321,7 +321,16 @@
     justify-content: space-between;
     cursor: pointer;
     border-radius: 10px;
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
   }
-  .box-cta:hover { filter: brightness(1.05); }
+  .box-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 0 0 #0A0A0A;
+    filter: brightness(1.05);
+  }
+  .box-cta:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 0 #0A0A0A;
+  }
   .cta-arrow { width: 22px; height: 22px; }
 </style>
