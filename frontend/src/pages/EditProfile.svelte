@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { push } from "svelte-spa-router";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
 
@@ -30,7 +31,7 @@
     onMount(async () => {
         const token = localStorage.getItem("auth_token");
         if (!token) {
-            window.location.href = "/#/login";
+            push("/login");
             return;
         }
 
@@ -40,7 +41,7 @@
             });
             if (response.status === 401) {
                 localStorage.removeItem("auth_token");
-                window.location.href = "/#/login";
+                push("/login");
                 return;
             }
             if (!response.ok) throw new Error("Gagal mengambil data profile.");
@@ -107,14 +108,14 @@
             
             if (response.status === 401) {
                 localStorage.removeItem("auth_token");
-                window.location.href = "/#/login";
+                push("/login");
                 return;
             }
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}));
                 throw new Error(data.message || "Profile gagal disimpan.");
             }
-            window.location.href = "/#/profile";
+            push("/profile");
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Profile gagal disimpan.";
         } finally {

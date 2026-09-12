@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { push } from 'svelte-spa-router';
 
   // Set VITE_API_URL di file .env frontend, contoh: VITE_API_URL=http://localhost:8000
   const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -23,7 +24,7 @@
     if (token) {
       localStorage.setItem('auth_token', token);
       // Bersihkan query string lalu arahkan ke halaman utama/dashboard
-      window.location.href = '/#/';
+      push('/');
       return;
     }
 
