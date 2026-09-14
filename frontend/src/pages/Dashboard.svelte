@@ -5,6 +5,7 @@
     import Navbar from "../lib/Navbar.svelte";
     import SkillCard from "../lib/SkillCard.svelte";
     import logo from "../assets/logo.png";
+    import FilterDropdown from "../lib/FilterDropdown.svelte";
 
     editPage("Swapp");
 
@@ -13,6 +14,35 @@
     function submitSearch() {
         searchQuery = searchQuery.trim();
     }
+    let activeBar = $state("search");
+    let filterOpen = $state(false)
+    let filterTriggerEl = $state(null);
+        function selectSearch() {
+
+        activeBar = "search";
+
+        filterOpen = false;
+
+    }
+
+
+
+    function selectFilter() {
+
+        if (activeBar !== "filter") {
+
+            activeBar = "filter";
+
+            filterOpen = false;
+
+        } else {
+
+            filterOpen = !filterOpen;
+
+        }
+
+    }
+
 
     const skillOffers = [
         { duration: "2 HOUR", mentor: "Reinzal", skill: "Svelte Anjay", category: "Design", university: "University of Surabaya", credit: 2 },
@@ -33,11 +63,109 @@
 
     <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-320 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <CategoryBar />
-        <form class="search-bar relative flex lg:w-100 items-center rounded-full border-2 border-pitch-black bg-white shadow-[6px_6px_0_#000]" onsubmit={(event) => { event.preventDefault(); submitSearch(); }}>
-            <label for="skill-search" class="sr-only">Cari skill</label>
-            <input id="skill-search" bind:value={searchQuery} type="search" placeholder="Lagi penasaran sama apa nih?" class="relative z-10 min-w-0 flex-1 bg-transparent px-8 py-4 font-archivo text-sm text-pitch-black outline-none placeholder:text-pitch-black" />
-            <button type="submit" aria-label="Cari" class="relative z-10 px-6 py-4 text-xl text-pitch-black">⌕</button>
-        </form>
+        <div class="relative flex items-center gap-3 lg:w-100">
+                        
+
+            <button
+
+                type="button"
+
+                onclick={selectSearch}
+
+                aria-expanded={activeBar === "search"}
+
+                aria-label="Cari"
+
+                class="button-lift flex items-center overflow-hidden rounded-full border-2 border-pitch-black bg-white font-archivo text-sm text-off-white shadow-[6px_6px_0_#000] transition-[flex,padding] duration-300 ease-out {activeBar ===
+
+                'search'
+
+                    ? 'flex-1 justify-between px-8 py-4'
+
+                    : 'h-14 w-14 flex-none justify-center p-0'}"
+
+                style="--button-complement: #00d9ff"
+
+            >
+
+                {#if activeBar === "search"}
+
+                    <input bind:value={searchQuery} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
+
+                {/if}
+
+                <span aria-hidden="true" class="text-xl text-pitch-black">⌕</span>
+
+            </button>
+
+            <button
+
+                type="button"
+
+                bind:this={filterTriggerEl}
+
+                onclick={selectFilter}
+
+                aria-expanded={activeBar === "filter" && filterOpen}
+
+                aria-label="Filter"
+
+                class="button-lift flex items-center overflow-hidden rounded-full border-2 border-pitch-black bg-[#F2A672] font-archivo text-sm text-pitch-black shadow-[6px_6px_0_#000] transition-[flex,padding] duration-300 ease-out {activeBar ===
+
+                'filter'
+
+                    ? 'flex-1 justify-between px-8 py-4'
+
+                    : 'h-14 w-14 flex-none justify-center p-0'}"
+
+                style="--button-complement: #ff2e63"
+
+            >
+
+                {#if activeBar === "filter"}
+
+                    <span class="mx-auto whitespace-nowrap">Filter</span>
+
+                {/if}
+
+                <span class="flex flex-none items-center gap-2">
+
+                    <svg viewBox="0 0 24 24" aria-hidden="true" class="h-5 w-5 flex-none">
+
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+                    </svg>
+
+                    {#if activeBar === "filter"}
+
+                        <svg
+
+                            viewBox="0 0 12 8"
+
+                            aria-hidden="true"
+
+                            class="h-3 w-3 flex-none transition-transform duration-200 {filterOpen ? '' : 'rotate-180'}"
+
+                        >
+
+                            <polygon points="1,7 6,1 11,7" fill="currentColor" />
+
+                        </svg>
+
+                    {/if}
+
+                </span>
+
+            </button>
+
+
+
+            <FilterDropdown bind:open={filterOpen} triggerEl={filterTriggerEl} />
+
+        </div>
+
+
+
     </section>
 
     <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-320" aria-labelledby="offers-title">
