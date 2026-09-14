@@ -8,7 +8,7 @@
     editPage("Beranda");
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-    /** @type {Array<{content: string, user?: {name?: string}, created_at: string, updated_at?: string}>} */
+    /** @type {Array<{id: number, content: string, user?: {name?: string, avatar?: string}, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, comments?: Array<object>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}>} */
     let posts = [];
     let content = "";
     let loading = true;
@@ -22,11 +22,63 @@
             const response = await fetch(`${backendUrl}/api/posts`);
             if (!response.ok) throw new Error("Feed tidak dapat dimuat.");
             const data = await response.json();
-            posts = data.data ?? [];
+            posts = (data.data ?? []).map((post) => ({ ...post, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }));
         } catch (exception) {
             error = exception instanceof Error ? exception.message : "Feed tidak dapat dimuat.";
         } finally {
             loading = false;
+        }
+    }
+
+    function authHeaders() {
+        return { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}` };
+    }
+
+    async function toggleLike(post) {
+        if (post.likeLoading) return;
+        posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: true } : item);
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${post.id}/like`, { method: "POST", headers: authHeaders() });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Like gagal diproses.");
+            posts = posts.map((item) => item.id === post.id ? { ...item, liked_by_user: data.liked, likes_count: data.likes_count, likeLoading: false } : item);
+        } catch (exception) {
+            error = exception instanceof Error ? exception.message : "Like gagal diproses.";
+            posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: false } : item);
+        }
+    }
+
+    async function toggleComments(post) {
+        if (post.commentsOpen) {
+            posts = posts.map((item) => item.id === post.id ? { ...item, commentsOpen: false } : item);
+            return;
+        }
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${post.id}/comments`);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Komentar gagal dimuat.");
+            posts = posts.map((item) => item.id === post.id ? { ...item, comments: data.data ?? [], commentsOpen: true } : item);
+        } catch (exception) {
+            error = exception instanceof Error ? exception.message : "Komentar gagal dimuat.";
+        }
+    }
+
+    function updateCommentText(post, event) {
+        posts = posts.map((item) => item.id === post.id ? { ...item, commentText: event.currentTarget.value } : item);
+    }
+
+    async function submitComment(post) {
+        const text = post.commentText?.trim();
+        if (!text || post.commentLoading) return;
+        posts = posts.map((item) => item.id === post.id ? { ...item, commentLoading: true } : item);
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${post.id}/comments`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content: text }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Komentar gagal dikirim.");
+            posts = posts.map((item) => item.id === post.id ? { ...item, comments: [data, ...(item.comments ?? [])], comments_count: (item.comments_count ?? 0) + 1, commentText: "", commentLoading: false, commentsOpen: true } : item);
+        } catch (exception) {
+            error = exception instanceof Error ? exception.message : "Komentar gagal dikirim.";
+            posts = posts.map((item) => item.id === post.id ? { ...item, commentLoading: false } : item);
         }
     }
 
@@ -49,7 +101,7 @@
 
             const data = await response.json();
             if (!response.ok) throw new Error(data.message ?? "Post gagal dibuat.");
-            posts = [data, ...posts];
+            posts = [{ ...data, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }, ...posts];
             content = "";
         } catch (exception) {
             error = exception instanceof Error ? exception.message : "Post gagal dibuat.";
@@ -99,7 +151,7 @@
                     <p class="font-mono text-xs font-bold">Belum ada post. Jadilah yang pertama berbagi.</p>
                 {:else}
                     {#each posts as post, index}
-                        <div class="dashboard-enter" style="animation-delay: {index * 100}ms"><TimelinePost content={post.content} author={post.user?.name ?? "Unknown user"} createdAt={formatDate(post.created_at)} edited={isEdited(post)} /></div>
+                        <div class="dashboard-enter" style="animation-delay: {index * 100}ms"><TimelinePost content={post.content} author={post.user?.name ?? "Unknown user"} authorAvatar={post.user?.avatar ?? ""} createdAt={formatDate(post.created_at)} edited={isEdited(post)} liked={post.liked_by_user ?? false} likesCount={post.likes_count ?? 0} commentsCount={post.comments_count ?? 0} comments={post.comments ?? []} commentsOpen={post.commentsOpen ?? false} commentText={post.commentText ?? ""} likeLoading={post.likeLoading ?? false} commentLoading={post.commentLoading ?? false} onToggleLike={() => toggleLike(post)} onToggleComments={() => toggleComments(post)} onCommentInput={(event) => updateCommentText(post, event)} onSubmitComment={() => submitComment(post)} /></div>
                     {/each}
                 {/if}
             </div>

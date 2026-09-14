@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Skill;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SkillController extends Controller
 {
@@ -36,18 +37,29 @@ class SkillController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'category_skills' => ['required', 'string', 'max:100'],
             'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'material' => ['required_without:id', 'sometimes', 'file', 'mimes:pdf', 'max:20480'],
         ]);
 
         // Ensure the user has a profile to attach skills to.
         $profile = $request->user()->profile()->firstOrCreate([]);
 
-        $payload = collect($validated)->except(['id'])->toArray();
+        $payload = collect($validated)->except(['id', 'material'])->toArray();
+
+        if ($request->hasFile('material')) {
+            $payload['material_path'] = $request->getSchemeAndHttpHost() . Storage::url(
+                $request->file('material')->store('skill-materials', 'public')
+            );
+        }
 
         if (! empty($validated['id'])) {
             $skill = $profile->skillRecords()->whereKey($validated['id'])->first();
 
             if (! $skill) {
                 return response()->json(['message' => 'Skill not found.'], 404);
+            }
+
+            if ($request->hasFile('material') && $skill->material_path) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', parse_url($skill->material_path, PHP_URL_PATH)));
             }
 
             $skill->update($payload);
@@ -73,6 +85,10 @@ class SkillController extends Controller
 
         if (! $skill) {
             return response()->json(['message' => 'Skill not found.'], 404);
+        }
+
+        if ($skill->material_path) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', parse_url($skill->material_path, PHP_URL_PATH)));
         }
 
         $skill->delete();

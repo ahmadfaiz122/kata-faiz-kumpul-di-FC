@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Achievement;
+use Illuminate\Support\Facades\Storage;
 
 class AchievementController extends Controller
 {
@@ -35,21 +36,33 @@ class AchievementController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'levels' => ['required', 'string', 'max:100'],
             'category' => ['sometimes','nullable', 'string', 'max:100'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'tanggal_terbit' => ['required', 'integer'],
             'kadaluwarsa' => ['required', 'integer'],
-            'validated_upload' => ['sometimes', 'boolean'],
+            'certificate' => ['required_without:id', 'sometimes', 'file', 'mimes:jpg,jpeg,png,gif,webp,pdf', 'max:10240'],
         ]);
 
         // Ensure the user has a profile to attach achievements to.
         $profile = $request->user()->profile()->firstOrCreate([]);
 
-        $payload = collect($validated)->except(['id'])->toArray();
+        $payload = collect($validated)->except(['id', 'certificate'])->toArray();
+
+        if ($request->hasFile('certificate')) {
+            $payload['certificate_path'] = $request->getSchemeAndHttpHost() . Storage::url(
+                $request->file('certificate')->store('certificates', 'public')
+            );
+            $payload['validated_upload'] = true;
+        }
 
         if (! empty($validated['id'])) {
             $achievement = $profile->achievementRecords()->whereKey($validated['id'])->first();
 
             if (! $achievement) {
                 return response()->json(['message' => 'Achievement not found.'], 404);
+            }
+
+            if ($request->hasFile('certificate') && $achievement->certificate_path) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', parse_url($achievement->certificate_path, PHP_URL_PATH)));
             }
 
             $achievement->update($payload);
@@ -75,6 +88,10 @@ class AchievementController extends Controller
 
         if (! $achievement) {
             return response()->json(['message' => 'Achievement not found.'], 404);
+        }
+
+        if ($achievement->certificate_path) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', parse_url($achievement->certificate_path, PHP_URL_PATH)));
         }
 
         $achievement->delete();

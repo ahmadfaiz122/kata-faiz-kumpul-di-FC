@@ -14,8 +14,8 @@
     import logo from "../assets/logo.png";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-    /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, user?: {name?: string}}} ProfilePost */
-    /** @type {{id: number, name?: string}|null} */
+    /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, user?: {name?: string, avatar?: string}, comments?: Array<{content: string, user?: {name?: string}}>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}} ProfilePost */
+    /** @type {{id: number, name?: string, profile?: {alias?: string, username?: string, skills?: string[], skill_records?: Array<{name: string, category_skills?: string, material_path?: string}>, achievements?: string[], achievement_records?: Array<{name: string, description?: string, levels?: string, tanggal_terbit?: number, kadaluwarsa?: number, certificate_path?: string}>}}|null} */
     let user = null;
     /** @type {ProfilePost[]} */
     let posts = [];
@@ -25,6 +25,63 @@
     let editingPostId = null;
     let editContent = "";
     let savingPost = false;
+
+    function authHeaders() {
+        return { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}` };
+    }
+
+    /** @param {ProfilePost} post */
+    async function toggleLike(post) {
+        if (post.likeLoading) return;
+        posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: true } : item);
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${post.id}/like`, { method: "POST", headers: authHeaders() });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Like gagal diproses.");
+            posts = posts.map((item) => item.id === post.id ? { ...item, liked_by_user: data.liked, likes_count: data.likes_count, likeLoading: false } : item);
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Like gagal diproses.";
+            posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: false } : item);
+        }
+    }
+
+    /** @param {ProfilePost} post */
+    async function toggleComments(post) {
+        if (post.commentsOpen) {
+            posts = posts.map((item) => item.id === post.id ? { ...item, commentsOpen: false } : item);
+            return;
+        }
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${post.id}/comments`, { headers: { Accept: "application/json" } });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Komentar gagal dimuat.");
+            posts = posts.map((item) => item.id === post.id ? { ...item, comments: data.data ?? [], commentsOpen: true } : item);
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Komentar gagal dimuat.";
+        }
+    }
+
+    /** @param {ProfilePost} post @param {Event} event */
+    function updateCommentText(post, event) {
+        const input = /** @type {HTMLInputElement} */ (event.currentTarget);
+        posts = posts.map((item) => item.id === post.id ? { ...item, commentText: input.value } : item);
+    }
+
+    /** @param {ProfilePost} post */
+    async function submitComment(post) {
+        const text = post.commentText?.trim();
+        if (!text || post.commentLoading) return;
+        posts = posts.map((item) => item.id === post.id ? { ...item, commentLoading: true } : item);
+        try {
+            const response = await fetch(`${backendUrl}/api/posts/${post.id}/comments`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ content: text }) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message ?? "Komentar gagal dikirim.");
+            posts = posts.map((item) => item.id === post.id ? { ...item, comments: [data, ...(item.comments ?? [])], comments_count: (item.comments_count ?? 0) + 1, commentText: "", commentLoading: false, commentsOpen: true } : item);
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Komentar gagal dikirim.";
+            posts = posts.map((item) => item.id === post.id ? { ...item, commentLoading: false } : item);
+        }
+    }
 
     function logout() {
         localStorage.removeItem("auth_token");
@@ -136,7 +193,9 @@
                 },
             });
             if (!postsResponse.ok) throw new Error("Post profile gagal dimuat.");
-            posts = (await postsResponse.json()).data ?? [];
+            /** @type {ProfilePost[]} */
+            const profilePosts = (await postsResponse.json()).data ?? [];
+            posts = profilePosts.map((/** @type {ProfilePost} */ post) => ({ ...post, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }));
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profile.";
         } finally {
@@ -183,14 +242,14 @@
                 <p class="font-mono text-sm font-bold">You can also call me by</p>
                 <p class="mt-1 font-anton text-3xl uppercase">{user.profile?.alias || user.profile?.username || user.name}</p>
             </div>
-            <Achievement achievements={user.profile?.achievements || []} />
+            <Achievement achievements={user.profile?.achievement_records || []} />
         </section>
 
         <section class="dashboard-enter dashboard-enter-delay-3 mt-7 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000]">
             <h2 class="inline-block bg-pitch-black px-10 py-1 font-mono text-sm font-bold text-off-white">Skills</h2>
             <div class="mt-4 flex flex-wrap gap-3">
-                {#each user.profile?.skills || [] as skill}
-                    <span class="border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-sm shadow-[3px_3px_0_#000]">{skill}</span>
+                {#each user.profile?.skill_records || [] as skill}
+                    <div class="border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-sm shadow-[3px_3px_0_#000]"><span>{skill.name}</span>{#if skill.material_path}<a href={skill.material_path} target="_blank" rel="noreferrer" class="mt-1 block text-[10px] underline">Buka materi PDF ↗</a>{/if}</div>
                 {/each}
             </div>
         </section>
@@ -216,7 +275,7 @@
                             </form>
                         {:else}
                             <div class="dashboard-enter" style="animation-delay: {index * 100}ms">
-                                <TimelinePost content={post.content} author={post.user?.name ?? user.name} createdAt={formatDate(post.created_at)} edited={isEdited(post)} canManage={true} onEdit={() => startEditing(post)} onDelete={() => deletePost(post.id)} />
+                                <TimelinePost content={post.content} author={post.user?.name ?? user.name} authorAvatar={post.user?.avatar ?? ""} createdAt={formatDate(post.created_at)} edited={isEdited(post)} liked={post.liked_by_user ?? false} likesCount={post.likes_count ?? 0} commentsCount={post.comments_count ?? 0} comments={post.comments ?? []} commentsOpen={post.commentsOpen ?? false} commentText={post.commentText ?? ""} likeLoading={post.likeLoading ?? false} commentLoading={post.commentLoading ?? false} onToggleLike={() => toggleLike(post)} onToggleComments={() => toggleComments(post)} onCommentInput={(event) => updateCommentText(post, event)} onSubmitComment={() => submitComment(post)} canManage={true} onEdit={() => startEditing(post)} onDelete={() => deletePost(post.id)} />
                             </div>
                         {/if}
                     {/each}

@@ -6,17 +6,65 @@ use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use App\Models\PostLike;
 
 class PostController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $posts = Post::query()
-            ->with('user:id,name')
+            ->with('user:id,name,avatar')
+            ->withCount(['likes', 'comments'])
             ->latest('id')
             ->paginate(20);
 
+        if ($request->user()) {
+            $posts->getCollection()->each(function (Post $post) use ($request) {
+                $post->setAttribute('liked_by_user', $post->likes()->where('user_id', $request->user()->id)->exists());
+            });
+        }
+
         return response()->json($posts);
+    }
+
+    public function toggleLike(Request $request, Post $post): JsonResponse
+    {
+        $like = PostLike::query()->where('post_id', $post->id)->where('user_id', $request->user()->id)->first();
+
+        if ($like) {
+            $like->delete();
+            $liked = false;
+        } else {
+            PostLike::create(['post_id' => $post->id, 'user_id' => $request->user()->id]);
+            $liked = true;
+        }
+
+        return response()->json([
+            'liked' => $liked,
+            'likes_count' => $post->likes()->count(),
+        ]);
+    }
+
+    public function comments(Post $post): JsonResponse
+    {
+        return response()->json([
+            'data' => $post->comments()->with('user:id,name')->latest('id')->get(),
+        ]);
+    }
+
+    public function storeComment(Request $request, Post $post): JsonResponse
+    {
+        $validated = $request->validate([
+            'content' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $comment = $post->comments()->create([
+            ...$validated,
+            'user_id' => $request->user()->id,
+        ]);
+        $comment->load('user:id,name');
+
+        return response()->json($comment, 201);
     }
 
     public function store(Request $request): JsonResponse
@@ -26,7 +74,7 @@ class PostController extends Controller
         ]);
 
         $post = $request->user()->posts()->create($validated);
-        $post->load('user:id,name');
+        $post->load('user:id,name,avatar');
 
         return response()->json($post, 201);
     }
@@ -34,9 +82,14 @@ class PostController extends Controller
     public function mine(Request $request): JsonResponse
     {
         $posts = $request->user()->posts()
-            ->with('user:id,name')
+            ->with('user:id,name,avatar')
+            ->withCount(['likes', 'comments'])
             ->latest('id')
             ->get();
+
+        $posts->each(function (Post $post) use ($request) {
+            $post->setAttribute('liked_by_user', $post->likes()->where('user_id', $request->user()->id)->exists());
+        });
 
         return response()->json(['data' => $posts]);
     }
@@ -50,7 +103,7 @@ class PostController extends Controller
         ]);
 
         $post->update($validated);
-        $post->load('user:id,name');
+        $post->load('user:id,name,avatar');
 
         return response()->json($post);
     }

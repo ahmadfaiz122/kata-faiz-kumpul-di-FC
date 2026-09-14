@@ -20,9 +20,11 @@ Route::middleware('throttle:60,1')->group(function () {
     })->middleware('auth:sanctum');
 
     Route::get('/posts', [PostController::class, 'index']);
+    Route::get('/posts/{post}/comments', [PostController::class, 'comments']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show']);
+        Route::post('/profile', [ProfileController::class, 'update']);
         Route::put('/profile', [ProfileController::class, 'update']);
 
         // Route::post('/posts', [PostController::class, 'store']);
@@ -35,6 +37,8 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::post('/achievements', [AchievementController::class, 'store']);
         Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
         Route::post('/posts', [PostController::class, 'store']);
+        Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
+        Route::post('/posts/{post}/comments', [PostController::class, 'storeComment']);
         Route::get('/user/posts', [PostController::class, 'mine']);
         Route::put('/posts/{post}', [PostController::class, 'update']);
         Route::delete('/posts/{post}', [PostController::class, 'destroy']);
