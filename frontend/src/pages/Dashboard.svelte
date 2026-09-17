@@ -189,4 +189,16 @@
             <button type="button" class="button-lift border-2 border-pitch-black bg-off-white px-7 py-3 font-mono text-xs uppercase shadow-[4px_4px_0_#000]" style="--button-complement: #00d9ff">Load More</button>
         </div>
     </section>
+
+    <a
+        href="/#/add-proposal"
+        aria-label="Buat proposal baru"
+        title="Buat proposal baru"
+        class="button-lift fixed bottom-6 right-6 z-40 flex h-16 w-16 items-center justify-center rounded-full border-3 border-pitch-black bg-laser-pink text-pitch-black shadow-[6px_6px_0_#000] sm:bottom-10 sm:right-10 sm:h-20 sm:w-20"
+        style="--button-complement: #ccff00"
+    >
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="h-9 w-9 sm:h-11 sm:w-11">
+            <path d="M12 5V19M5 12H19" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+    </a>
 </main>

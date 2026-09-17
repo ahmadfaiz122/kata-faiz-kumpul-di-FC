@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\ProposalController;
 
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -36,6 +37,7 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::get('/achievements', [AchievementController::class, 'index']);
         Route::post('/achievements', [AchievementController::class, 'store']);
         Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
+        Route::post('/proposals', [ProposalController::class, 'store']);
         Route::post('/posts', [PostController::class, 'store']);
         Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
         Route::post('/posts/{post}/comments', [PostController::class, 'storeComment']);
