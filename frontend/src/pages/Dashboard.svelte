@@ -1,15 +1,21 @@
 <script>
+    import { onMount } from "svelte";
+    import { tick } from "svelte";
     import { editPage } from "../lib/sharedvar.svelte.js";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import CategoryBar from "../lib/CategoryBar.svelte";
     import Navbar from "../lib/Navbar.svelte";
     import SkillCard from "../lib/SkillCard.svelte";
-    import logo from "../assets/logo.png";
+    import logo from "../assets/logo.webp";
     import FilterDropdown from "../lib/FilterDropdown.svelte";
 
     editPage("Swapp");
 
-    let searchQuery = "";
+    let searchQuery = $state("");
+    let searchFocused = $state(false);
+    let searchInput = $state();
+    let skillOffers = $state([]);
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     function submitSearch() {
         searchQuery = searchQuery.trim();
@@ -17,17 +23,21 @@
     let activeBar = $state("search");
     let filterOpen = $state(false)
     let filterTriggerEl = $state(null);
-        function selectSearch() {
+        async function selectSearch() {
 
         activeBar = "search";
 
         filterOpen = false;
+            await tick();
+            searchInput?.focus();
 
     }
 
 
 
     function selectFilter() {
+
+        searchFocused = false;
 
         if (activeBar !== "filter") {
 
@@ -44,11 +54,39 @@
     }
 
 
-    const skillOffers = [
-        { duration: "2 HOUR", mentor: "Reinzal", skill: "Svelte Anjay", category: "Design", university: "University of Surabaya", credit: 2 },
-        { duration: "1 HOUR", mentor: "Alya", skill: "Brand Strategy", category: "Business", university: "University of Surabaya", credit: 1 }
-    ];
+    let visibleOffers = $derived(skillOffers.filter((offer) => {
+        const query = searchQuery.trim().toLowerCase();
+        return !query || `${offer.instructor} ${offer.category} ${offer.mentorName}`.toLowerCase().includes(query);
+    }));
+
+    onMount(async () => {
+        const response = await fetch(`${backendUrl}/api/proposals`, { headers: { Accept: "application/json" } });
+        if (!response.ok) return;
+
+        const result = await response.json();
+        skillOffers = (result.data ?? []).map((proposal) => ({
+            duration: `${proposal.hour ?? 1} HOUR`,
+            mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
+            instructor: proposal.skill_name,
+            category: proposal.skill_category,
+            credits: `${proposal.hour ?? 1} kredit`,
+            university: proposal.city || "Community learner",
+        }));
+    });
 </script>
+
+<style>
+    .typing-indicator {
+        animation: typing-blink 0.8s steps(2, start) infinite;
+        width: 3px;
+        height: 1.35rem;
+        background: currentColor;
+    }
+
+    @keyframes typing-blink {
+        50% { opacity: 0; }
+    }
+</style>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -76,7 +114,7 @@
 
                 aria-label="Cari"
 
-                class="button-lift flex items-center overflow-hidden rounded-full border-2 border-pitch-black bg-white font-archivo text-sm text-off-white shadow-[6px_6px_0_#000] transition-[flex,padding] duration-300 ease-out {activeBar ===
+                class="button-lift flex items-center overflow-hidden rounded-full border-2 border-pitch-black font-archivo text-sm text-off-white shadow-[6px_6px_0_#000] transition-[background-color,flex,padding] duration-300 ease-out {searchFocused ? 'bg-laser-pink' : 'bg-white'} {activeBar ===
 
                 'search'
 
@@ -90,7 +128,8 @@
 
                 {#if activeBar === "search"}
 
-                    <input bind:value={searchQuery} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
+                    <input bind:this={searchInput} bind:value={searchQuery} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
+                    {#if searchFocused}<span class="typing-indicator" aria-hidden="true"></span>{/if}
 
                 {/if}
 
@@ -178,7 +217,7 @@
         </div>
 
         <div class="grid gap-6 lg:grid-cols-2">
-            {#each skillOffers as offer, index}
+            {#each visibleOffers as offer, index}
                 <div class:dashboard-enter={index === 0} class:dashboard-enter-delay-3={index === 1}>
                     <SkillCard {...offer} />
                 </div>

@@ -1,9 +1,9 @@
 <script>
     import { onMount } from "svelte";
     import { push } from "svelte-spa-router";
-    import indexImage1 from "../assets/star.png";
-    import indexImage2 from "../assets/stats.png";
-    import indexImage3 from "../assets/rank.png";
+    import indexImage1 from "../assets/star.webp";
+    import indexImage2 from "../assets/stats.webp";
+    import indexImage3 from "../assets/rank.webp";
     import Bio from "../lib/profileComponents/Bio.svelte";
     import Credentials from "../lib/profileComponents/Credentials.svelte";
     import Index from "../lib/profileComponents/Index.svelte";
@@ -11,7 +11,7 @@
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import TimelinePost from "../lib/TimelinePost.svelte";
-    import logo from "../assets/logo.png";
+    import logo from "../assets/logo.webp";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, user?: {name?: string, avatar?: string}, comments?: Array<{content: string, user?: {name?: string}}>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}} ProfilePost */
@@ -206,7 +206,7 @@
 
 <main class="min-h-screen overflow-hidden px-5 py-7 sm:px-10 lg:px-14">
     <header class="dashboard-enter mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
+        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
         <Navbar />
         <div class="justify-self-end">
             <ProfileDropdown />
@@ -238,7 +238,7 @@
 
         <section class="dashboard-enter dashboard-enter-delay-2 mt-5 grid gap-7 lg:grid-cols-[minmax(280px,1fr)_minmax(0,2fr)]">
             <div class="flex min-h-40 flex-col justify-center bg-[#ffa174] px-8 py-7 shadow-[10px_10px_0_#000]">
-                <span class="font-archivo text-6xl leading-none text-[#3d6cff] h-[30px] mb-3">“</span>
+                <span class="font-anton text-6xl leading-none text-[#3d6cff] h-[30px] mb-3">“</span>
                 <p class="font-mono text-sm font-bold">You can also call me by</p>
                 <p class="mt-1 font-anton text-3xl uppercase">{user.profile?.alias || user.profile?.username || user.name}</p>
             </div>

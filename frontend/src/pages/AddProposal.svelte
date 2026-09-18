@@ -1,13 +1,16 @@
 <script>
+    import { onMount } from "svelte";
     import { push } from "svelte-spa-router";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
-    import logo from "../assets/logo.png";
+    import logo from "../assets/logo.webp";
 
     let fullName = "";
     let email = "";
     let phone = "";
     let city = "";
+    let skillName = "";
+    let skillCategory = "";
     let skillDescription = "";
     /** @type {File|null} */
     let proposalFile = null;
@@ -16,6 +19,20 @@
     let submitted = false;
     let submitting = false;
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+    onMount(async () => {
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+
+        const response = await fetch(`${backendUrl}/api/user`, {
+            headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+
+        const user = await response.json();
+        fullName = user.name || "";
+        email = user.email || "";
+    });
 
     /** @param {Event & {currentTarget: HTMLInputElement}} event */
     function selectFile(event) {
@@ -57,6 +74,8 @@
             body.append("email", email.trim());
             body.append("phone", phone.trim());
             body.append("city", city.trim());
+            body.append("skill_name", skillName.trim());
+            body.append("skill_category", skillCategory);
             body.append("skill_description", skillDescription.trim());
             body.append("proposal_file", proposalFile);
 
@@ -81,7 +100,7 @@
                 throw new Error(validationMessage || "Proposal gagal dikirim.");
             }
 
-            submitted = true;
+            push("/swapp");
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Proposal gagal dikirim.";
         } finally {
@@ -95,6 +114,8 @@
         email = "";
         phone = "";
         city = "";
+        skillName = "";
+        skillCategory = "";
         skillDescription = "";
         proposalFile = null;
         if (fileInput) fileInput.value = "";
@@ -159,6 +180,28 @@
                 </fieldset>
 
                 <fieldset class="mt-9 border-t-2 border-pitch-black pt-7">
+                    <legend class="font-anton text-3xl uppercase">Skills</legend>
+                    <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                        <label class="flex flex-col gap-2 font-mono text-xs uppercase">
+                            Nama skill
+                            <input bind:value={skillName} required type="text" placeholder="Contoh: Desain grafis" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                        </label>
+                        <label class="flex flex-col gap-2 font-mono text-xs uppercase">
+                            Kategori skill
+                            <select bind:value={skillCategory} required class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]">
+                                <option value="">Pilih kategori</option>
+                                <option>Education</option>
+                                <option>Technology</option>
+                                <option>Business</option>
+                                <option>Language</option>
+                                <option>Art</option>
+                                <option>Writing</option>
+                            </select>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="mt-9 border-t-2 border-pitch-black pt-7">
                     <legend class="font-anton text-3xl uppercase">Deskripsi skill</legend>
                     <label class="mt-5 flex flex-col gap-2 font-mono text-xs uppercase">
                         Skill yang kamu tawarkan
@@ -171,7 +214,7 @@
                     <label for="proposal-file" class="mt-5 flex cursor-pointer flex-col items-center justify-center border-3 border-dashed border-pitch-black bg-white px-5 py-10 text-center transition-colors hover:bg-[#ffe477]">
                         <span class="flex h-14 w-14 items-center justify-center border-2 border-pitch-black bg-laser-pink font-anton text-2xl">PDF</span>
                         <span class="mt-4 font-mono text-xs uppercase">{proposalFile ? proposalFile.name : "Klik untuk pilih file"}</span>
-                        <span class="mt-2 text-sm">PDF saja, maksimal 10 MB</span>
+                        <span class="mt-2 text-sm">PDF saja, maksimal 5 MB</span>
                         <input id="proposal-file" bind:this={fileInput} onchange={selectFile} accept="application/pdf,.pdf" type="file" class="sr-only" />
                     </label>
                 </fieldset>

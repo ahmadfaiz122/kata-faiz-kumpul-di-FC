@@ -8,6 +8,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ProposalController extends Controller
 {
+    public function index()
+    {
+        return response()->json([
+            'data' => SkillRequest::query()
+                ->with('requesterUser:id,name,avatar')
+                ->where('status', 'pending')
+                ->latest()
+                ->get(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -15,6 +26,8 @@ class ProposalController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
             'city' => ['required', 'string', 'max:100'],
+            'skill_name' => ['required', 'string', 'max:100'],
+            'skill_category' => ['required', 'string', 'max:100'],
             'skill_description' => ['required', 'string', 'max:5000'],
             'proposal_file' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
@@ -27,6 +40,8 @@ class ProposalController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'city' => $validated['city'],
+            'skill_name' => $validated['skill_name'],
+            'skill_category' => $validated['skill_category'],
             'skill_description' => $validated['skill_description'],
             'proposal_path' => $request->getSchemeAndHttpHost() . Storage::url($proposalPath),
             'status' => 'pending',

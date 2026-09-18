@@ -1,6 +1,12 @@
 <script>
     import { createEventDispatcher } from 'svelte';
     import { slide } from 'svelte/transition';
+    import businessIcon from '../assets/category/business.svg';
+    import educationIcon from '../assets/category/edu.svg';
+    import languageIcon from '../assets/category/language.svg';
+    import technologyIcon from '../assets/category/tech.svg';
+    import writingIcon from '../assets/category/writing.svg';
+    import artIcon from '../assets/category/art.svg';
 
     const dispatch = createEventDispatcher();
 
@@ -27,109 +33,41 @@
         {
             name: 'Education',
             color: 'bg-[#ffa174]',
-            icon: 'education',
+            icon: educationIcon,
             complement: '#00d9ff'
         },
         {
             name: 'Technology',
             color: 'bg-laser-pink',
-            icon: 'technology',
+            icon: technologyIcon,
             complement: '#00d9ff'
         },
         {
             name: 'Business',
             color: 'bg-[#9b82e6]',
-            icon: 'business',
+            icon: businessIcon,
             complement: '#ccff00'
         },
         {
             name: 'Language',
             color: 'bg-[#40b8d0]',
-            icon: 'language',
+            icon: languageIcon,
             complement: '#ff006e'
         },
         {
             name: 'Art',
             color: 'bg-[#ffe477]',
-            icon: 'art',
+            icon: artIcon,
             complement: '#ff006e'
         },
         {
             name: 'Writing',
             color: 'bg-[#ffa174]',
-            icon: 'writing',
+            icon: writingIcon,
             complement: '#00d9ff'
         }
     ];
 
-    // Same paths as before, just centralized so the desktop pills and the
-    // mobile dropdown rows render from one source instead of duplicating
-    // six <svg> blocks twice.
-    const iconPaths = {
-        education: `
-            <path d="M12 42L40 15L68 42" />
-            <path d="M18 39V57L40 69L62 57V39" />
-            <path d="M26 47L40 55L54 47" />
-            <path d="M32 27L59 42" />
-        `,
-        technology: `
-            <rect x="8" y="15" width="27" height="18" rx="2" />
-            <path d="M14 38H29" />
-            <rect x="42" y="9" width="17" height="28" rx="3" />
-            <rect x="51" y="42" width="21" height="15" rx="2" />
-            <path d="M47 62H68" />
-            <path d="M28 48C35 40 48 40 55 48" />
-            <path d="M32 54C38 48 45 48 51 54" />
-        `,
-        business: `
-            <circle cx="28" cy="20" r="9" />
-            <path d="M17 43C17 34 39 34 39 43V61H17V43Z" />
-            <rect x="44" y="39" width="25" height="23" rx="2" />
-            <path d="M49 39V34H64V39" />
-            <path d="M44 48H69" />
-        `,
-        language: `
-            <rect x="10" y="8" width="60" height="45" rx="2" />
-            <path d="M21 19H49" />
-            <path d="M35 15V42" />
-            <path d="M20 27C25 36 32 39 42 41" />
-            <path d="M49 21C44 31 39 35 29 39" />
-            <path d="M46 55V68" />
-            <path d="M38 68H55" />
-            <path d="M51 53L64 68" />
-        `,
-        art: `
-            <path d="M40 10C23 10 10 22 10 38C10 53 22 65 37 65H42C46 65 48 60 46 56C44 52 47 48 52 48H60C66 48 70 43 70 37C70 22 57 10 40 10Z" />
-            <circle cx="27" cy="31" r="3" fill="black" />
-            <circle cx="40" cy="25" r="3" fill="black" />
-            <circle cx="54" cy="31" r="3" fill="black" />
-            <circle cx="31" cy="44" r="3" fill="black" />
-        `,
-        writing: `
-            <path d="M14 63C14 63 14 57 22 56L59 19" />
-            <path d="M54 14L66 26" />
-            <path d="M49 19L61 31" />
-            <path d="M22 56L31 65" />
-            <path d="M14 63L31 65" />
-            <path d="M58 18L63 13L68 18L63 23" />
-        `
-    };
-
-    function iconMarkup(name, size) {
-        return `
-            <svg
-                viewBox="0 0 80 80"
-                fill="none"
-                stroke="black"
-                stroke-width="3.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="w-[${size}px] h-[${size}px]"
-            >
-                ${iconPaths[name] ?? ''}
-            </svg>
-        `;
-    }
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -184,7 +122,7 @@
                 >
                     <!-- Icon -->
                     <div class="flex h-[71px] w-[71px] shrink-0 items-center justify-center">
-                        {@html iconMarkup(category.icon, 58)}
+                        <img src={category.icon} alt="" class:category-icon-small={category.name === 'Art' || category.name === 'Writing'} class="h-[58px] w-[58px] object-contain">
                     </div>
 
                     <!-- Text ketika hover -->
@@ -219,6 +157,11 @@
     </div>
 
     <style>
+        .category-icon-small {
+            opacity: 0.85;
+            transform: scale(0.82);
+        }
+
         .category-list {
             gap: 1.25rem;
             min-width: 0;
@@ -342,7 +285,7 @@
                                 group-hover:scale-110
                             "
                         >
-                            {@html iconMarkup(category.icon, 24)}
+                            <img src={category.icon} alt="" class="h-6 w-6 object-contain">
                         </span>
 
                         <span class="flex-1 text-base font-archivo font-bold uppercase tracking-wide text-pitch-black">

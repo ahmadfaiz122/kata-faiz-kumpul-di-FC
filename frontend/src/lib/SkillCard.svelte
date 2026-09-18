@@ -8,6 +8,15 @@
   export let category = "Design";
   export let credits = "2 kredit";
   export let ctaLabel = "Rekrut";
+
+  function firstName(name) {
+    return name?.trim().split(/\s+/)[0] || "Anonymous";
+  }
+
+  function textSizeClass(text) {
+    const length = text?.length || 0;
+    return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
+  }
 </script>
 
 <div class="card">
@@ -37,7 +46,7 @@
         <span class="with-text">Learning</span>
       </div>
       <div class="banner banner-teal">
-        <span class="name-text">{instructor}</span>
+        <span class="name-text {textSizeClass(instructor)}" title={instructor}>{instructor}</span>
       </div>
     </div>
 
@@ -64,7 +73,7 @@
           <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
-      <span class="label-lg">{mentorName}</span>
+      <span class="label-lg {textSizeClass(firstName(mentorName))}" title={firstName(mentorName)}>{firstName(mentorName)}</span>
     </div>
 
     <div class="box box-white">
@@ -112,14 +121,16 @@
 
   .card {
     position: relative;
-    width: 580px;
-    height: 281px;
+    width: 100%;
+    max-width: 580px;
+    min-height: 281px;
+    height: auto;
     background: #EDEAE2;
     border: 3px solid #0A0A0A;
     border-radius: 26px;
     box-shadow: 9px 9px 0 0 #0A0A0A;
     display: flex;
-    padding: 18px 20px;
+    padding: 18px 20px 28px;
     overflow: hidden;
   }
 
@@ -222,6 +233,19 @@
     line-height: 1;
     text-shadow: 3px 3px 0 rgba(10,10,10,0.25);
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .text-compact {
+    font-size: 14px !important;
+    line-height: 1.1;
+  }
+
+  .text-extra-compact {
+    font-size: 11px !important;
+    line-height: 1.1;
   }
 
   .uni {
@@ -308,6 +332,10 @@
     font-weight: 700;
     color: #0A0A0A;
     line-height: 1.15;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .box-cta {
@@ -333,4 +361,31 @@
     box-shadow: 1px 1px 0 0 #0A0A0A;
   }
   .cta-arrow { width: 22px; height: 22px; }
+
+  @media (max-width: 640px) {
+    .card {
+      display: block;
+      padding: 16px 16px 24px;
+    }
+
+    .left {
+      min-height: 214px;
+    }
+
+    .banner-stack {
+      transform: scale(0.82);
+      transform-origin: top left;
+    }
+
+    .divider {
+      width: auto;
+      height: 2px;
+      margin: 10px 0 14px;
+    }
+
+    .right {
+      width: 100%;
+      flex: none;
+    }
+  }
 </style>

@@ -14,6 +14,8 @@ class SkillRequest extends Model
         'email',
         'phone',
         'city',
+        'skill_name',
+        'skill_category',
         'skill_description',
         'proposal_path',
         'new_column',

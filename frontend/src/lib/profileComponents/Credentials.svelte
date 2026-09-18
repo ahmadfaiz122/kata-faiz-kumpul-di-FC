@@ -16,7 +16,7 @@
             <img src={user.avatar || fallbackPhoto} class="h-full w-full object-cover" alt={`${user.name} profile`}>
         </div>
         <div class="ml-5 sm:ml-7">
-            <p class="mb-3 w-max border-2 border-black bg-electric-cyan px-2 py-1 font-medium shadow-[4px_4px_0_#000]">SELAMAT DATANG</p>
+            <p class="mb-3 w-max border-2 border-black bg-electric-cyan px-2 py-1 tracking-wider font-anton shadow-[4px_4px_0_#000]">Selamat Datang</p>
             <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{user.name}</h1>
             <div class="mt-4 flex flex-wrap items-center gap-3 font-archivo text-xs sm:text-sm">
                 <p>{user.email}</p>

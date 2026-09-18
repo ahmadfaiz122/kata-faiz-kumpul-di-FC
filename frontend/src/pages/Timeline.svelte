@@ -126,7 +126,7 @@
 
 <main class="min-h-screen bg-[#d8d8d8] px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.png" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
+        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
         <Navbar />
         <div class="justify-self-end dashboard-enter"><ProfileDropdown /></div>
     </header>
