@@ -12,11 +12,20 @@ class ProposalController extends Controller
     {
         return response()->json([
             'data' => SkillRequest::query()
-                ->with('requesterUser:id,name,avatar')
+                ->with('requesterUser:id,name,avatar','requesterUser.profile.achievementRecords')
                 ->where('status', 'pending')
                 ->latest()
                 ->get(),
         ]);
+    }
+
+    public function show($id)
+    {
+        $proposal = SkillRequest::query()
+            ->with('requesterUser:id,name,avatar','requesterUser.profile.achievementRecords')
+            ->findOrFail($id);
+
+        return response()->json(['data' => $proposal]);
     }
 
     public function store(Request $request)

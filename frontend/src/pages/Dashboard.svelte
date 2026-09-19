@@ -16,6 +16,7 @@
     let searchInput = $state();
     /** @type {Array<{proposalId: number|string, proposal: Record<string, any>, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
+    let credit = 0
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     function submitSearch() {
@@ -65,9 +66,8 @@
         if (!response.ok) return;
 
         const result = await response.json();
-        skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
-            proposalId: proposal.id,
-            proposal,
+        skillOffers = (result.data ?? []).map((proposal) => ({
+            id: proposal.id,
             duration: `${proposal.hour ?? 1} HOUR`,
             mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
             instructor: proposal.skill_name,
@@ -77,19 +77,6 @@
         }));
     });
 </script>
-
-<style>
-    .typing-indicator {
-        animation: typing-blink 0.8s steps(2, start) infinite;
-        width: 3px;
-        height: 1.35rem;
-        background: currentColor;
-    }
-
-    @keyframes typing-blink {
-        50% { opacity: 0; }
-    }
-</style>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
@@ -132,7 +119,6 @@
                 {#if activeBar === "search"}
 
                     <input bind:this={searchInput} bind:value={searchQuery} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
-                    {#if searchFocused}<span class="typing-indicator" aria-hidden="true"></span>{/if}
 
                 {/if}
 
@@ -219,7 +205,7 @@
             <span class="hidden font-mono text-sm sm:block">01 / 06</span>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid gap-6 md:grid-cols-2">
             {#each visibleOffers as offer, index}
                 <div class:dashboard-enter={index === 0} class:dashboard-enter-delay-3={index === 1}>
                     <SkillCard {...offer} />

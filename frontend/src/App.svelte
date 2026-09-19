@@ -17,6 +17,7 @@
       "/login" : Login,
       "/edit-profile" : EditProfile,
       "/add-proposal" : AddProposal,
+      "/rekrut/:id" : Rekrut,
       "/rekrut" : Rekrut,
     }
 </script>
