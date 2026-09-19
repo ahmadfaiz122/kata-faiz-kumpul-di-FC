@@ -19,6 +19,21 @@
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
   }
 
+ function skillFontSize(text) {
+  const length = text?.length || 0;
+  const maxSize = 40;
+  const minSize = 15;
+  const startShrinkAt = 3;   // chars before shrinking kicks in
+  const fullyShrunkAt = 14;  // chars at which minSize is reached
+
+  if (length <= startShrinkAt) return maxSize;
+  if (length >= fullyShrunkAt) return minSize;
+
+  const ratio = (length - startShrinkAt) / (fullyShrunkAt - startShrinkAt);
+  return Math.round(maxSize - ratio * (maxSize - minSize));
+}
+
+
   /** @param {unknown} value */
   function formatCredits(value) {
     return String(value ?? "").replace(/_/g, "").trim();
@@ -53,7 +68,7 @@
         <span class="with-text">Learning</span>
       </div>
       <div class="banner banner-teal">
-        <span class="name-text {textSizeClass(instructor)}" title={instructor}>{instructor}</span>
+        <span class="name-text" style="font-size: {skillFontSize(instructor)}px" title={instructor}>{instructor}</span>
       </div>
     </div>
 
