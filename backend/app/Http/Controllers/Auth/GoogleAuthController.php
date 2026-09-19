@@ -89,6 +89,8 @@ class GoogleAuthController extends Controller
             ]
         );
 
+        $user->profile()->firstOrCreate([], ['credits' => 1]);
+
         // Membutuhkan Laravel Sanctum (php artisan install:api atau composer require laravel/sanctum)
         $token = $user->createToken('auth_token')->plainTextToken;
 

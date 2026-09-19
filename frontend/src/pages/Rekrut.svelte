@@ -29,7 +29,8 @@
     let showPaymentModal = false;
     let paymentMethod = "";
     let selectedSkillId = "";
-    let mySkills = []
+    /** @type {Array<{id: number|string, name: string, category_skills?: string}>} */
+    let mySkills = [];
     let mySkillsLoading = false;
     let confirmError = "";
     let confirming = false;
@@ -93,6 +94,7 @@
             mySkillsLoading = false;
         }
     }
+    /** @param {string} method */
     function choosePaymentMethod(method) {
         paymentMethod = method;
         confirmError = "";
@@ -109,7 +111,7 @@
         showPaymentModal = false;
     }
 
-    function confirmRekrut() {
+    async function confirmRekrut() {
         confirmError = "";
 
         if (!paymentMethod) {
@@ -123,22 +125,29 @@
         }
 
         confirming = true;
-        const sentMessage = {
-            id: `rekrut-${Date.now()}`,
-            name: profile.name || "Pengguna Swapp",
-            subject: `Permintaan rekrut: ${skillName || "Skill"}`,
-            preview: paymentMethod === "credit"
-                ? "Aku ingin belajar skill ini dengan kredit."
-                : "Aku ingin bertukar skill untuk sesi belajar ini.",
-            time: "Baru saja",
-            unread: false,
-            color: "bg-laser-pink",
-        };
-
-        const storedMessages = JSON.parse(localStorage.getItem("sent_messages") || "[]");
-        localStorage.setItem("sent_messages", JSON.stringify([sentMessage, ...storedMessages]));
-        showPaymentModal = false;
-        push("/swapp");
+        try {
+            const response = await fetch(`${backendUrl}/api/transactions`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+                body: JSON.stringify({
+                    proposal_id: Number(params?.id),
+                    mode: paymentMethod,
+                    requester_skill_id: paymentMethod === "skill" ? Number(selectedSkillId) : null,
+                }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || "Pengajuan transaksi gagal.");
+            showPaymentModal = false;
+            push("/messages");
+        } catch (requestError) {
+            confirmError = requestError instanceof Error ? requestError.message : "Pengajuan transaksi gagal.";
+        } finally {
+            confirming = false;
+        }
     }
 </script>
 

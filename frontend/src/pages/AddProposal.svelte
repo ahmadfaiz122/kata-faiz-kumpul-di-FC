@@ -9,6 +9,7 @@
     let email = "";
     let phone = "";
     let city = "";
+    let availableAt = "";
     /** @type {Array<{id: number|string, name: string, category_skills?: string}>} */
     let skills = [];
     let skillsLoading = true;
@@ -58,16 +59,24 @@
         }
     });
 
-    function selectCategory() {
+    function selectSkill() {
         const selectedSkill = skills.find((skill) => String(skill.id) === String(skillId));
         skillName = selectedSkill?.name || "";
         skillCategory = selectedSkill?.category_skills || "";
     }
 
-    function selectSkillByName() {
-        const selectedSkill = skills.find((skill) => skill.name.toLowerCase() === skillName.trim().toLowerCase());
-        skillId = selectedSkill ? String(selectedSkill.id) : "";
-        skillCategory = selectedSkill?.category_skills || "";
+    function validatePhone() {
+        phone = phone.replace(/\D/g, "").slice(0, 14);
+        if (!/^08[0-9]{8,12}$/.test(phone)) {
+            return "Nomor telepon harus diawali 08 dan berisi 10 sampai 14 angka.";
+        }
+        return "";
+    }
+
+    /** @param {Event & {currentTarget: HTMLInputElement}} event */
+    function handlePhoneInput(event) {
+        phone = event.currentTarget.value.replace(/\D/g, "").slice(0, 14);
+        error = "";
     }
 
     /** @param {Event & {currentTarget: HTMLInputElement}} event */
@@ -102,8 +111,13 @@
             error = "Silakan masukkan file proposal dalam format PDF.";
             return;
         }
-        if (!skillName.trim() || !skillCategory) {
-            error = "Nama dan kategori skill wajib diisi.";
+        if (!skillId || !skillName.trim()) {
+            error = "Pilih skill yang sudah kamu upload di profil.";
+            return;
+        }
+        const phoneError = validatePhone();
+        if (phoneError) {
+            error = phoneError;
             return;
         }
 
@@ -115,9 +129,8 @@
             body.append("email", email.trim());
             body.append("phone", phone.trim());
             body.append("city", city.trim());
+            body.append("available_at", availableAt);
             if (skillId) body.append("skill_id", String(skillId));
-            body.append("skill_name", skillName.trim());
-            body.append("skill_category", skillCategory);
             body.append("skill_description", skillDescription.trim());
             body.append("proposal_file", proposalFile);
 
@@ -156,6 +169,7 @@
         email = "";
         phone = "";
         city = "";
+        availableAt = "";
         skillId = "";
         skillName = "";
         skillCategory = "";
@@ -166,7 +180,7 @@
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
-    <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+    <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
         <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
             <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
         </a>
@@ -199,7 +213,7 @@
                 </div>
             </div>
         {:else}
-            <form onsubmit={submitProposal} class="border-3 border-pitch-black bg-off-white p-5 shadow-[8px_8px_0_#000] sm:p-8">
+            <form onsubmit={submitProposal} novalidate class="border-3 border-pitch-black bg-off-white p-5 shadow-[8px_8px_0_#000] sm:p-8">
                 <fieldset>
                     <legend class="font-anton text-3xl uppercase">Data diri</legend>
                     <div class="mt-5 grid gap-5 sm:grid-cols-2">
@@ -213,11 +227,19 @@
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Nomor telepon
-                            <input bind:value={phone} required type="tel" placeholder="08xxxxxxxxxx" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            <input bind:value={phone} required type="tel" inputmode="numeric" maxlength="14" oninput={handlePhoneInput} placeholder="08xxxxxxxxxx" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            {#if phone && !/^08[0-9]{8,12}$/.test(phone.replace(/\D/g, ""))}
+                                <span class="font-mono text-[10px] normal-case text-red-600">Nomor harus diawali 08 dan panjangnya 10-14 angka.</span>
+                            {/if}
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Kota domisili
                             <input bind:value={city} required type="text" placeholder="Kota kamu" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                        </label>
+                        <label class="flex flex-col gap-2 font-mono text-xs uppercase sm:col-span-2">
+                            Jadwal mulai sesi
+                            <input bind:value={availableAt} required type="datetime-local" min={new Date().toISOString().slice(0, 16)} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            <span class="font-mono text-[10px] normal-case text-pitch-black/60">Request yang belum disetujui provider akan hilang setelah 1 hari.</span>
                         </label>
                     </div>
                 </fieldset>
@@ -227,23 +249,15 @@
                     <div class="mt-5 grid gap-5 sm:grid-cols-2">
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Nama skill
-                            <input bind:value={skillName} oninput={selectSkillByName} list="profile-skills" required type="text" placeholder={skillsLoading ? "Memuat skill..." : "Pilih atau ketik nama skill"} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
-                            <datalist id="profile-skills">
-                                {#each skills as skill}
-                                    <option value={skill.name}></option>
-                                {/each}
-                            </datalist>
+                            <input bind:value={skillName} readonly required type="text" placeholder="Pilih skill di samping" class="border-2 border-pitch-black bg-gray-100 px-4 py-3 font-archivo text-base normal-case outline-none" />
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
-                            Kategori skill
-                            <select bind:value={skillCategory} required disabled={skillsLoading || !skillName} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00] disabled:cursor-not-allowed disabled:bg-gray-100">
-                                <option value="">{skillsLoading ? "Memuat kategori..." : "Pilih kategori"}</option>
-                                <option value="Education">Education</option>
-                                <option value="Technology">Technology</option>
-                                <option value="Business">Business</option>
-                                <option value="Language">Language</option>
-                                <option value="Art">Art</option>
-                                <option value="Writing">Writing</option>
+                            Skill yang dipunya
+                            <select bind:value={skillId} onchange={selectSkill} required disabled={skillsLoading || skills.length === 0} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00] disabled:cursor-not-allowed disabled:bg-gray-100">
+                                <option value="">{skillsLoading ? "Memuat skill..." : skills.length ? "Pilih skill" : "Belum ada skill"}</option>
+                                {#each skills as skill}
+                                    <option value={skill.id}>{skill.name}</option>
+                                {/each}
                             </select>
                         </label>
                     </div>

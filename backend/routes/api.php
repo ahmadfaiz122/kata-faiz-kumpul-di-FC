@@ -7,12 +7,18 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TransactionReviewController;
 
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/user', function (Request $request) {
-        $user = $request->user()->load('profile.skillRecords', 'profile.achievementRecords');
+        $user = $request->user()->load('profile:id,user_id,credits');
 
-        if ($user->profile) {
+        if ($request->boolean('details')) {
+            $user->load('profile.skillRecords', 'profile.achievementRecords');
+        }
+
+        if ($request->boolean('details') && $user->profile) {
             $user->profile->setAttribute('skills', $user->profile->skillRecords->pluck('name')->values());
             $user->profile->setAttribute('achievements', $user->profile->achievementRecords->pluck('name')->values());
         }
@@ -41,6 +47,12 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::post('/achievements', [AchievementController::class, 'store']);
         Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
         Route::post('/proposals', [ProposalController::class, 'store']);
+        Route::get('/transactions', [TransactionController::class, 'index']);
+        Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
+        Route::get('/transactions/{transaction}/materials/{skill}', [TransactionController::class, 'material']);
+        Route::post('/transactions/{transaction}/approve', [TransactionController::class, 'approve']);
+        Route::post('/transactions/{transaction}/review', [TransactionReviewController::class, 'store']);
         Route::post('/posts', [PostController::class, 'store']);
         Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
         Route::post('/posts/{post}/comments', [PostController::class, 'storeComment']);

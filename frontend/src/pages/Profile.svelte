@@ -167,7 +167,7 @@
         }
 
         try {
-            const response = await fetch(`${backendUrl}/api/user`, {
+            const response = await fetch(`${backendUrl}/api/user?details=1`, {
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${token}`,

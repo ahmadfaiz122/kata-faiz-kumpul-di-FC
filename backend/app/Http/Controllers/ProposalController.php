@@ -14,6 +14,9 @@ class ProposalController extends Controller
             'data' => SkillRequest::query()
                 ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
                 ->where('status', 'pending')
+                ->where(function ($query) {
+                    $query->whereNull('created_at')->orWhere('created_at', '>=', now()->subDay());
+                })
                 ->latest()
                 ->get(),
         ]);
@@ -33,20 +36,19 @@ class ProposalController extends Controller
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:50'],
+            'phone' => ['required', 'regex:/\A08[0-9]{8,12}\z/'],
             'city' => ['required', 'string', 'max:100'],
-            'skill_id' => ['sometimes', 'nullable', 'integer'],
-            'skill_name' => ['required', 'string', 'max:100'],
-            'skill_category' => ['required', 'string', 'max:100'],
+            'skill_id' => ['required', 'integer'],
+            'available_at' => ['required', 'date', 'after_or_equal:now'],
             'skill_description' => ['required', 'string', 'max:5000'],
             'proposal_file' => ['required', 'file', 'mimes:pdf', 'max:5120'],
+        ], [
+            'phone.regex' => 'Nomor WhatsApp harus diawali 08 dan berisi 10 sampai 14 angka.',
         ]);
 
-        $skill = ! empty($validated['skill_id'])
-            ? $request->user()->profile?->skillRecords()->find($validated['skill_id'])
-            : null;
+        $skill = $request->user()->profile?->skillRecords()->find($validated['skill_id']);
 
-        if (! empty($validated['skill_id']) && ! $skill) {
+        if (! $skill) {
             return response()->json([
                 'message' => 'Skill yang dipilih tidak terdaftar di profil kamu.',
                 'errors' => ['skill_id' => ['Pilih skill yang kamu miliki.']],
@@ -61,13 +63,14 @@ class ProposalController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'city' => $validated['city'],
-            'skill_id' => $skill?->id,
-            'skill_name' => $skill?->name ?? $validated['skill_name'],
-            'skill_category' => $skill?->category_skills ?? $validated['skill_category'],
+            'skill_id' => $skill->id,
+            'skill_name' => $skill->name,
+            'skill_category' => $skill->category_skills,
             'skill_description' => $validated['skill_description'],
             'proposal_path' => $request->getSchemeAndHttpHost() . Storage::url($proposalPath),
             'status' => 'pending',
             'hour' => 1,
+            'available_at' => $validated['available_at'],
         ]);
 
         return response()->json(['data' => $proposal], 201);

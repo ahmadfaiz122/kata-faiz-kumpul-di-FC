@@ -21,7 +21,13 @@ class SkillRequest extends Model
         'new_column',
         'status',
         'hour',
+        'available_at',
     ];
+
+    protected function casts(): array
+    {
+        return ['available_at' => 'datetime'];
+    }
 
     public function skill()
     {

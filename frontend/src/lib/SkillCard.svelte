@@ -119,7 +119,6 @@
     </div>
   </div>
 </div>
-</div>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');

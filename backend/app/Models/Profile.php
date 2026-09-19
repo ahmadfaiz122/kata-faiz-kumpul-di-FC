@@ -54,4 +54,9 @@ class Profile extends Model
     {
         return $this->hasMany(PostTimeline::class);
     }
+
+    public function getCreditBalanceAttribute(): int
+    {
+        return (int) ($this->credits ?? 0);
+    }
 }
