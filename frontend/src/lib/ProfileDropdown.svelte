@@ -24,8 +24,8 @@
 </script>
 
 {#if user}
-<div class="flex items-center gap-2 rounded-full border-2 border-black bg-electric-cyan px-3 py-2 shadow-[6px_6px_0_#000] sm:gap-4 sm:px-6 sm:py-3">
+<a href="/#/edit-profile" aria-label="Edit profile" title="Edit profile" class="flex items-center gap-2 rounded-full border-2 border-black bg-electric-cyan px-3 py-2 shadow-[6px_6px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:gap-4 sm:px-6 sm:py-3">
     <img src={user.avatar} alt={user.name} class="h-10 w-10 rounded-full border-2 border-black object-cover">
     <span class="font-mono text-sm font-bold md:text-xl md:font-normal">{firstName(user.name)}</span>
-</div>
+</a>
 {/if}
