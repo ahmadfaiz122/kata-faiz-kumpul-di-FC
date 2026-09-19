@@ -1,31 +1,37 @@
 <script>
-  export let id = null
+  /** @type {number|string|null} */
+  export let id = null;
   export let duration = "2 HOUR";
   export let mentorName = "Reinzal";
   export let university = "University of Surabaya";
   export let instructor = "Svelte";
   export let category = "Design";
   export let credits = "2 kredit";
-  /** @type {Record<string, any>|null} */
-  export let proposal = null;
   export let ctaLabel = "Rekrut";
 
+  /** @param {string} name */
   function firstName(name) {
     return name?.trim().split(/\s+/)[0] || "Anonymous";
   }
 
+  /** @param {string} text */
   function textSizeClass(text) {
     const length = text?.length || 0;
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
   }
 
+  /** @param {unknown} value */
+  function formatCredits(value) {
+    return String(value ?? "").replace(/_/g, "").trim();
+  }
+
   function recruit() {
-    if (proposal) sessionStorage.setItem("selected_proposal", JSON.stringify(proposal));
-    window.location.href = "/#/rekrut";
+    window.location.href = id ? `/#/rekrut/${id}` : "/#/rekrut";
   }
 </script>
 
 <div class="card">
+
   <!-- LEFT SIDE -->
   <div class="left">
     <!-- clock badge -->
@@ -114,8 +120,8 @@
         <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
+    </div>
   </div>
-</div>
 </div>
 
 <style>

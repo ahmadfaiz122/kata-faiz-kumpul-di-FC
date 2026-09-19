@@ -36,7 +36,14 @@
 
     async function toggleLike(post) {
         if (post.likeLoading) return;
-        posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: true } : item);
+        const liked = post.liked_by_user ?? false;
+        const likesCount = post.likes_count ?? 0;
+        posts = posts.map((item) => item.id === post.id ? {
+            ...item,
+            liked_by_user: !liked,
+            likes_count: Math.max(0, likesCount + (liked ? -1 : 1)),
+            likeLoading: true
+        } : item);
         try {
             const response = await fetch(`${backendUrl}/api/posts/${post.id}/like`, { method: "POST", headers: authHeaders() });
             const data = await response.json();
@@ -44,7 +51,7 @@
             posts = posts.map((item) => item.id === post.id ? { ...item, liked_by_user: data.liked, likes_count: data.likes_count, likeLoading: false } : item);
         } catch (exception) {
             error = exception instanceof Error ? exception.message : "Like gagal diproses.";
-            posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: false } : item);
+            posts = posts.map((item) => item.id === post.id ? { ...item, liked_by_user: liked, likes_count: likesCount, likeLoading: false } : item);
         }
     }
 

@@ -23,6 +23,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/{post}/comments', [PostController::class, 'comments']);
     Route::get('/proposals', [ProposalController::class, 'index']);
+    Route::get('/proposals/{proposal}', [ProposalController::class, 'show']);
     Route::get('/proposals/{proposal}/file', [ProposalController::class, 'file']);
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -40,6 +41,9 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::post('/achievements', [AchievementController::class, 'store']);
         Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
         Route::post('/proposals', [ProposalController::class, 'store']);
+        Route::get('/user/proposals', [ProposalController::class, 'mine']);
+        Route::post('/user/proposals/{id}', [ProposalController::class, 'update']);
+        Route::delete('/user/proposals/{id}', [ProposalController::class, 'destroy']);
         Route::post('/posts', [PostController::class, 'store']);
         Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
         Route::post('/posts/{post}/comments', [PostController::class, 'storeComment']);

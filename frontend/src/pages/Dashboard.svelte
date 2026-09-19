@@ -14,7 +14,7 @@
     let searchQuery = $state("");
     let searchFocused = $state(false);
     let searchInput = $state();
-    /** @type {Array<{proposalId: number|string, proposal: Record<string, any>, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
+    /** @type {Array<{id: number|string, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
     let credit = 0
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -66,7 +66,7 @@
         if (!response.ok) return;
 
         const result = await response.json();
-        skillOffers = (result.data ?? []).map((proposal) => ({
+        skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
             id: proposal.id,
             duration: `${proposal.hour ?? 1} HOUR`,
             mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
@@ -79,7 +79,7 @@
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
-    <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+    <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
         <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
             <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
         </a>
@@ -89,7 +89,7 @@
         </div>
     </header>
 
-    <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-320 flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+    <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <CategoryBar />
         <div class="relative flex items-center gap-3 lg:w-100">
                         
@@ -196,7 +196,7 @@
 
     </section>
 
-    <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-320" aria-labelledby="offers-title">
+    <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-7xl" aria-labelledby="offers-title">
         <div class="mb-5 flex items-end justify-between gap-4">
             <div>
                 <p class="font-mono text-sm uppercase tracking-wide text-laser-pink">Temukan teman belajar</p>
