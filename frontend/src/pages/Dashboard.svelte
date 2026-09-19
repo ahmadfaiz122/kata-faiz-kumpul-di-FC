@@ -16,6 +16,8 @@
     let searchInput = $state();
     /** @type {Array<{id: number|string, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
+    let proposalsLoading = $state(true);
+    let proposalsError = $state("");
     let credit = 0
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -62,19 +64,26 @@
     }));
 
     onMount(async () => {
-        const response = await fetch(`${backendUrl}/api/proposals`, { headers: { Accept: "application/json" } });
-        if (!response.ok) return;
+        try {
+            const response = await fetch(`${backendUrl}/api/proposals`, { headers: { Accept: "application/json" } });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || `Server proposal mengembalikan ${response.status}.`);
+            if (!Array.isArray(result.data)) throw new Error("Format data proposal dari server tidak valid.");
 
-        const result = await response.json();
-        skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
-            id: proposal.id,
-            duration: `${proposal.hour ?? 1} HOUR`,
-            mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
-            instructor: proposal.skill_name,
-            category: proposal.skill_category,
-            credits: `${proposal.hour ?? 1} kredit`,
-            university: proposal.city || "Community learner",
-        }));
+            skillOffers = result.data.map((/** @type {Record<string, any>} */ proposal) => ({
+                id: proposal.id,
+                duration: `${proposal.hour ?? 1} HOUR`,
+                mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
+                instructor: proposal.skill_name,
+                category: proposal.skill_category,
+                credits: `${proposal.hour ?? 1} kredit`,
+                university: proposal.city || "Community learner",
+            }));
+        } catch (requestError) {
+            proposalsError = requestError instanceof Error ? requestError.message : "Post Swapp gagal dimuat.";
+        } finally {
+            proposalsLoading = false;
+        }
     });
 </script>
 
@@ -206,6 +215,13 @@
         </div>
 
         <div class="grid gap-6 md:grid-cols-2">
+            {#if proposalsLoading}
+                <p class="border-2 border-pitch-black bg-off-white p-5 font-mono text-xs">Memuat post Swapp...</p>
+            {:else if proposalsError}
+                <p role="alert" class="border-2 border-pitch-black bg-[#ffd6df] p-5 font-mono text-xs">{proposalsError}</p>
+            {:else if visibleOffers.length === 0}
+                <p class="border-2 border-pitch-black bg-off-white p-5 font-mono text-xs">Belum ada post Swapp aktif.</p>
+            {/if}
             {#each visibleOffers as offer, index}
                 <div class:dashboard-enter={index === 0} class:dashboard-enter-delay-3={index === 1}>
                     <SkillCard {...offer} />

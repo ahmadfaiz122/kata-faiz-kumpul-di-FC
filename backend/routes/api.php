@@ -47,11 +47,17 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::post('/achievements', [AchievementController::class, 'store']);
         Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
         Route::post('/proposals', [ProposalController::class, 'store']);
+        Route::get('/user/proposals', [ProposalController::class, 'mine']);
+        Route::post('/user/proposals/{id}', [ProposalController::class, 'update']);
+        Route::delete('/user/proposals/{id}', [ProposalController::class, 'destroy']);
         Route::get('/transactions', [TransactionController::class, 'index']);
+        Route::get('/credits/ledger', [TransactionController::class, 'ledger']);
         Route::post('/transactions', [TransactionController::class, 'store']);
         Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
         Route::get('/transactions/{transaction}/materials/{skill}', [TransactionController::class, 'material']);
         Route::post('/transactions/{transaction}/approve', [TransactionController::class, 'approve']);
+        Route::post('/transactions/{transaction}/reject', [TransactionController::class, 'reject']);
+        Route::post('/transactions/{transaction}/cancel', [TransactionController::class, 'cancel']);
         Route::post('/transactions/{transaction}/review', [TransactionReviewController::class, 'store']);
         Route::post('/posts', [PostController::class, 'store']);
         Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
