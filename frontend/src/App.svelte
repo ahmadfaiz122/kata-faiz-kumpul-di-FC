@@ -7,6 +7,7 @@
     import Leaderboard from "./pages/Leaderboard.svelte";
     import EditProfile from "./pages/EditProfile.svelte";
     import AddProposal from "./pages/AddProposal.svelte";
+    import Rekrut from "./pages/Rekrut.svelte";
     const routes = {
       "/" : Timeline,
       "/swapp" : Dashboard,
@@ -16,6 +17,7 @@
       "/login" : Login,
       "/edit-profile" : EditProfile,
       "/add-proposal" : AddProposal,
+      "/rekrut" : Rekrut,
     }
 </script>
 
