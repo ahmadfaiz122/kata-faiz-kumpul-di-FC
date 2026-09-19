@@ -9,6 +9,10 @@
     let email = "";
     let phone = "";
     let city = "";
+    /** @type {Array<{id: number|string, name: string, category_skills?: string}>} */
+    let skills = [];
+    let skillsLoading = true;
+    let skillId = "";
     let skillName = "";
     let skillCategory = "";
     let skillDescription = "";
@@ -22,17 +26,42 @@
 
     onMount(async () => {
         const token = localStorage.getItem("auth_token");
-        if (!token) return;
+        if (!token) {
+            skillsLoading = false;
+            push("/login");
+            return;
+        }
 
-        const response = await fetch(`${backendUrl}/api/user`, {
-            headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) return;
+        try {
+            const headers = { Accept: "application/json", Authorization: `Bearer ${token}` };
+            const [userResponse, skillsResponse] = await Promise.all([
+                fetch(`${backendUrl}/api/user`, { headers }),
+                fetch(`${backendUrl}/api/skills`, { headers }),
+            ]);
 
-        const user = await response.json();
-        fullName = user.name || "";
-        email = user.email || "";
+            if (userResponse.status === 401 || skillsResponse.status === 401) {
+                push("/login");
+                return;
+            }
+            if (!userResponse.ok || !skillsResponse.ok) throw new Error("Gagal mengambil data profil dan skill.");
+
+            const user = await userResponse.json();
+            const skillResult = await skillsResponse.json();
+            fullName = user.name || "";
+            email = user.email || "";
+            skills = skillResult.data || [];
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profil dan skill.";
+        } finally {
+            skillsLoading = false;
+        }
     });
+
+    function selectCategory() {
+        const selectedSkill = skills.find((skill) => String(skill.id) === String(skillId));
+        skillName = selectedSkill?.name || "";
+        skillCategory = selectedSkill?.category_skills || "";
+    }
 
     /** @param {Event & {currentTarget: HTMLInputElement}} event */
     function selectFile(event) {
@@ -46,8 +75,8 @@
             return;
         }
 
-        if (file.size > 10 * 1024 * 1024) {
-            error = "Ukuran file maksimal 10 MB.";
+        if (file.size > 5 * 1024 * 1024) {
+            error = "Ukuran file maksimal 5 MB.";
             event.currentTarget.value = "";
             proposalFile = null;
             return;
@@ -65,6 +94,10 @@
             error = "Silakan masukkan file proposal dalam format PDF.";
             return;
         }
+        if (!skillId) {
+            error = "Pilih skill yang sudah kamu upload di profil.";
+            return;
+        }
 
         submitting = true;
 
@@ -74,8 +107,7 @@
             body.append("email", email.trim());
             body.append("phone", phone.trim());
             body.append("city", city.trim());
-            body.append("skill_name", skillName.trim());
-            body.append("skill_category", skillCategory);
+            body.append("skill_id", String(skillId));
             body.append("skill_description", skillDescription.trim());
             body.append("proposal_file", proposalFile);
 
@@ -114,6 +146,7 @@
         email = "";
         phone = "";
         city = "";
+        skillId = "";
         skillName = "";
         skillCategory = "";
         skillDescription = "";
@@ -184,18 +217,15 @@
                     <div class="mt-5 grid gap-5 sm:grid-cols-2">
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Nama skill
-                            <input bind:value={skillName} required type="text" placeholder="Contoh: Desain grafis" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            <input bind:value={skillName} readonly required type="text" placeholder="Pilih kategori skill" class="border-2 border-pitch-black bg-gray-100 px-4 py-3 font-archivo text-base normal-case outline-none" />
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Kategori skill
-                            <select bind:value={skillCategory} required class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]">
-                                <option value="">Pilih kategori</option>
-                                <option>Education</option>
-                                <option>Technology</option>
-                                <option>Business</option>
-                                <option>Language</option>
-                                <option>Art</option>
-                                <option>Writing</option>
+                            <select bind:value={skillId} onchange={selectCategory} required disabled={skillsLoading || skills.length === 0} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00] disabled:cursor-not-allowed disabled:bg-gray-100">
+                                <option value="">{skillsLoading ? "Memuat skill..." : skills.length ? "Pilih skill" : "Belum ada skill"}</option>
+                                {#each skills as skill}
+                                    <option value={skill.id}>{skill.name}</option>
+                                {/each}
                             </select>
                         </label>
                     </div>

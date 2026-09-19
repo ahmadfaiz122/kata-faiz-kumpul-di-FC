@@ -21,6 +21,15 @@
     let skills = [];
 
     onMount(async () => {
+        const storedProposal = sessionStorage.getItem("selected_proposal");
+        if (storedProposal) {
+            try {
+                proposal = JSON.parse(storedProposal);
+            } catch {
+                sessionStorage.removeItem("selected_proposal");
+            }
+        }
+
         const token = localStorage.getItem("auth_token");
         if (!token) {
             push("/login");
@@ -76,32 +85,32 @@
         <div class="mt-6 grid gap-7 sm:grid-cols-[120px_1fr]">
             <div class="flex flex-col items-center gap-3">
                 <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000]">
-                {#if profile.photo}<img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
+                {#if proposal.requester_user?.avatar || profile.photo}<img src={proposal.requester_user?.avatar || profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
                 </div>
            </div>
            <div class="ml-5 sm:ml-7">
-                <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{profile.name}</h1>
+                <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{proposal.full_name || proposal.requester_user?.name || profile.name}</h1>
                 <div class="mt-3 flex flex-wrap items-center gap-3 font-archivo text-xs sm:text-sm">
-                    <p>{profile.email}</p>
+                    <p>{proposal.email || profile.email}</p>
                 </div>
                 <div class="bottom-[2px] font-mono left-[4px] flex items-center gap-[6px] mt-2">
                     <svg viewBox="0 0 24 24" width=15px height=15px fill="none">
                         <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.4" stroke-linecap="round" />
                         <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <span>Magetan</span>
+                    <span>{proposal.city || "Domisili belum tersedia"}</span>
                 </div>
             </div>
         </div>
         <div class='mt-12'>
             <div class="mt-8">
                     <div class="flex items-center justify-between font-mono text-[13px] font-bold"><span>Deskripsi Skill</span>
-                        <button type="button" class=" border-2 border-pitch-black flex button-lift bg-electric-cyan px-3 py-2 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">
+                        <button type="button" onclick={() => proposal.id && window.open(`${backendUrl}/api/proposals/${proposal.id}/file`, "_blank")} class=" border-2 border-pitch-black flex button-lift bg-electric-cyan px-3 py-2 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">
                             <svg fill="#000000" width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="download-alt" class="icon glyph">
                                 <path d="M11.29,16.71h0a1.15,1.15,0,0,0,.33.21.94.94,0,0,0,.76,0,1.15,1.15,0,0,0,.33-.21h0l4-4a1,1,0,0,0-1.42-1.42L13,13.59V3a1,1,0,0,0-2,0V13.59l-2.29-2.3a1,1,0,1,0-1.42,1.42Z"/>
                                 <path d="M19,20H5a1,1,0,0,0,0,2H19a1,1,0,0,0,0-2Z"/></svg><p class="ms-1">Download PDF</p></button></div>
                     <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]">
-                        <p class="font-mono text-[15px] leading-relaxed sm:text-xs">Saya adalah seorang software engineer sepuh yang sedang bekerja untuk sebuah proyek</p>
+                                <p class="font-mono text-[15px] leading-relaxed sm:text-xs">{proposal.skill_description || "Deskripsi skill belum tersedia."}</p>
                     </div>
                 </div>
         </div>

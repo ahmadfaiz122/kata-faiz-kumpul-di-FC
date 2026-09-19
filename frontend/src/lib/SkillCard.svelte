@@ -6,6 +6,8 @@
   export let instructor = "Svelte";
   export let category = "Design";
   export let credits = "2 kredit";
+  /** @type {Record<string, any>|null} */
+  export let proposal = null;
   export let ctaLabel = "Rekrut";
 
   function firstName(name) {
@@ -15,6 +17,11 @@
   function textSizeClass(text) {
     const length = text?.length || 0;
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
+  }
+
+  function recruit() {
+    if (proposal) sessionStorage.setItem("selected_proposal", JSON.stringify(proposal));
+    window.location.href = "/#/rekrut";
   }
 </script>
 
@@ -100,7 +107,7 @@
       <span class="label-lg">{credits}</span>
     </div>
 
-    <button class="box box-cta" onclick={() => window.location.href = '/#/rekrut'}>
+    <button class="box box-cta" onclick={recruit}>
       <span>{ctaLabel}</span>
       <svg viewBox="0 0 24 24" class="cta-arrow" fill="none">
         <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.6" stroke-linecap="round" />

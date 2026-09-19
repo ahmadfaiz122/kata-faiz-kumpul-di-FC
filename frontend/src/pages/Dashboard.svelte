@@ -14,6 +14,7 @@
     let searchQuery = $state("");
     let searchFocused = $state(false);
     let searchInput = $state();
+    /** @type {Array<{proposalId: number|string, proposal: Record<string, any>, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -22,7 +23,7 @@
     }
     let activeBar = $state("search");
     let filterOpen = $state(false)
-    let filterTriggerEl = $state(null);
+    let filterTriggerEl = $state(/** @type {HTMLButtonElement|null} */ (null));
         async function selectSearch() {
 
         activeBar = "search";
@@ -64,7 +65,9 @@
         if (!response.ok) return;
 
         const result = await response.json();
-        skillOffers = (result.data ?? []).map((proposal) => ({
+        skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
+            proposalId: proposal.id,
+            proposal,
             duration: `${proposal.hour ?? 1} HOUR`,
             mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
             instructor: proposal.skill_name,
