@@ -1,5 +1,5 @@
 <script>
-
+  export let id = null
   export let duration = "2 HOUR";
   export let mentorName = "Reinzal";
   export let university = "University of Surabaya";
@@ -100,7 +100,7 @@
       <span class="label-lg">{credits}</span>
     </div>
 
-    <button class="box box-cta" onclick={() => window.location.href = '/#/rekrut'}>
+    <button class="box box-cta" onclick={() => window.location.href = id ? `/#/rekrut/${id}` : '/#/rekrut'}>
       <span>{ctaLabel}</span>
       <svg viewBox="0 0 24 24" class="cta-arrow" fill="none">
         <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.6" stroke-linecap="round" />

@@ -7,9 +7,14 @@
     import { onMount } from "svelte";
     import { push } from "svelte-spa-router";
 
-    let profile = { name: "", username: "", alias: "", bio: "", email: "", nim: "", photo: "" };
-    let proposal = {}
-    let prestasi = []
+    /** @type {{ id?: string }} */
+    export let params = {};
+
+    let profile = { name: "", email: "", photo: "", city: "" };
+    let skillName = "";
+    let skillCategory = "";
+    let skillDescription = "";
+    let proposalPath = "";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let error = "";
@@ -20,6 +25,13 @@
     /** @type {Array<{id: number|string, name: string}>} */
     let skills = [];
 
+    let showPaymentModal = false;
+    let paymentMethod = "";
+    let selectedSkillId = "";
+    let mySkillsLoading = false;
+    let confirmError = "";
+    let confirming = false;
+
     onMount(async () => {
         const token = localStorage.getItem("auth_token");
         if (!token) {
@@ -27,8 +39,15 @@
             return;
         }
 
+        const proposalId = params?.id;
+        if (!proposalId) {
+            error = "Request tidak ditemukan.";
+            loading = false;
+            return;
+        }
+
         try {
-            const response = await fetch(`${backendUrl}/api/profile`, {
+            const response = await fetch(`${backendUrl}/api/proposals/${proposalId}`, {
                 headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
             });
             if (response.status === 401) {
@@ -36,26 +55,42 @@
                 push("/login");
                 return;
             }
-            if (!response.ok) throw new Error("Gagal mengambil data profile.");
-            const data = await response.json();
-            const stored = data.profile || {};
+            if (!response.ok) throw new Error("Gagal mengambil data request.");
+
+            const result = await response.json();
+            const data = result.data ?? result;
+
             profile = {
-                name: data.name || "",
-                email: data.email || "",
-                photo: data.avatar || "",
-                username: stored.username || "",
-                alias: stored.alias || "",
-                bio: stored.bio || "",
-                nim: stored.nim || "",
+                name: data.requester_user?.name ?? data.full_name ?? "",
+                email: data.email ?? "",
+                photo: data.requester_user?.avatar ?? "",
+                city: data.city ?? "",
             };
-            skills = stored.skill_records || [];
-            achievements = stored.achievement_records || [];
+            achievements = data.requester_user?.profile?.achievement_records ?? [];
+            skillName = data.skill_name ?? "";
+            skillCategory = data.skill_category ?? "";
+            skillDescription = data.skill_description ?? "";
+            proposalPath = data.proposal_path ?? "";
         } catch (requestError) {
-            error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profile.";
+            error = requestError instanceof Error ? requestError.message : "Gagal mengambil data request.";
         } finally {
             loading = false;
         }
     });
+    function choosePaymentMethod(method) {
+        paymentMethod = method;
+        confirmError = "";
+    }
+    function openPaymentModal() {
+        confirmError = "";
+        paymentMethod = "";
+        selectedSkillId = "";
+        showPaymentModal = true;
+    }
+
+    function closePaymentModal() {
+        showPaymentModal = false;
+    }
 </script>
 
 <main class="relative min-h-screen overflow-hidden bg-[#d8d8d8] px-5 py-5 sm:px-10 lg:px-18">
@@ -72,39 +107,52 @@
             Kembali ke barter
         </a>
         <section class="dashboard-enter dashboard-enter-delay-1 mt-4 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000] sm:p-9">
-        <h1 class="font-mono text-xl font-bold sm:text-2xl">Informasi Pengajar</h1>
-        <div class="mt-6 grid gap-7 sm:grid-cols-[120px_1fr]">
-            <div class="flex flex-col items-center gap-3">
-                <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000]">
-                {#if profile.photo}<img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
-                </div>
-           </div>
-           <div class="ml-5 sm:ml-7">
-                <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{profile.name}</h1>
-                <div class="mt-3 flex flex-wrap items-center gap-3 font-archivo text-xs sm:text-sm">
-                    <p>{profile.email}</p>
-                </div>
-                <div class="bottom-[2px] font-mono left-[4px] flex items-center gap-[6px] mt-2">
-                    <svg viewBox="0 0 24 24" width=15px height=15px fill="none">
-                        <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.4" stroke-linecap="round" />
-                        <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <span>Magetan</span>
-                </div>
+        {#if loading}
+    <p class="font-mono text-sm">Memuat data request...</p>
+{:else if error}
+    <p class="font-mono text-sm text-laser-pink">{error}</p>
+{:else}
+<h1 class="font-mono text-xl font-bold sm:text-2xl">Informasi Pengajar</h1>
+<div class="mt-6 grid gap-7 sm:grid-cols-[120px_1fr]">
+    <div class="flex flex-col items-center gap-3">
+        <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000]">
+        {#if profile.photo}<img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
+        </div>
+   </div>
+   <div class="ml-5 sm:ml-7">
+        <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{profile.name}</h1>
+        <div class="mt-3 flex flex-wrap items-center gap-3 font-archivo text-xs sm:text-sm">
+            <p>{profile.email}</p>
+        </div>
+        {#if skillName}
+            <p class="mt-2 font-mono text-xs uppercase text-laser-pink">{skillName}{#if skillCategory} · {skillCategory}{/if}</p>
+        {/if}
+        <div class="bottom-[2px] font-mono left-[4px] flex items-center gap-[6px] mt-2">
+            <svg viewBox="0 0 24 24" width=15px height=15px fill="none">
+                <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.4" stroke-linecap="round" />
+                <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>{profile.city || "Kota tidak diketahui"}</span>
+        </div>
+    </div>
+</div>
+<div class='mt-12'>
+    <div class="mt-8">
+            <div class="flex items-center justify-between font-mono text-[13px] font-bold"><span>Deskripsi Skill</span>
+                {#if proposalPath}
+                <a href={proposalPath} target="_blank" rel="noreferrer" class="border-2 border-pitch-black flex button-lift bg-electric-cyan px-3 py-2 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">
+                    <svg fill="#000000" width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="download-alt" class="icon glyph">
+                        <path d="M11.29,16.71h0a1.15,1.15,0,0,0,.33.21.94.94,0,0,0,.76,0,1.15,1.15,0,0,0,.33-.21h0l4-4a1,1,0,0,0-1.42-1.42L13,13.59V3a1,1,0,0,0-2,0V13.59l-2.29-2.3a1,1,0,1,0-1.42,1.42Z"/>
+                        <path d="M19,20H5a1,1,0,0,0,0,2H19a1,1,0,0,0,0-2Z"/></svg><p class="ms-1">Download PDF</p></a>
+                {/if}
+            </div>
+            <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]">
+                <p class="font-mono text-[15px] leading-relaxed sm:text-xs">{skillDescription || "Belum ada deskripsi skill."}</p>
             </div>
         </div>
-        <div class='mt-12'>
-            <div class="mt-8">
-                    <div class="flex items-center justify-between font-mono text-[13px] font-bold"><span>Deskripsi Skill</span>
-                        <button type="button" class=" border-2 border-pitch-black flex button-lift bg-electric-cyan px-3 py-2 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">
-                            <svg fill="#000000" width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" id="download-alt" class="icon glyph">
-                                <path d="M11.29,16.71h0a1.15,1.15,0,0,0,.33.21.94.94,0,0,0,.76,0,1.15,1.15,0,0,0,.33-.21h0l4-4a1,1,0,0,0-1.42-1.42L13,13.59V3a1,1,0,0,0-2,0V13.59l-2.29-2.3a1,1,0,1,0-1.42,1.42Z"/>
-                                <path d="M19,20H5a1,1,0,0,0,0,2H19a1,1,0,0,0,0-2Z"/></svg><p class="ms-1">Download PDF</p></button></div>
-                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]">
-                        <p class="font-mono text-[15px] leading-relaxed sm:text-xs">Saya adalah seorang software engineer sepuh yang sedang bekerja untuk sebuah proyek</p>
-                    </div>
-                </div>
-        </div>
+</div>
+<!-- Prestasi + rating sections stay exactly as before (not wired to real data yet) -->
+{/if}
         <div class='mt-8'>
             <div class="mt-8">
                     <div class="flex items-center justify-between font-mono text-[13px] font-bold">
@@ -134,9 +182,7 @@
                                     {@const issuedYear = achievement.tanggal_terbit
                                         ? "20" + String(achievement.tanggal_terbit).slice(0, 2)
                                         : "----"}
-                                    {@const description =
-                                        achievement.description ||
-                                        "Informasi prestasi belum tersedia. Pastikan bahwa frontend ini terconnect ke backend dengan benar"}
+                                    {@const description = achievement.description || "Informasi prestasi belum tersedia. Pastikan bahwa frontend ini terconnect ke backend dengan benar"}
 
                                     <article class="border-2 border-pitch-black bg-off-white p-4 shadow-[5px_5px_0_#000] sm:p-5">
                                         <div class="flex items-center gap-4">
@@ -192,7 +238,7 @@
     </section>
     <div class="flex justify-center">
         <div class="mt-10 flex items-center justify-center gap-4">
-            <button type="submit" class="button-lift border-2 border-pitch-black inline-flex items-center justify-center gap-2 bg-white px-6 py-3 font-mono text-sm font-bold shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ff006e">
+            <button type="submit" onclick={openPaymentModal} class="button-lift border-2 border-pitch-black inline-flex items-center justify-center gap-2 bg-white px-6 py-3 font-mono text-sm font-bold shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ff006e">
                 <span>Konfirmasi Rekrut</span>
                 <svg viewBox="0 0 24 24" class="w-[22px] h-[22px]" fill="none">
                     <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.6" stroke-linecap="round" />
@@ -203,3 +249,60 @@
     </div>
     </div>
 </main>
+
+{#if showPaymentModal}
+    <div class="fixed inset-0 z-200 flex items-center justify-center bg-pitch-black/45 p-4" role="presentation" onclick={(event) => event.target === event.currentTarget && closePaymentModal()}>
+        <dialog open aria-labelledby="payment-modal-title" class="dashboard-enter relative m-0 w-full max-w-165 overflow-hidden rounded-xl border-4 border-pitch-black bg-off-white shadow-[10px_10px_0_#000]">
+            <header class="flex items-center justify-between border-b-4 border-pitch-black bg-neon-yellow px-6 py-4 sm:px-9">
+                <h2 id="payment-modal-title" class="font-archivo text-2xl font-bold sm:text-3xl">Pilih Metode Penukaran</h2>
+                <button type="button" onclick={closePaymentModal} aria-label="Close payment modal" class="text-5xl leading-none">×</button>
+            </header>
+
+            <div class="px-6 py-8 sm:px-10 sm:py-10">
+
+                <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                    <button
+                        type="button"
+                        onclick={() => choosePaymentMethod("credit")}
+                        class="button-lift flex flex-col items-center gap-3 border-3 border-pitch-black bg-cyber-lime p-5 text-center shadow-[5px_5px_0_#000] {paymentMethod === 'credit' ? 'ring-4 ring-laser-pink' : ''}"
+                        style="--button-complement: #ff006e"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-10 w-10" fill="none">
+                            <ellipse cx="12" cy="6" rx="7" ry="3" fill="none" stroke="black" stroke-width="2" />
+                            <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" fill="none" stroke="black" stroke-width="2" />
+                            <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" fill="none" stroke="black" stroke-width="2" />
+                        </svg>
+                        <span class="font-archivo text-lg font-bold uppercase">Bayar dengan Kredit</span>
+                        <span class="font-mono text-[10px] text-pitch-black/60">Gunakan kredit waktu</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick={() => choosePaymentMethod("skill")}
+                        class="button-lift flex flex-col items-center gap-3 border-3 border-pitch-black bg-electric-cyan p-5 text-center shadow-[5px_5px_0_#000] {paymentMethod === 'skill' ? 'ring-4 ring-laser-pink' : ''}"
+                        style="--button-complement: #ff006e"
+                    >
+                        <svg viewBox="0 0 24 24" class="h-10 w-10" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 8L3 12L7 16" />
+                            <path d="M17 8L21 12L17 16" />
+                            <path d="M14 4L9.8589 19.4548" />
+                        </svg>
+                        <span class="font-archivo text-lg font-bold uppercase">Bayar dengan Skill</span>
+                        <span class="font-mono text-[10px] text-pitch-black/60">Tukar dengan skill(barter)</span>
+                    </button>
+                </div>
+
+                {#if confirmError}
+                    <p role="alert" class="mt-5 border-2 border-pale-red bg-[#ffd6df] px-4 py-3 font-mono text-xs">{confirmError}</p>
+                {/if}
+
+                <div class="mt-8 flex justify-end gap-3">
+                    <button type="button" onclick={closePaymentModal} class="border-2 border-pitch-black bg-off-white px-5 py-2 font-mono text-xs font-bold">Batal</button>
+                    <button type="button" disabled={confirming} onclick={confirmRekrut} class="button-lift border-2 border-pitch-black bg-laser-pink px-6 py-2 font-mono text-xs font-bold text-off-white shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ccff00">
+                        {confirming ? "Memproses..." : "Konfirmasi"}
+                    </button>
+                </div>
+            </div>
+        </dialog>
+    </div>
+{/if}

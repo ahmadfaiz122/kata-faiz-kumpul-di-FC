@@ -15,6 +15,7 @@
     let searchFocused = $state(false);
     let searchInput = $state();
     let skillOffers = $state([]);
+    let credit = 0
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     function submitSearch() {
@@ -65,6 +66,7 @@
 
         const result = await response.json();
         skillOffers = (result.data ?? []).map((proposal) => ({
+            id: proposal.id,
             duration: `${proposal.hour ?? 1} HOUR`,
             mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
             instructor: proposal.skill_name,
