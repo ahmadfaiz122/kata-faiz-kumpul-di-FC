@@ -15,6 +15,7 @@
     let skillCategory = "";
     let skillDescription = "";
     let proposalPath = "";
+    let proposal = null;
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let error = "";
@@ -28,6 +29,7 @@
     let showPaymentModal = false;
     let paymentMethod = "";
     let selectedSkillId = "";
+    let mySkills = []
     let mySkillsLoading = false;
     let confirmError = "";
     let confirming = false;
@@ -66,6 +68,7 @@
                 photo: data.requester_user?.avatar ?? "",
                 city: data.city ?? "",
             };
+            skills = data.requester_user?.profile?.skill_records ?? [];
             achievements = data.requester_user?.profile?.achievement_records ?? [];
             skillName = data.skill_name ?? "";
             skillCategory = data.skill_category ?? "";
@@ -77,10 +80,23 @@
             loading = false;
         }
     });
-    /** @param {string} method */
+    async function loadMySkills() {
+        const token = localStorage.getItem("auth_token");
+        if (mySkills.length || mySkillsLoading) return;
+        mySkillsLoading = true;
+        try {
+            const response = await fetch(`${backendUrl}/api/skills`, { headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, });
+            if (!response.ok) return;
+            const result = await response.json();
+            mySkills = result.data ?? [];
+        } finally {
+            mySkillsLoading = false;
+        }
+    }
     function choosePaymentMethod(method) {
         paymentMethod = method;
         confirmError = "";
+        if (method === "skill") loadMySkills();
     }
     function openPaymentModal() {
         confirmError = "";
@@ -93,20 +109,36 @@
         showPaymentModal = false;
     }
 
-    async function confirmRekrut() {
+    function confirmRekrut() {
+        confirmError = "";
+
         if (!paymentMethod) {
-            confirmError = "Pilih metode pembayaran terlebih dahulu.";
+            confirmError = "Pilih metode penukaran terlebih dahulu.";
+            return;
+        }
+
+        if (paymentMethod === "skill" && !selectedSkillId) {
+            confirmError = "Pilih skill yang ingin kamu tawarkan.";
             return;
         }
 
         confirming = true;
-        confirmError = "";
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 300));
-            showPaymentModal = false;
-        } finally {
-            confirming = false;
-        }
+        const sentMessage = {
+            id: `rekrut-${Date.now()}`,
+            name: profile.name || "Pengguna Swapp",
+            subject: `Permintaan rekrut: ${skillName || "Skill"}`,
+            preview: paymentMethod === "credit"
+                ? "Aku ingin belajar skill ini dengan kredit."
+                : "Aku ingin bertukar skill untuk sesi belajar ini.",
+            time: "Baru saja",
+            unread: false,
+            color: "bg-laser-pink",
+        };
+
+        const storedMessages = JSON.parse(localStorage.getItem("sent_messages") || "[]");
+        localStorage.setItem("sent_messages", JSON.stringify([sentMessage, ...storedMessages]));
+        showPaymentModal = false;
+        push("/swapp");
     }
 </script>
 
@@ -308,6 +340,25 @@
                         <span class="font-mono text-[10px] text-pitch-black/60">Tukar dengan skill(barter)</span>
                     </button>
                 </div>
+                {#if paymentMethod === "skill"}
+                    <div class="mt-6 border-t-2 border-pitch-black pt-5">
+                        <label class="grid gap-2 font-archivo text-sm font-bold" for="offer-skill">
+                            Pilih skill yang kamu tawarkan
+                            {#if mySkillsLoading}
+                                <span class="font-mono text-[10px] font-normal text-pitch-black/60">Memuat skill kamu...</span>
+                            {:else if mySkills.length === 0}
+                                <span class="font-mono text-[10px] font-normal text-laser-pink">Kamu belum punya skill terdaftar. Tambahkan dulu di Edit Profile.</span>
+                            {:else}
+                                <select id="offer-skill" bind:value={selectedSkillId} class="modal-input">
+                                    <option value="">Pilih skill...</option>
+                                    {#each mySkills as skill}
+                                        <option value={skill.id}>{skill.name}</option>
+                                    {/each}
+                                </select>
+                            {/if}
+                        </label>
+                    </div>
+                    {/if}
 
                 {#if confirmError}
                     <p role="alert" class="mt-5 border-2 border-pale-red bg-[#ffd6df] px-4 py-3 font-mono text-xs">{confirmError}</p>
@@ -319,7 +370,7 @@
                         {confirming ? "Memproses..." : "Konfirmasi"}
                     </button>
                 </div>
-            </div>
+                </div>
         </dialog>
     </div>
 {/if}

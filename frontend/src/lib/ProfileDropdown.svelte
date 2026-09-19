@@ -25,6 +25,13 @@
 
 {#if user}
 <div class="flex items-center gap-3">
+    <a href="/#/messages" aria-label="Messages" title="Messages" class="relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-black bg-off-white shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" aria-hidden="true">
+            <path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4.15A2.5 2.5 0 0 1 5 12.5v-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+            <path d="m8 8 4 3 4-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-black bg-laser-pink px-1 font-mono text-[9px] font-bold">1</span>
+    </a>
     <div class="flex items-center gap-2 rounded-full border-2 border-black bg-cyber-lime px-3 py-2 shadow-[6px_6px_0_#000] sm:gap-3 sm:px-5 sm:py-3" title="Kredit kamu">
         <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0" fill="none">
             <ellipse cx="12" cy="6" rx="7" ry="3" fill="none" stroke="black" stroke-width="2" />

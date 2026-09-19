@@ -27,6 +27,7 @@
 </script>
 
 <div class="card">
+
   <!-- LEFT SIDE -->
   <div class="left">
     <!-- clock badge -->
@@ -117,6 +118,7 @@
     </button>
     </div>
   </div>
+</div>
 </div>
 
 <style>

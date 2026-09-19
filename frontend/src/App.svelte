@@ -8,6 +8,7 @@
     import EditProfile from "./pages/EditProfile.svelte";
     import AddProposal from "./pages/AddProposal.svelte";
     import Rekrut from "./pages/Rekrut.svelte";
+    import Messages from "./pages/Messages.svelte";
     const routes = {
       "/" : Timeline,
       "/swapp" : Dashboard,
@@ -19,6 +20,7 @@
       "/add-proposal" : AddProposal,
       "/rekrut/:id" : Rekrut,
       "/rekrut" : Rekrut,
+      "/messages" : Messages,
     }
 </script>
 
