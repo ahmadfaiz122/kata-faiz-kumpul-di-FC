@@ -1,4 +1,5 @@
 <script>
+    import { onMount } from "svelte";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import logo from "../assets/logo.webp";
@@ -24,7 +25,7 @@
         }
     ];
 
-    const sentMessages = [
+    const defaultSentMessages = [
         {
             id: 3,
             name: "Reinzal Kinas",
@@ -44,6 +45,13 @@
             color: "bg-[#ffa174]"
         }
     ];
+
+    let sentMessages = $state(defaultSentMessages);
+
+    onMount(() => {
+        const storedMessages = JSON.parse(localStorage.getItem("sent_messages") || "[]");
+        sentMessages = [...storedMessages, ...defaultSentMessages];
+    });
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
@@ -93,7 +101,7 @@
             <section aria-labelledby="sent-title">
                 <div class="mb-4 flex items-center justify-between border-b-3 border-pitch-black pb-3">
                     <h2 id="sent-title" class="font-mono text-xl font-bold uppercase sm:text-2xl">Sent</h2>
-                    <span class="font-mono text-[10px] font-bold uppercase">2 messages</span>
+                    <span class="font-mono text-[10px] font-bold uppercase">{sentMessages.length} messages</span>
                 </div>
                 <div class="grid gap-4">
                     {#each sentMessages as message}

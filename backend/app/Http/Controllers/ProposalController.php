@@ -12,7 +12,7 @@ class ProposalController extends Controller
     {
         return response()->json([
             'data' => SkillRequest::query()
-                ->with('requesterUser:id,name,avatar','requesterUser.profile.achievementRecords')
+                ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
                 ->where('status', 'pending')
                 ->latest()
                 ->get(),
@@ -22,7 +22,7 @@ class ProposalController extends Controller
     public function show($id)
     {
         $proposal = SkillRequest::query()
-            ->with('requesterUser:id,name,avatar','requesterUser.profile.achievementRecords')
+            ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
             ->findOrFail($id);
 
         return response()->json(['data' => $proposal]);
@@ -35,14 +35,18 @@ class ProposalController extends Controller
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
             'city' => ['required', 'string', 'max:100'],
-            'skill_id' => ['required', 'integer'],
+            'skill_id' => ['sometimes', 'nullable', 'integer'],
+            'skill_name' => ['required', 'string', 'max:100'],
+            'skill_category' => ['required', 'string', 'max:100'],
             'skill_description' => ['required', 'string', 'max:5000'],
             'proposal_file' => ['required', 'file', 'mimes:pdf', 'max:5120'],
         ]);
 
-        $skill = $request->user()->profile?->skillRecords()->find($validated['skill_id']);
+        $skill = ! empty($validated['skill_id'])
+            ? $request->user()->profile?->skillRecords()->find($validated['skill_id'])
+            : null;
 
-        if (! $skill) {
+        if (! empty($validated['skill_id']) && ! $skill) {
             return response()->json([
                 'message' => 'Skill yang dipilih tidak terdaftar di profil kamu.',
                 'errors' => ['skill_id' => ['Pilih skill yang kamu miliki.']],
@@ -57,9 +61,9 @@ class ProposalController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'],
             'city' => $validated['city'],
-            'skill_id' => $skill->id,
-            'skill_name' => $skill->name,
-            'skill_category' => $skill->category_skills,
+            'skill_id' => $skill?->id,
+            'skill_name' => $skill?->name ?? $validated['skill_name'],
+            'skill_category' => $skill?->category_skills ?? $validated['skill_category'],
             'skill_description' => $validated['skill_description'],
             'proposal_path' => $request->getSchemeAndHttpHost() . Storage::url($proposalPath),
             'status' => 'pending',

@@ -15,6 +15,7 @@
     let skillCategory = "";
     let skillDescription = "";
     let proposalPath = "";
+    let proposal = null;
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let error = "";
@@ -76,6 +77,7 @@
                 photo: data.requester_user?.avatar ?? "",
                 city: data.city ?? "",
             };
+            skills = data.requester_user?.profile?.skill_records ?? [];
             achievements = data.requester_user?.profile?.achievement_records ?? [];
             skillName = data.skill_name ?? "";
             skillCategory = data.skill_category ?? "";
@@ -114,6 +116,38 @@
 
     function closePaymentModal() {
         showPaymentModal = false;
+    }
+
+    function confirmRekrut() {
+        confirmError = "";
+
+        if (!paymentMethod) {
+            confirmError = "Pilih metode penukaran terlebih dahulu.";
+            return;
+        }
+
+        if (paymentMethod === "skill" && !selectedSkillId) {
+            confirmError = "Pilih skill yang ingin kamu tawarkan.";
+            return;
+        }
+
+        confirming = true;
+        const sentMessage = {
+            id: `rekrut-${Date.now()}`,
+            name: profile.name || "Pengguna Swapp",
+            subject: `Permintaan rekrut: ${skillName || "Skill"}`,
+            preview: paymentMethod === "credit"
+                ? "Aku ingin belajar skill ini dengan kredit."
+                : "Aku ingin bertukar skill untuk sesi belajar ini.",
+            time: "Baru saja",
+            unread: false,
+            color: "bg-laser-pink",
+        };
+
+        const storedMessages = JSON.parse(localStorage.getItem("sent_messages") || "[]");
+        localStorage.setItem("sent_messages", JSON.stringify([sentMessage, ...storedMessages]));
+        showPaymentModal = false;
+        push("/swapp");
     }
 </script>
 
