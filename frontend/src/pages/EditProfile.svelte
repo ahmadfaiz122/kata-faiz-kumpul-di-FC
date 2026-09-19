@@ -28,6 +28,10 @@
     let achievementError = "";
     let skillSubmitting = false;
     let skillError = "";
+    /** @type {number|string|null} */
+    let editingSkillId = null;
+    /** @type {number|string|null} */
+    let editingAchievementId = null;
     /** @type {File|null} */
     let avatarFile = null;
     /** @type {HTMLInputElement|undefined} */
@@ -153,6 +157,8 @@
 
     function closeModal() {
         activeModal = "";
+        editingSkillId = null;
+        editingAchievementId = null;
         skillName = "";
         skillCategory = "";
         skillMaterialFile = null;
@@ -164,6 +170,8 @@
         achievementExpirytgl = "";
         achievementLevel = "";
         certificateFile = null;
+        skillError = "";
+        achievementError = "";
     }
 
     /** @param {unknown} requestError */
@@ -171,15 +179,44 @@
         return requestError instanceof Error ? requestError.message : "Permintaan gagal.";
     }
 
+    /** @param {Array<{id: number|string, name: string, category_skills?: string, description?: string}>} items */
+    function openSkillModal(items, skillId) {
+        const skill = items.find((item) => String(item.id) === String(skillId));
+        if (!skill) return;
+        editingSkillId = skill.id;
+        skillName = skill.name;
+        skillCategory = skill.category_skills || "";
+        skillError = "";
+        activeModal = "skill";
+    }
+
+    /** @param {{id: number|string, name: string, description?: string, tanggal_terbit?: number, kadaluwarsa?: number, levels?: string}} achievement */
+    function openAchievementModal(achievement) {
+        editingAchievementId = achievement.id;
+        achievementName = achievement.name || "";
+        achievementDescription = achievement.description || "";
+        achievementLevel = achievement.levels || "";
+        const issued = String(achievement.tanggal_terbit ?? "").padStart(4, "0");
+        const expiry = String(achievement.kadaluwarsa ?? "").padStart(4, "0");
+        achievementDateTahun = issued.slice(0, 2);
+        achievementDatetgl = issued.slice(-2);
+        achievementExpiryTahun = expiry.slice(0, 2);
+        achievementExpirytgl = expiry.slice(-2);
+        certificateFile = null;
+        achievementError = "";
+        activeModal = "achievement";
+    }
+
     async function addSkill() {
-        if (!skillName.trim() || !skillCategory || !skillMaterialFile || skillSubmitting) return;
+        if (!skillName.trim() || !skillCategory || (!editingSkillId && !skillMaterialFile) || skillSubmitting) return;
         skillSubmitting = true;
         skillError = "";
         try {
             const body = new FormData();
             body.append("name", skillName.trim());
             body.append("category_skills", skillCategory);
-            body.append("material", skillMaterialFile);
+            if (editingSkillId) body.append("id", String(editingSkillId));
+            if (skillMaterialFile) body.append("material", skillMaterialFile);
             const result = await fetch(`${backendUrl}/api/skills`, {
                 method: "POST",
                 headers: {
@@ -193,7 +230,9 @@
                 const validationMessage = data.errors ? Object.values(data.errors).flat().join(" ") : data.message;
                 throw new Error(validationMessage || "Skill gagal disimpan.");
             }
-            skills = [...skills, data.data];
+            skills = editingSkillId
+                ? skills.map((item) => String(item.id) === String(data.data.id) ? data.data : item)
+                : [...skills, data.data];
             closeModal();
         } catch (requestError) {
             skillError = errorMessage(requestError);
@@ -203,7 +242,7 @@
     }
 
     async function addAchievement() {
-        if (!achievementName.trim() || !certificateFile || achievementSubmitting) return;
+        if (!achievementName.trim() || (!editingAchievementId && !certificateFile) || achievementSubmitting) return;
         if (!achievementDateTahun || !achievementDatetgl || achievementDatetgl === "Bulan") {
             achievementError = "Tanggal terbit wajib diisi.";
             return;
@@ -221,11 +260,12 @@
         try {
             const body = new FormData();
             body.append("name", achievementName.trim());
+            if (editingAchievementId) body.append("id", String(editingAchievementId));
             body.append("description", achievementDescription.trim());
             body.append("tanggal_terbit", String(parseInt(String(achievementDateTahun) + String(achievementDatetgl), 10) || ""));
             body.append("kadaluwarsa", String(parseInt(String(achievementExpiryTahun) + String(achievementExpirytgl), 10) || ""));
             body.append("levels", achievementLevel.trim());
-            body.append("certificate", certificateFile);
+            if (certificateFile) body.append("certificate", certificateFile);
 
             const result = await fetch(`${backendUrl}/api/achievements`, {
                 method: "POST",
@@ -243,7 +283,9 @@
                     : data.message;
                 throw new Error(validationMessage || "Prestasi gagal disimpan.");
             }
-            achievements = [...achievements, data.data];
+            achievements = editingAchievementId
+                ? achievements.map((item) => String(item.id) === String(data.data.id) ? data.data : item)
+                : [...achievements, data.data];
             closeModal();
         } catch (requestError) {
             achievementError = errorMessage(requestError);
@@ -254,6 +296,7 @@
 
     /** @param {number|string} skillId @param {string} skillName */
     async function removeSkill(skillId, skillName) {
+        if (!window.confirm(`Hapus skill "${skillName}"? Data ini tidak dapat dikembalikan.`)) return;
         error = "";
         try {
             const response = await fetch(`${backendUrl}/api/skills/${skillId}`, {
@@ -264,14 +307,19 @@
                     Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
                 },
             });
-            skills = skills.filter((item) => item.name !== skillName);
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.message || "Skill gagal dihapus.");
+            }
+            skills = skills.filter((item) => String(item.id) !== String(skillId));
         } catch (requestError) {
             error = errorMessage(requestError);
         }
     }
 
-    /** @param {number|string} achievementId @param {number} index */
-    async function removeAchievement(achievementId, index) {
+    /** @param {number|string} achievementId @param {string} achievementName */
+    async function removeAchievement(achievementId, achievementName) {
+        if (!window.confirm(`Hapus sertifikasi "${achievementName}"? Data ini tidak dapat dikembalikan.`)) return;
         try {
             const result = await fetch(`${backendUrl}/api/achievements/${achievementId}`, {
                 method: "DELETE",
@@ -281,8 +329,9 @@
                     Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
                 },
             });
-            const data = await result.json();
-            achievements = achievements.filter((_, itemIndex) => itemIndex !== index);
+            const data = await result.json().catch(() => ({}));
+            if (!result.ok) throw new Error(data.message || "Sertifikasi gagal dihapus.");
+            achievements = achievements.filter((item) => String(item.id) !== String(achievementId));
         } catch (requestError) {
             achievementError = errorMessage(requestError);
         }
@@ -341,14 +390,17 @@
                                 <div class="flex h-12 w-12 shrink-0 items-center justify-center border-2 border-pitch-black bg-[#ffe477] text-xl">🏅</div>
                                 <div class="flex-1 font-archivo text-[9px]"><p>{achievement.name}</p><p class="mt-2 text-[8px]">Dibuat {String(achievement.tanggal_terbit ?? 0).slice(-2)}/20{Math.floor((achievement.tanggal_terbit ?? 0) / 100)} | Kedaluwarsa {String(achievement.kadaluwarsa ?? 0).slice(-2)}/20{Math.floor((achievement.kadaluwarsa ?? 0) / 100)}</p>{#if achievement.certificate_path}<a href={achievement.certificate_path} target="_blank" rel="noreferrer" class="mt-2 inline-block underline">Lihat sertifikat</a>{/if}</div>
                                 <span class="bg-[#ffa174] px-2 py-1 text-[8px]">{achievement.levels}</span>
-                                <button type="button" aria-label="Delete achievement" onclick={() => removeAchievement(achievement.id, index)} class="text-sm">♙</button>
+                                <div class="flex shrink-0 items-center gap-2">
+                                    <button type="button" aria-label="Edit achievement" onclick={() => openAchievementModal(achievement)} class="border-2 border-pitch-black bg-[#ffe477] px-2 py-1 text-[9px] font-bold shadow-[2px_2px_0_#000]">Edit</button>
+                                    <button type="button" aria-label="Delete achievement" onclick={() => removeAchievement(achievement.id, achievement.name)} class="border-2 border-pitch-black bg-laser-pink px-2 py-1 text-[9px] font-bold shadow-[2px_2px_0_#000]">Hapus</button>
+                                </div>
                             </div>
                         {/each}
                     </div>
                 </div>
                 <div class="mt-8">
                     <div class="flex items-center justify-between font-mono text-[10px] font-bold"><span>Skill dan Kemampuan</span><button type="button" onclick={() => activeModal = "skill"} class="button-lift bg-electric-cyan px-3 py-1 shadow-[2px_2px_0_#000]" style="--button-complement: #ff006e">＋ Tambah</button></div>
-                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]"><p class="font-mono text-[9px]">Skills I Can Teach</p>{#each skills as skill}<button type="button" onclick={() => removeSkill(skill.id, skill.name)} class="mr-2 mt-2 inline-block rounded-full border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-[9px]">{skill.name} ×</button>{/each}</div>
+                    <div class="mt-2 min-h-20 border-2 border-pitch-black p-3 shadow-[3px_3px_0_#000]"><p class="font-mono text-[9px]">Skills I Can Teach</p>{#each skills as skill}<span class="mr-2 mt-2 inline-flex items-center gap-2 rounded-full border-2 border-pitch-black bg-[#ffa174] px-3 py-1 font-mono text-[9px]"><span>{skill.name}</span><button type="button" aria-label={`Edit ${skill.name}`} onclick={() => openSkillModal(skills, skill.id)} class="font-bold">Edit</button><button type="button" aria-label={`Delete ${skill.name}`} onclick={() => removeSkill(skill.id, skill.name)} class="font-bold">×</button></span>{/each}</div>
                 </div>
             </section>
 
@@ -374,18 +426,19 @@
     <div class="fixed inset-0 z-200 flex items-center justify-center bg-pitch-black/45 p-4" role="presentation" onclick={(event) => event.target === event.currentTarget && closeModal()}>
         {#if activeModal === "skill"}
             <dialog open aria-labelledby="skill-modal-title" class="dashboard-enter relative w-full max-w-175 overflow-hidden rounded-xl border-4 border-pitch-black bg-off-white shadow-[10px_10px_0_#000]">
-                <header class="flex items-center justify-between border-b-4 border-pitch-black bg-[#ffe477] px-6 py-4 sm:px-9"><h2 id="skill-modal-title" class="font-archivo text-3xl font-bold sm:text-4xl">Tambahkan Skill</h2><button type="button" onclick={closeModal} aria-label="Close skill modal" class="text-5xl leading-none text-[#8d7927]">×</button></header>
+                <header class="flex items-center justify-between border-b-4 border-pitch-black bg-[#ffe477] px-6 py-4 sm:px-9"><h2 id="skill-modal-title" class="font-archivo text-3xl font-bold sm:text-4xl">{editingSkillId ? "Edit Skill" : "Tambahkan Skill"}</h2><button type="button" onclick={closeModal} aria-label="Close skill modal" class="text-5xl leading-none text-[#8d7927]">×</button></header>
                 <form onsubmit={(event) => { event.preventDefault(); addSkill(); }} class="space-y-10 px-8 py-10 sm:px-20 sm:py-12">
                     <label class="grid gap-3 font-archivo text-2xl">Nama Skill<input bind:value={skillName} required placeholder="eg. Figma.." class="modal-input" /></label>
                     <label class="grid max-w-135 gap-3 font-archivo text-2xl">Kategori<select bind:value={skillCategory} required class="modal-input"><option value="">Pilih Kategori...</option><option>Design</option><option>Technology</option><option>Business</option><option>Language</option></select></label>
-                    <label class="grid gap-3 font-archivo text-2xl">Materi PDF<input required type="file" accept="application/pdf,.pdf" onchange={(event) => skillMaterialFile = event.currentTarget.files?.[0] ?? null} class="modal-input" /></label>
-                    <p class="font-mono text-xs">Wajib PDF, maksimal 20 MB.</p>
-                    <div class="flex justify-end"><button type="submit" class="button-lift bg-[#48b3cf] px-7 py-3 font-archivo text-2xl shadow-[5px_5px_0_#000]" style="--button-complement: #ff006e">Tambahkan</button></div>
+                    <label class="grid gap-3 font-archivo text-2xl">Materi PDF<input required={!editingSkillId} type="file" accept="application/pdf,.pdf" onchange={(event) => skillMaterialFile = event.currentTarget.files?.[0] ?? null} class="modal-input" /></label>
+                    <p class="font-mono text-xs">{editingSkillId ? "Pilih file baru bila ingin mengganti materi." : "Wajib PDF, maksimal 20 MB."}</p>
+                    {#if skillError}<p class="font-mono text-xs text-[#b3261e]">{skillError}</p>{/if}
+                    <div class="flex justify-end"><button type="submit" disabled={skillSubmitting} class="button-lift bg-[#48b3cf] px-7 py-3 font-archivo text-2xl shadow-[5px_5px_0_#000] disabled:opacity-50" style="--button-complement: #ff006e">{skillSubmitting ? "Menyimpan..." : editingSkillId ? "Simpan" : "Tambahkan"}</button></div>
                 </form>
             </dialog>
         {:else}
             <dialog open aria-labelledby="achievement-modal-title" class="relative dashboard-enter w-full max-w-190 max-h-200 overflow-auto border-4 border-pitch-black bg-off-white p-0 shadow-[10px_10px_0_#000]">
-                <header class="flex items-center justify-between border-b-4 border-pitch-black bg-laser-pink px-6 py-4 sm:px-9"><h2 id="achievement-modal-title" class="font-archivo text-2xl font-bold sm:text-3xl">Tambahkan Prestasi</h2><button type="button" onclick={closeModal} aria-label="Close achievement modal" class="text-5xl leading-none">×</button></header>
+                <header class="flex items-center justify-between border-b-4 border-pitch-black bg-laser-pink px-6 py-4 sm:px-9"><h2 id="achievement-modal-title" class="font-archivo text-2xl font-bold sm:text-3xl">{editingAchievementId ? "Edit Sertifikasi" : "Tambahkan Prestasi"}</h2><button type="button" onclick={closeModal} aria-label="Close achievement modal" class="text-5xl leading-none">×</button></header>
                 <form onsubmit={(event) => { event.preventDefault(); addAchievement(); }} class="grid gap-7 px-8 py-10 sm:grid-cols-[130px_1fr] sm:px-16 sm:py-14">
                     <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-[#ffe477] text-5xl shadow-[5px_5px_0_#000]">🏅</div>
                     <div class="grid gap-6">
@@ -421,12 +474,12 @@
                             <option>12</option>
                         </select></label><input bind:value={achievementExpiryTahun} aria-label="Tahun Kadaluwarsa" class="modal-input self-end" type="number" placeholder="2 Digit Tahun" min="14" max="99"/></div>
                         <label class="grid gap-2 font-archivo text-lg">Tingkat<select bind:value={achievementLevel} class="modal-input"><option value="">Pilih tingkat</option><option>Nasional</option><option>Internasional</option></select></label>
-                        <label class="grid gap-2 font-archivo text-lg">Sertifikat pendukung<input required type="file" accept="image/*,.pdf,application/pdf" onchange={(event) => certificateFile = event.currentTarget.files?.[0] ?? null} class="modal-input" /></label>
-                        <p class="font-mono text-[10px]">Wajib diunggah. Format gambar atau PDF, maksimal 10 MB.</p>
+                        <label class="grid gap-2 font-archivo text-lg">Sertifikat pendukung<input required={!editingAchievementId} type="file" accept="image/*,.pdf,application/pdf" onchange={(event) => certificateFile = event.currentTarget.files?.[0] ?? null} class="modal-input" /></label>
+                        <p class="font-mono text-[10px]">{editingAchievementId ? "Pilih file baru bila ingin mengganti sertifikat." : "Wajib diunggah. Format gambar atau PDF, maksimal 10 MB."}</p>
                         <div class="flex justify-end">{#if achievementError}<p class="font-archivo text-lg text-[#b3261e]">{achievementError}</p>{/if}</div>
                         <div class="flex justify-end">
             <button type="submit" disabled={achievementSubmitting} class="button-lift bg-[#48b3cf] px-7 py-2 font-archivo text-lg shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ccff00">
-                {achievementSubmitting ? "Menyimpan..." : "Validasi"}
+                {achievementSubmitting ? "Menyimpan..." : editingAchievementId ? "Simpan" : "Validasi"}
             </button>
                     </div>
                         </div>

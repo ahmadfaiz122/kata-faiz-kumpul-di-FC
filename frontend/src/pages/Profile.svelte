@@ -25,6 +25,15 @@
     let editingPostId = null;
     let editContent = "";
     let savingPost = false;
+    /** @type {Array<{id: number|string, full_name?: string, email?: string, phone?: string, city?: string, skill_name?: string, skill_category?: string, skill_description?: string, proposal_path?: string}>} */
+    let swappPosts = [];
+    /** @type {number|string|null} */
+    let editingSwappId = null;
+    let swappSaving = false;
+    let swappError = "";
+    let swappForm = { full_name: "", email: "", phone: "", city: "", skill_name: "", skill_category: "", skill_description: "" };
+    /** @type {File|null} */
+    let swappFile = null;
 
     function authHeaders() {
         return { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}` };
@@ -33,7 +42,14 @@
     /** @param {ProfilePost} post */
     async function toggleLike(post) {
         if (post.likeLoading) return;
-        posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: true } : item);
+        const liked = post.liked_by_user ?? false;
+        const likesCount = post.likes_count ?? 0;
+        posts = posts.map((item) => item.id === post.id ? {
+            ...item,
+            liked_by_user: !liked,
+            likes_count: Math.max(0, likesCount + (liked ? -1 : 1)),
+            likeLoading: true
+        } : item);
         try {
             const response = await fetch(`${backendUrl}/api/posts/${post.id}/like`, { method: "POST", headers: authHeaders() });
             const data = await response.json();
@@ -41,7 +57,7 @@
             posts = posts.map((item) => item.id === post.id ? { ...item, liked_by_user: data.liked, likes_count: data.likes_count, likeLoading: false } : item);
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Like gagal diproses.";
-            posts = posts.map((item) => item.id === post.id ? { ...item, likeLoading: false } : item);
+            posts = posts.map((item) => item.id === post.id ? { ...item, liked_by_user: liked, likes_count: likesCount, likeLoading: false } : item);
         }
     }
 
@@ -158,6 +174,69 @@
         }
     }
 
+    /** @param {typeof swappPosts[number]} proposal */
+    function startEditingSwapp(proposal) {
+        editingSwappId = proposal.id;
+        swappForm = {
+            full_name: proposal.full_name ?? "",
+            email: proposal.email ?? "",
+            phone: proposal.phone ?? "",
+            city: proposal.city ?? "",
+            skill_name: proposal.skill_name ?? "",
+            skill_category: proposal.skill_category ?? "",
+            skill_description: proposal.skill_description ?? "",
+        };
+        swappFile = null;
+        swappError = "";
+    }
+
+    function cancelEditingSwapp() {
+        editingSwappId = null;
+        swappFile = null;
+        swappError = "";
+    }
+
+    async function updateSwapp() {
+        if (!editingSwappId || swappSaving) return;
+        swappSaving = true;
+        swappError = "";
+        try {
+            const body = new FormData();
+            for (const [key, value] of Object.entries(swappForm)) body.append(key, value.trim());
+            if (swappFile) body.append("proposal_file", swappFile);
+            const response = await fetch(`${backendUrl}/api/user/proposals/${editingSwappId}`, {
+                method: "POST",
+                headers: { Accept: "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}` },
+                body,
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message ?? "Post Swapp gagal diedit.");
+            swappPosts = swappPosts.map((item) => String(item.id) === String(editingSwappId) ? data.data : item);
+            cancelEditingSwapp();
+        } catch (requestError) {
+            swappError = requestError instanceof Error ? requestError.message : "Post Swapp gagal diedit.";
+        } finally {
+            swappSaving = false;
+        }
+    }
+
+    /** @param {number|string} proposalId @param {string} proposalName */
+    async function deleteSwapp(proposalId, proposalName) {
+        if (!window.confirm(`Hapus post Swapp "${proposalName}"? Data ini tidak dapat dikembalikan.`)) return;
+        swappError = "";
+        try {
+            const response = await fetch(`${backendUrl}/api/user/proposals/${proposalId}`, {
+                method: "DELETE",
+                headers: { Accept: "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}` },
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message ?? "Post Swapp gagal dihapus.");
+            swappPosts = swappPosts.filter((item) => String(item.id) !== String(proposalId));
+        } catch (requestError) {
+            swappError = requestError instanceof Error ? requestError.message : "Post Swapp gagal dihapus.";
+        }
+    }
+
     onMount(async () => {
         const token = localStorage.getItem("auth_token");
 
@@ -196,6 +275,11 @@
             /** @type {ProfilePost[]} */
             const profilePosts = (await postsResponse.json()).data ?? [];
             posts = profilePosts.map((/** @type {ProfilePost} */ post) => ({ ...post, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }));
+            const swappResponse = await fetch(`${backendUrl}/api/user/proposals`, {
+                headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+            });
+            if (!swappResponse.ok) throw new Error("Post Swapp gagal dimuat.");
+            swappPosts = (await swappResponse.json()).data ?? [];
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profile.";
         } finally {
@@ -277,6 +361,44 @@
                             <div class="dashboard-enter" style="animation-delay: {index * 100}ms">
                                 <TimelinePost content={post.content} author={post.user?.name ?? user.name} authorAvatar={post.user?.avatar ?? ""} createdAt={formatDate(post.created_at)} edited={isEdited(post)} liked={post.liked_by_user ?? false} likesCount={post.likes_count ?? 0} commentsCount={post.comments_count ?? 0} comments={post.comments ?? []} commentsOpen={post.commentsOpen ?? false} commentText={post.commentText ?? ""} likeLoading={post.likeLoading ?? false} commentLoading={post.commentLoading ?? false} onToggleLike={() => toggleLike(post)} onToggleComments={() => toggleComments(post)} onCommentInput={(event) => updateCommentText(post, event)} onSubmitComment={() => submitComment(post)} canManage={true} onEdit={() => startEditing(post)} onDelete={() => deletePost(post.id)} />
                             </div>
+                        {/if}
+                    {/each}
+                </div>
+            {/if}
+        </section>
+
+        <section class="dashboard-enter dashboard-enter-delay-3 mt-7">
+            <div class="mb-4 flex items-end justify-between border-b-2 border-pitch-black pb-2">
+                <h2 class="font-anton text-3xl uppercase">My Swapp Posts</h2>
+                <span class="font-mono text-xs font-bold">{swappPosts.length} post</span>
+            </div>
+            {#if swappError}<p class="mb-4 border-2 border-pitch-black bg-[#ffe477] p-3 font-mono text-xs font-bold" role="alert">{swappError}</p>{/if}
+            {#if swappPosts.length === 0}
+                <p class="border-2 border-pitch-black bg-off-white p-5 font-mono text-xs font-bold shadow-[6px_6px_0_#000]">Belum ada post Swapp di profile kamu.</p>
+            {:else}
+                <div class="space-y-5">
+                    {#each swappPosts as proposal}
+                        {#if String(editingSwappId) === String(proposal.id)}
+                            <form class="grid gap-4 border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000]" onsubmit={(event) => { event.preventDefault(); updateSwapp(); }}>
+                                <h3 class="font-mono text-sm font-bold">Edit post Swapp</h3>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <input bind:value={swappForm.full_name} required placeholder="Nama lengkap" class="border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs" />
+                                    <input bind:value={swappForm.email} required type="email" placeholder="Email" class="border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs" />
+                                    <input bind:value={swappForm.phone} required placeholder="Nomor telepon" class="border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs" />
+                                    <input bind:value={swappForm.city} required placeholder="Kota" class="border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs" />
+                                    <input bind:value={swappForm.skill_name} required placeholder="Nama skill" class="border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs" />
+                                    <select bind:value={swappForm.skill_category} required class="border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs"><option value="">Pilih kategori</option><option>Education</option><option>Technology</option><option>Business</option><option>Language</option><option>Art</option><option>Writing</option></select>
+                                </div>
+                                <textarea bind:value={swappForm.skill_description} required maxlength="5000" rows="4" placeholder="Deskripsi skill" class="border-2 border-pitch-black bg-white p-3 font-mono text-xs"></textarea>
+                                <label class="font-mono text-xs">Ganti file proposal (opsional)<input type="file" accept="application/pdf,.pdf" onchange={(event) => swappFile = event.currentTarget.files?.[0] ?? null} class="mt-2 block w-full border-2 border-pitch-black bg-white p-2" /></label>
+                                <div class="flex justify-end gap-3"><button type="button" onclick={cancelEditingSwapp} class="border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-xs font-bold">Batal</button><button type="submit" disabled={swappSaving} class="button-lift border-2 border-pitch-black bg-laser-pink px-4 py-2 font-mono text-xs font-bold text-off-white shadow-[3px_3px_0_#000] disabled:opacity-50">{swappSaving ? "Menyimpan..." : "Simpan"}</button></div>
+                            </form>
+                        {:else}
+                            <article class="border-2 border-pitch-black bg-off-white p-5 shadow-[7px_7px_0_#000]">
+                                <div class="flex flex-wrap items-start justify-between gap-3"><div><h3 class="font-anton text-2xl uppercase">{proposal.skill_name}</h3><p class="font-mono text-[10px]">{proposal.skill_category} · {proposal.city} · {proposal.hour ?? 1} jam</p></div><div class="flex gap-2"><button type="button" onclick={() => startEditingSwapp(proposal)} class="border-2 border-pitch-black bg-[#ffe477] px-3 py-1 font-mono text-[10px] font-bold shadow-[2px_2px_0_#000]">Edit</button><button type="button" onclick={() => deleteSwapp(proposal.id, proposal.skill_name ?? "ini")} class="border-2 border-pitch-black bg-laser-pink px-3 py-1 font-mono text-[10px] font-bold text-off-white shadow-[2px_2px_0_#000]">Hapus</button></div></div>
+                                <p class="mt-4 font-mono text-xs leading-relaxed">{proposal.skill_description}</p>
+                                {#if proposal.proposal_path}<a href={proposal.proposal_path} target="_blank" rel="noreferrer" class="mt-4 inline-block font-mono text-[10px] font-bold underline">Lihat proposal PDF ↗</a>{/if}
+                            </article>
                         {/if}
                     {/each}
                 </div>
