@@ -34,6 +34,15 @@
     let confirming = false;
 
     onMount(async () => {
+        const storedProposal = sessionStorage.getItem("selected_proposal");
+        if (storedProposal) {
+            try {
+                proposal = JSON.parse(storedProposal);
+            } catch {
+                sessionStorage.removeItem("selected_proposal");
+            }
+        }
+
         const token = localStorage.getItem("auth_token");
         if (!token) {
             push("/login");

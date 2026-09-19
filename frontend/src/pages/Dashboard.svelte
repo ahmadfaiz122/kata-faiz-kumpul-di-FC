@@ -14,6 +14,7 @@
     let searchQuery = $state("");
     let searchFocused = $state(false);
     let searchInput = $state();
+    /** @type {Array<{proposalId: number|string, proposal: Record<string, any>, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
     let credit = 0
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -23,7 +24,7 @@
     }
     let activeBar = $state("search");
     let filterOpen = $state(false)
-    let filterTriggerEl = $state(null);
+    let filterTriggerEl = $state(/** @type {HTMLButtonElement|null} */ (null));
         async function selectSearch() {
 
         activeBar = "search";
