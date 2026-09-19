@@ -75,19 +75,6 @@
     });
 </script>
 
-<style>
-    .typing-indicator {
-        animation: typing-blink 0.8s steps(2, start) infinite;
-        width: 3px;
-        height: 1.35rem;
-        background: currentColor;
-    }
-
-    @keyframes typing-blink {
-        50% { opacity: 0; }
-    }
-</style>
-
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
         <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
@@ -129,7 +116,6 @@
                 {#if activeBar === "search"}
 
                     <input bind:this={searchInput} bind:value={searchQuery} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
-                    {#if searchFocused}<span class="typing-indicator" aria-hidden="true"></span>{/if}
 
                 {/if}
 
@@ -216,7 +202,7 @@
             <span class="hidden font-mono text-sm sm:block">01 / 06</span>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid gap-6 md:grid-cols-2">
             {#each visibleOffers as offer, index}
                 <div class:dashboard-enter={index === 0} class:dashboard-enter-delay-3={index === 1}>
                     <SkillCard {...offer} />

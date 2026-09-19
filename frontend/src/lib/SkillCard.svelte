@@ -16,6 +16,10 @@
     const length = text?.length || 0;
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
   }
+
+  function formatCredits(value) {
+    return String(value ?? "").replace(/_/g, "").trim();
+  }
 </script>
 
 <div class="card">
@@ -66,7 +70,7 @@
   <div class="right">
     <div class="box box-yellow">
       <div class="box-yellow-row">
-        <span class="label-sm">You can learn from</span>
+        <span class="label-sm">Master</span>
         <svg viewBox="0 0 24 24" class="mini-arrow" fill="none">
           <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.2" stroke-linecap="round" />
           <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
@@ -84,29 +88,26 @@
         </svg>
       </div>
       <div class="box-text-col">
-        <span class="label-sm">From Category:</span>
+        <span class="label-sm">Category</span>
         <span class="label-lg">{category}</span>
       </div>
     </div>
 
+    <div class="bottom-actions">
     <div class="box box-white">
       <div class="icon-tile icon-teal">
         <svg viewBox="0 0 24 24" fill="none">
-          <ellipse cx="12" cy="6" rx="7" ry="3" fill="none" stroke="black" stroke-width="2" />
-          <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" fill="none" stroke="black" stroke-width="2" />
-          <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" fill="none" stroke="black" stroke-width="2" />
+          <circle cx="12" cy="12" r="8" fill="none" stroke="black" stroke-width="2" />
+          <path d="M12 7V17M15 9.5C14.2 8.8 13.2 8.5 12 8.5c-1.7 0-3 0.8-3 2s1.3 2 3 2 3 0.8 3 2-1.3 2-3 2c-1.2 0-2.2-0.3-3-1" stroke="black" stroke-width="1.5" stroke-linecap="round" />
         </svg>
       </div>
-      <span class="label-lg">{credits}</span>
+      <span class="label-lg credit-value" title={formatCredits(credits)}>{formatCredits(credits)}</span>
     </div>
 
-    <button class="box box-cta" onclick={() => window.location.href = '/#/rekrut'}>
-      <span>{ctaLabel}</span>
-      <svg viewBox="0 0 24 24" class="cta-arrow" fill="none">
-        <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.6" stroke-linecap="round" />
-        <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
+      <button class="box box-cta" onclick={() => window.location.href = '/#/rekrut'}>
+        <span class="cta-label">{ctaLabel}</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -121,7 +122,7 @@
   .card {
     position: relative;
     width: 100%;
-    max-width: 580px;
+    max-width: none;
     min-height: 281px;
     height: auto;
     background: #EDEAE2;
@@ -129,7 +130,7 @@
     border-radius: 26px;
     box-shadow: 9px 9px 0 0 #0A0A0A;
     display: flex;
-    padding: 18px 20px 28px;
+    padding: 18px 16px 28px;
     overflow: hidden;
   }
 
@@ -340,12 +341,13 @@
   .box-cta {
     background: #E8225A;
     color: #000000;
-    font-size: 20px;
+    font-size: 14px;
     font-weight: 700;
-    padding: 5px 16px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 5px;
     cursor: pointer;
     border-radius: 10px;
     transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
@@ -359,7 +361,27 @@
     transform: translate(2px, 2px);
     box-shadow: 1px 1px 0 0 #0A0A0A;
   }
-  .cta-arrow { width: 22px; height: 22px; }
+  .cta-label {
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .credit-value {
+    font-size: 13px;
+  }
+
+  .bottom-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 9px;
+  }
+
+  .bottom-actions > .box-white,
+  .bottom-actions > .box-cta {
+    width: 100%;
+    min-width: 0;
+    min-height: 54px;
+  }
 
   @media (max-width: 640px) {
     .card {
@@ -386,5 +408,10 @@
       width: 100%;
       flex: none;
     }
+
+    .bottom-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
+
 </style>
