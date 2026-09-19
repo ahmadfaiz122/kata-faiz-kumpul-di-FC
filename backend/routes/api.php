@@ -23,6 +23,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/posts', [PostController::class, 'index']);
     Route::get('/posts/{post}/comments', [PostController::class, 'comments']);
     Route::get('/proposals', [ProposalController::class, 'index']);
+    Route::get('/proposals/{id}', [ProposalController::class, 'show']);
     Route::get('/proposals/{proposal}/file', [ProposalController::class, 'file']);
 
     Route::middleware('auth:sanctum')->group(function () {
