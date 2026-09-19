@@ -1,5 +1,6 @@
 <script>
-  export let id = null
+  /** @type {number|string|null} */
+  export let id = null;
   export let duration = "2 HOUR";
   export let mentorName = "Reinzal";
   export let university = "University of Surabaya";
@@ -130,6 +131,7 @@
         <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
+    </div>
   </div>
 </div>
 </div>

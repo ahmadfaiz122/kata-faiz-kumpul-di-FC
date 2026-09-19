@@ -21,7 +21,7 @@
     let error = "";
     let loading = true
 
-    /** @type {Array<{id: number|string, name: string, tanggal_terbit?: number, kadaluwarsa?: number, levels?: string, certificate_path?: string}>} */
+    /** @type {Array<{id: number|string, name: string, description?: string, tanggal_terbit?: number, kadaluwarsa?: number, levels?: string, certificate_path?: string}>} */
     let achievements = [];
     /** @type {Array<{id: number|string, name: string}>} */
     let skills = [];
@@ -35,15 +35,6 @@
     let confirming = false;
 
     onMount(async () => {
-        const storedProposal = sessionStorage.getItem("selected_proposal");
-        if (storedProposal) {
-            try {
-                proposal = JSON.parse(storedProposal);
-            } catch {
-                sessionStorage.removeItem("selected_proposal");
-            }
-        }
-
         const token = localStorage.getItem("auth_token");
         if (!token) {
             push("/login");
@@ -185,7 +176,7 @@
         {#if skillName}
             <p class="mt-2 font-mono text-xs uppercase text-laser-pink">{skillName}{#if skillCategory} · {skillCategory}{/if}</p>
         {/if}
-        <div class="bottom-[2px] font-mono left-[4px] flex items-center gap-[6px] mt-2">
+        <div class="bottom-0.5 font-mono left-1 flex items-center gap-1.5 mt-2">
             <svg viewBox="0 0 24 24" width=15px height=15px fill="none">
                 <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.4" stroke-linecap="round" />
                 <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
@@ -298,7 +289,7 @@
         <div class="mt-10 flex items-center justify-center gap-4">
             <button type="submit" onclick={openPaymentModal} class="button-lift border-2 border-pitch-black inline-flex items-center justify-center gap-2 bg-white px-6 py-3 font-mono text-sm font-bold shadow-[4px_4px_0_#000] disabled:opacity-50" style="--button-complement: #ff006e">
                 <span>Konfirmasi Rekrut</span>
-                <svg viewBox="0 0 24 24" class="w-[22px] h-[22px]" fill="none">
+                <svg viewBox="0 0 24 24" class="w-5.5 h-5.5" fill="none">
                     <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.6" stroke-linecap="round" />
                     <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
