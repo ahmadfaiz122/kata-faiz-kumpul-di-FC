@@ -6,31 +6,27 @@
   export let instructor = "Svelte";
   export let category = "Design";
   export let credits = "2 kredit";
-  /** @type {Record<string, any>|null} */
-  export let proposal = null;
   export let ctaLabel = "Rekrut";
 
+  /** @param {string} name */
   function firstName(name) {
     return name?.trim().split(/\s+/)[0] || "Anonymous";
   }
 
+  /** @param {string} text */
   function textSizeClass(text) {
     const length = text?.length || 0;
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
   }
 
-<<<<<<< HEAD
-  function recruit() {
-    if (proposal) sessionStorage.setItem("selected_proposal", JSON.stringify(proposal));
-    window.location.href = "/#/rekrut";
-=======
+  /** @param {unknown} value */
   function formatCredits(value) {
     return String(value ?? "").replace(/_/g, "").trim();
->>>>>>> 62fc4b0889486d2b1f5dc1073fe6ae9fcb5bf24a
   }
 </script>
 
 <div class="card">
+
   <!-- LEFT SIDE -->
   <div class="left">
     <!-- clock badge -->
@@ -112,11 +108,7 @@
       <span class="label-lg credit-value" title={formatCredits(credits)}>{formatCredits(credits)}</span>
     </div>
 
-<<<<<<< HEAD
-    <button class="box box-cta" onclick={recruit}>
-=======
     <button class="box box-cta" onclick={() => window.location.href = id ? `/#/rekrut/${id}` : '/#/rekrut'}>
->>>>>>> 62fc4b0889486d2b1f5dc1073fe6ae9fcb5bf24a
       <span>{ctaLabel}</span>
       <svg viewBox="0 0 24 24" class="cta-arrow" fill="none">
         <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.6" stroke-linecap="round" />
@@ -124,6 +116,7 @@
       </svg>
     </button>
   </div>
+</div>
 </div>
 
 <style>
