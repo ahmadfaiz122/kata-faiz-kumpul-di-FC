@@ -20,7 +20,8 @@
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
   }
 
- function skillFontSize(text) {
+  /** @param {string} text */
+  function skillFontSize(text) {
   const length = text?.length || 0;
   const maxSize = 40;
   const minSize = 15;
@@ -283,9 +284,17 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    max-width: calc(100% - 8px);
   }
   .uni-arrow { width: 15px; height: 15px; }
-  .uni span { font-size: 12px; color: #0A0A0A; }
+  .uni span {
+    min-width: 0;
+    overflow: hidden;
+    color: #0A0A0A;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
   /* ---------- DIVIDER ---------- */
   .divider {
@@ -439,6 +448,25 @@
 
     .bottom-actions {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 380px) {
+    .card {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .banner-stack {
+      transform: scale(0.7);
+    }
+
+    .left {
+      min-height: 188px;
+    }
+
+    .bottom-actions {
+      grid-template-columns: 1fr;
     }
   }
 

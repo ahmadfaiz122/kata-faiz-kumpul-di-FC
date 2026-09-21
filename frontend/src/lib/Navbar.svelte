@@ -30,8 +30,8 @@
 
 <svelte:window bind:innerWidth={innerWidth} />
 
-<nav class="relative md:flex h-14 items-center rounded-full border-2 border-black bg-neon-yellow shadow-[6px_6px_0_#000] sm:h-16">
-    {#if innerWidth < 640}
+<nav class="relative flex h-14 items-center rounded-full border-2 border-black bg-neon-yellow shadow-[6px_6px_0_#000] sm:h-16">
+    {#if innerWidth < 768}
         <button type="button" onclick={state.toggleNavbarMenu} class="transition duration-180 ease-in-out hover:-translate-y-1 h-full flex items-center rounded-full px-4 font-mono text-xs text-black sm:px-7 sm:text-base" style="--button-complement: #ff006e"id="menu-button"
       aria-expanded={state.appState.isNavbarMenuOpen} aria-haspopup="true"><svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -65,7 +65,7 @@
     </div>
         {/if}  
     {/if}
-    {#if innerWidth >= 640}
+    {#if innerWidth >= 768}
         {#each menus as menu}
         {#if currentPage === menu.alias}
             <a href={menu.href} class="button-lift flex bg-laser-pink h-full items-center rounded-full px-4 font-mono text-xs text-black sm:px-7 sm:text-base" style="--button-complement: #ff006e">{menu.name}</a>
