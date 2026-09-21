@@ -9,6 +9,7 @@
     import AddProposal from "./pages/AddProposal.svelte";
     import Rekrut from "./pages/Rekrut.svelte";
     import Messages from "./pages/Messages.svelte";
+    import LandingPage from "./pages/LandingPage.svelte";
     const routes = {
       "/" : Timeline,
       "/swapp" : Dashboard,
@@ -21,6 +22,7 @@
       "/rekrut/:id" : Rekrut,
       "/rekrut" : Rekrut,
       "/messages" : Messages,
+      "/landing" : LandingPage,
     }
 </script>
 
