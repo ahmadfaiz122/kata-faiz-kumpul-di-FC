@@ -72,14 +72,11 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div class="relative md:w-[816px] w-full font-archivo">
-    <!-- ============================================================ -->
-    <!-- DESKTOP / TABLET — pill bar, unchanged, visible >= 640px      -->
-    <!-- ============================================================ -->
+<div class="relative w-full min-[1200px]:min-w-[750px] min-[1200px]:max-w-[816px] min-[1200px]:[flex:1_1_816px] transition-[width] duration-300 ease-out font-archivo">
     <div
         class="
             relative
-            hidden sm:flex
+            hidden min-[1200px]:flex
             items-center justify-between
             w-full
             min-h-[123px]
@@ -125,7 +122,6 @@
                         <img src={category.icon} alt="" class:category-icon-small={category.name === 'Art' || category.name === 'Writing'} class="h-[58px] w-[58px] object-contain">
                     </div>
 
-                    <!-- Text ketika hover -->
                     <span
                         class="
                             whitespace-nowrap
@@ -187,9 +183,10 @@
     </style>
 
     <!-- ============================================================ -->
-    <!-- MOBILE — dropdown menu, visible < 640px                      -->
+    <!-- COMPACT — dropdown menu, visible until there's enough room    -->
+    <!-- for the full icon bar next to the search/filter row           -->
     <!-- ============================================================ -->
-    <div class="relative sm:hidden w-full">
+    <div class="relative min-[1200px]:hidden w-full">
         <button
             type="button"
             on:click={toggleOpen}

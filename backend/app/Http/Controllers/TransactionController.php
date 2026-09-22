@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SkillRequest;
 use App\Models\Transaction;
+use App\Models\CreditLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -30,6 +31,13 @@ class TransactionController extends Controller
             ->map(fn (Transaction $transaction) => $this->present($transaction, $userId));
 
         return response()->json(['data' => $transactions->values()]);
+    }
+
+    public function ledger(Request $request)
+    {
+        return response()->json([
+            'data' => $request->user()->creditLedger()->with('transaction:id,barter_request')->latest()->paginate(20),
+        ]);
     }
 
     public function store(Request $request)
@@ -100,15 +108,37 @@ class TransactionController extends Controller
                 abort(response()->json(['message' => 'Proposal ini sudah kedaluwarsa.'], 422));
             }
 
-            $requesterProfile = $transaction->requesterUser()->firstOrFail()->profile()->firstOrCreate([]);
-            $providerProfile = $transaction->providerUser()->firstOrFail()->profile()->firstOrCreate([]);
+            $requesterUser = $transaction->requesterUser()->firstOrFail();
+            $providerUser = $transaction->providerUser()->firstOrFail();
+            $requesterProfile = $requesterUser->profile()->firstOrCreate([]);
+            $providerProfile = $providerUser->profile()->firstOrCreate([]);
 
             if ($transaction->mode === 'credit') {
-                if ((int) $requesterProfile->credits < (int) $transaction->credits) {
+                $requesterProfile = $requesterUser->profile()->lockForUpdate()->firstOrFail();
+                $providerProfile = $providerUser->profile()->lockForUpdate()->firstOrFail();
+                $requesterBalance = (int) $requesterProfile->credits;
+                $providerBalance = (int) $providerProfile->credits;
+                if ($requesterBalance < (int) $transaction->credits) {
                     abort(response()->json(['message' => 'Credit requester tidak mencukupi.'], 422));
                 }
                 $requesterProfile->decrement('credits', $transaction->credits);
                 $providerProfile->increment('credits', $transaction->credits);
+                CreditLedger::create([
+                    'user_id' => $requesterUser->id,
+                    'transaction_id' => $transaction->id,
+                    'amount' => -$transaction->credits,
+                    'balance_after' => $requesterBalance - $transaction->credits,
+                    'type' => 'spent',
+                    'description' => 'Credit digunakan untuk sesi belajar.',
+                ]);
+                CreditLedger::create([
+                    'user_id' => $providerUser->id,
+                    'transaction_id' => $transaction->id,
+                    'amount' => $transaction->credits,
+                    'balance_after' => $providerBalance + $transaction->credits,
+                    'type' => 'earned',
+                    'description' => 'Credit diperoleh dari sesi belajar.',
+                ]);
             }
 
             $startsAt = $transaction->starts_at ?? now();
@@ -136,9 +166,33 @@ class TransactionController extends Controller
         return response()->json(['data' => $this->present($transaction, $request->user()->id)]);
     }
 
+    public function reject(Request $request, Transaction $transaction)
+    {
+        if ((int) $transaction->provider !== (int) $request->user()->id) {
+            return response()->json(['message' => 'Hanya provider yang dapat menolak transaksi.'], 403);
+        }
+        if ($transaction->status !== 'pending') {
+            return response()->json(['message' => 'Transaksi ini sudah diproses.'], 422);
+        }
+        $transaction->update(['status' => 'rejected']);
+        return response()->json(['message' => 'Transaksi ditolak.']);
+    }
+
+    public function cancel(Request $request, Transaction $transaction)
+    {
+        if ((int) $transaction->requester !== (int) $request->user()->id) {
+            return response()->json(['message' => 'Hanya requester yang dapat membatalkan transaksi.'], 403);
+        }
+        if ($transaction->status !== 'pending') {
+            return response()->json(['message' => 'Transaksi aktif tidak dapat dibatalkan.'], 422);
+        }
+        $transaction->update(['status' => 'cancelled']);
+        return response()->json(['message' => 'Transaksi dibatalkan.']);
+    }
+
     public function material(Request $request, Transaction $transaction, int $skill)
     {
-        if (! $this->isParticipant($transaction, $request->user()->id) || $transaction->status !== 'active' || $transaction->starts_at?->isFuture()) {
+        if (! $this->isParticipant($transaction, $request->user()->id) || ! in_array($transaction->status, ['active', 'completed'], true) || $transaction->starts_at?->isFuture()) {
             abort(403);
         }
 
@@ -157,7 +211,7 @@ class TransactionController extends Controller
 
     private function present(Transaction $transaction, int $userId): array
     {
-        $canAccess = $transaction->status === 'active' && $transaction->starts_at?->lte(now());
+        $canAccess = in_array($transaction->status, ['active', 'completed'], true) && $transaction->starts_at?->lte(now());
         $providerPhone = $canAccess ? $transaction->barterRequest?->phone : null;
         $materials = [];
         if ($canAccess) {

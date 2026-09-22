@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\CreditLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -89,7 +90,16 @@ class GoogleAuthController extends Controller
             ]
         );
 
-        $user->profile()->firstOrCreate([], ['credits' => 1]);
+        $profile = $user->profile()->firstOrCreate([], ['credits' => 1]);
+        if ($profile->wasRecentlyCreated) {
+            CreditLedger::create([
+                'user_id' => $user->id,
+                'amount' => 1,
+                'balance_after' => 1,
+                'type' => 'signup_bonus',
+                'description' => 'Bonus credit saat membuat akun.',
+            ]);
+        }
 
         // Membutuhkan Laravel Sanctum (php artisan install:api atau composer require laravel/sanctum)
         $token = $user->createToken('auth_token')->plainTextToken;

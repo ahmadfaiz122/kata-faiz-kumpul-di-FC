@@ -30,14 +30,27 @@
 
 <svelte:window bind:innerWidth={innerWidth} />
 
-<nav class="relative flex h-14 items-center rounded-full border-2 border-black bg-neon-yellow shadow-[6px_6px_0_#000] sm:h-16">
-    {#if innerWidth < 768}
-        <button type="button" onclick={state.toggleNavbarMenu} class="transition duration-180 ease-in-out hover:-translate-y-1 h-full flex items-center rounded-full px-4 font-mono text-xs text-black sm:px-7 sm:text-base" style="--button-complement: #ff006e"id="menu-button"
-      aria-expanded={state.appState.isNavbarMenuOpen} aria-haspopup="true"><svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg><p class="m-3">Menu</p></button>
-        {#if state.appState.isNavbarMenuOpen}
-        <div
+<div class="relative max-w-full shrink-0">
+    <nav class="relative flex h-9 max-w-full shrink-0 flex-nowrap items-center overflow-x-auto whitespace-nowrap rounded-full border-2 border-black bg-neon-yellow shadow-[6px_6px_0_#000] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:h-16">
+        {#if innerWidth < 800}
+            <button type="button" onclick={state.toggleNavbarMenu} class="transition duration-180 ease-in-out hover:-translate-y-1 h-full flex shrink-0 items-center rounded-full px-3 font-mono text-xs text-black sm:px-7 sm:text-base"style="--button-complement: #ff006e"id="menu-button"
+          aria-expanded={state.appState.isNavbarMenuOpen} aria-haspopup="true"><svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="shrink-0">
+    <path d="M4 6H20M4 12H20M4 18H20" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg><p class="m-3 shrink-0 max-[380px]:hidden">Menu</p></button>
+        {/if}
+        {#if innerWidth >= 800}
+            {#each menus as menu}
+            {#if currentPage === menu.alias}
+                <a href={menu.href} class="button-lift flex h-full shrink-0 items-center whitespace-nowrap rounded-full bg-laser-pink px-3 font-mono text-xs text-black lg:px-7 lg:text-base" style="--button-complement: #ff006e">{menu.name}</a>
+            {:else}
+                <a use:link href={menu.alias ? `/${menu.alias}` : '/'} class="button-lift flex h-full shrink-0 items-center whitespace-nowrap rounded-full px-3 font-mono text-xs text-black lg:px-7 lg:text-base" style="--button-complement: #ff006e">{menu.name}</a>
+            {/if}
+            {/each}
+        {/if}
+    </nav>
+
+    {#if innerWidth < 800 && state.appState.isNavbarMenuOpen}
+    <div
       class="absolute right-0 z-102 mt-4 w-47 overflow-hidden rounded-3xl border-2 border-black bg-pitch-black shadow-[10px_10px_0_#000]"
 >
       <div class="py-1" role="none">

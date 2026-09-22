@@ -98,7 +98,7 @@
 </script>
 
 {#if open}
-    <div class="absolute top-full left-0 right-0 z-40 mt-[18px] w-full sm:left-auto sm:max-w-[480px]">
+    <div class="absolute top-full left-0 right-0 z-40 mt-[18px] w-full sm:left-auto sm:w-[420px]">
 
         <div
             bind:this={panelEl}

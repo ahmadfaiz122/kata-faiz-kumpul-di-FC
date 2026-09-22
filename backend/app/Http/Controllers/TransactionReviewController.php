@@ -6,6 +6,7 @@ use App\Models\Transaction;
 use App\Models\TransactionReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class TransactionReviewController extends Controller
 {
@@ -17,10 +18,13 @@ class TransactionReviewController extends Controller
         if ($transaction->status !== 'completed') {
             return response()->json(['message' => 'Review tersedia setelah sesi satu jam selesai.'], 422);
         }
+        if ($transaction->review()->exists()) {
+            return response()->json(['message' => 'Review untuk transaksi ini sudah dikirim.'], 422);
+        }
 
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'reputation' => ['required', 'string', 'max:30'],
+            'reputation' => ['required', Rule::in(['sad', 'flat', 'smile'])],
             'comment' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -33,7 +37,7 @@ class TransactionReviewController extends Controller
             ]);
 
             $providerProfile = $transaction->providerUser()->firstOrFail()->profile()->firstOrCreate([]);
-            $providerProfile->increment('reputation', $validated['rating']);
+            $providerProfile->increment('reputation', 1);
             $providerProfile->update([
                 'rating' => TransactionReview::where('reviewed', $transaction->provider)->avg('rating'),
             ]);
