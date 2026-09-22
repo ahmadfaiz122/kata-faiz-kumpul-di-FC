@@ -10,6 +10,7 @@
     import Rekrut from "./pages/Rekrut.svelte";
     import Messages from "./pages/Messages.svelte";
     import LandingPage from "./pages/LandingPage.svelte";
+    import Transaksi from "./pages/Transaksi.svelte";
     const routes = {
       "/" : Timeline,
       "/swapp" : Dashboard,
@@ -23,6 +24,7 @@
       "/rekrut" : Rekrut,
       "/messages" : Messages,
       "/landing" : LandingPage,
+      "/transaksi" : Transaksi,
     }
 </script>
 

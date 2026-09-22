@@ -40,7 +40,6 @@
     const navItems = [
         { id: 'cara-kerja', label: 'Cara kerja' },
         { id: 'fitur', label: 'Fitur' },
-        { id: 'leaderboard', label: 'Leaderboard' }
     ];
 
     const perks = ['Gratis, tanpa uang', 'Kredit awal langsung masuk', 'Email @mhs.unesa.ac.id'];
@@ -73,12 +72,22 @@
     ];
 
     // Ledger: saldo is computed so the numbers on the page can never disagree.
+    const txnStyles = {
+        mengajar: { label: 'Mengajar', badge: 'bg-[#2fc7b8]', icon: 'up' },
+        belajar: { label: 'Belajar', badge: 'bg-[#ffa174]', icon: 'down' },
+        barter: { label: 'Barter skill', badge: 'bg-pale-purple', icon: 'swap' }
+    };
     const ledger = [
-        { delta: 1, title: 'Kredit awal untuk akun baru', meta: 'Saat pertama masuk' },
-        { delta: 1, title: 'Ngajar Figma untuk Alya', meta: '1 jam · dikonfirmasi berdua' },
-        { delta: -1, title: 'Belajar PHP dari Budi', meta: '1 jam · dikonfirmasi berdua' }
+        { type: 'mengajar', title: 'PHP Dasar', partner: 'Budi Santoso', date: '16 Sep 2026, 16.00', delta: 1 },
+
+        { type: 'belajar', title: 'Bahasa Inggris (TOEFL)', partner: 'Sarah Amelia', date: '14 Sep 2026, 10.00', delta: -1 },
+
+        { type: 'barter', title: 'Copywriting', partner: 'Reza Pratama', swapFor: 'Editing Video', date: '11 Sep 2026, 09.00', delta: 0 }
+
     ];
+
     const balance = ledger.reduce((sum, row) => sum + row.delta, 0);
+
     const flow = ['Diajukan', 'Pengajar setuju', 'Pelajar setuju', 'Kredit pindah'];
 
     const faq = [
@@ -105,7 +114,10 @@
         ne: '<path d="M7 17L17 7M17 7H9M17 7v8"/>',
         clock: '<path d="M12 6v6l4 3"/>',
         shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5L16 9.5"/>',
-        people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14c3 0 4.5 2 4.5 5"/>'
+        people: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14c3 0 4.5 2 4.5 5"/>',
+        up: '<path d="M12 19V6"/><path d="M6 11l6-6 6 6"/>',
+        down: '<path d="M12 5v13"/><path d="M6 13l6 6 6-6"/>',
+        swap: '<path d="M3 7h14"/><path d="M13 3l4 4-4 4"/><path d="M21 17H7"/><path d="M11 21l-4-4 4-4"/>'
     };
 
     // Category icons (64x64 grid), redrawn to match the reference image.
@@ -380,23 +392,59 @@
                     </ol>
                 </div>
 
-                <div class="{box} overflow-hidden bg-off-white">
+                                <div class="{box} overflow-hidden bg-off-white">
+
                     <div class="flex items-baseline justify-between border-b-[3px] border-black px-6 pb-3.5 pt-6 sm:px-8">
-                        <h3 class="font-anton text-4xl uppercase leading-none sm:text-[44px]">Riwayat credit</h3>
+
+                        <h3 class="font-anton text-4xl uppercase leading-none sm:text-[44px]">Riwayat Transaksi</h3>
+
                         <span class="font-mono text-[13px] font-bold">{ledger.length} AKTIVITAS</span>
+
                     </div>
 
+
+
                     {#each ledger as row}
-                        <div class="grid grid-cols-[52px_1fr_auto] items-center gap-4 border-b-2 border-black px-6 py-4 sm:px-8">
-                            <span class="grid h-13 w-13 place-items-center rounded-full border-[3px] border-black font-mono text-[22px] font-bold {row.delta > 0 ? 'bg-neon-yellow' : 'bg-laser-pink text-off-white'}">{row.delta > 0 ? '+' : ''}{row.delta}</span>
-                            <div>
-                                <b class="block text-[19px] leading-tight">{row.title}</b>
-                                <small class="font-mono text-xs text-black/70">{row.meta}</small>
+
+                        <div class="grid grid-cols-[52px_1fr_auto] items-center gap-4 border-b-2 border-black px-6 py-4 last:border-b-0 sm:px-8">
+
+                            <span class="grid h-13 w-13 shrink-0 place-items-center rounded-xl border-[3px] border-black {txnStyles[row.type].badge}">{@render icon(txnStyles[row.type].icon, 'h-6 w-6')}</span>
+
+
+
+                            <div class="min-w-0">
+
+                                <div class="flex flex-wrap items-center gap-2">
+
+                                    <b class="text-[18px] leading-tight sm:text-[19px]">{row.title}</b>
+
+                                    <span class="border-2 border-black {txnStyles[row.type].badge} px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide">{txnStyles[row.type].label}</span>
+
+                                </div>
+
+                                <p class="mt-1 truncate text-[14px] leading-snug text-black/70">{row.type === 'barter' ? `Barter dengan ${row.partner} · ditukar ${row.swapFor}` : `Bersama ${row.partner}`}</p>
+
+                                <p class="mt-0.5 font-mono text-[12px] text-black/45">{row.date}</p>
+
                             </div>
-                            <span class="font-mono text-[26px] font-bold">{row.delta > 0 ? '+' : ''}{row.delta}</span>
+
+
+
+                            <div class="flex flex-col items-end gap-2">
+
+                                <span class="whitespace-nowrap border-[3px] border-black px-3 py-1 font-mono text-[13px] font-bold {row.delta > 0 ? 'bg-neon-yellow' : row.delta < 0 ? 'bg-laser-pink text-off-white' : 'bg-off-white'}">{row.delta > 0 ? `+${row.delta} credit` : row.delta < 0 ? `${row.delta} credit` : 'Tanpa credit'}</span>
+
+                                <span class="whitespace-nowrap border-2 border-black bg-neon-yellow px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase shadow-[2px_2px_0_#000]">Selesai</span>
+
+                            </div>
+
                         </div>
+
                     {/each}
+
                 </div>
+
+
             </div>
         </div>
     </section>
@@ -617,7 +665,6 @@
 
             <div class="mt-11 flex flex-col gap-2 border-t-2 border-white/20 pt-5 font-mono text-[13px] text-white/60 sm:flex-row sm:justify-between">
                 <span>© 2026 LetSo. Dibuat untuk mahasiswa UNESA.</span>
-                <span>Swapp · Beranda · Leaderboard</span>
             </div>
         </div>
     </footer>
