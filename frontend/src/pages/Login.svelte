@@ -71,114 +71,38 @@
 </div>
 
 <style>
-  :global(body) {
-    margin: 0;
-  }
-
+  :global(body) { margin: 0; }
   .page {
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(circle at 15% 10%, rgba(201, 162, 39, 0.12), transparent 45%),
-      radial-gradient(circle at 85% 90%, rgba(201, 162, 39, 0.10), transparent 45%),
-      #0a2e5c;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    display: grid;
+    place-items: center;
     padding: 24px;
     box-sizing: border-box;
+    background-color: #d8d8d8;
+    background-image: linear-gradient(#bdbdbd 1px, transparent 1px), linear-gradient(90deg, #bdbdbd 1px, transparent 1px);
+    background-size: 24px 24px;
+    font-family: "Space Mono", monospace;
   }
-
   .gate {
     width: 100%;
-    max-width: 380px;
-    background: #f7f5f0;
-    border-radius: 14px;
-    padding: 40px 32px 32px;
+    max-width: 430px;
+    border: 4px solid #000;
+    border-radius: 0;
+    background: #fffdf5;
+    padding: 32px 28px 26px;
     text-align: center;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(201, 162, 39, 0.35);
+    box-shadow: 12px 12px 0 #000;
   }
-
-  .gate-mark {
-    color: #0a2e5c;
-    margin-bottom: 12px;
-  }
-
-  .eyebrow {
-    margin: 0 0 6px;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #c9a227;
-    font-weight: 600;
-  }
-
-  h1 {
-    margin: 0 0 8px;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-size: 26px;
-    color: #0a2e5c;
-    font-weight: 700;
-  }
-
-  .sub {
-    margin: 0 0 28px;
-    font-size: 13.5px;
-    color: #55606f;
-    line-height: 1.5;
-  }
-
-  .sub code {
-    background: rgba(10, 46, 92, 0.08);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-size: 12.5px;
-    color: #0a2e5c;
-  }
-
-  .google-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 13px 18px;
-    border-radius: 10px;
-    border: 1px solid #d8dde3;
-    background: #ffffff;
-    color: #26313f;
-    font-size: 14.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: box-shadow 0.15s ease, transform 0.1s ease;
-  }
-
-  .google-btn:hover:not(:disabled) {
-    box-shadow: 0 6px 16px rgba(10, 46, 92, 0.18);
-    transform: translateY(-1px);
-  }
-
-  .google-btn:disabled {
-    opacity: 0.7;
-    cursor: progress;
-  }
-
-  .error {
-    margin: 18px 0 0;
-    padding: 10px 14px;
-    background: rgba(198, 40, 40, 0.08);
-    color: #b3261e;
-    border: 1px solid rgba(198, 40, 40, 0.25);
-    border-radius: 8px;
-    font-size: 13px;
-    text-align: left;
-  }
-
-  .footnote {
-    margin: 22px 0 0;
-    font-size: 11.5px;
-    color: #8a93a0;
-    line-height: 1.5;
-  }
+  .gate-mark { display: inline-grid; place-items: center; width: 72px; height: 72px; margin-bottom: 18px; border: 3px solid #000; background: #b6ff00; color: #000; box-shadow: 5px 5px 0 #000; }
+  .eyebrow { margin: 0 0 8px; color: #ff006e; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  h1 { margin: 0 0 10px; color: #000; font-family: "Anton", Impact, sans-serif; font-size: clamp(2.6rem, 10vw, 4rem); line-height: 0.95; text-transform: uppercase; }
+  .sub { margin: 0 0 26px; color: #222; font-family: "Archivo", Arial, sans-serif; font-size: 13px; line-height: 1.55; }
+  .sub code { border: 2px solid #000; background: #ffe477; padding: 2px 6px; color: #000; font-family: "Space Mono", monospace; font-size: 11px; }
+  .google-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; border: 3px solid #000; border-radius: 0; padding: 14px 18px; background: #fff; color: #000; font-family: "Space Mono", monospace; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 5px 5px 0 #000; transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease; }
+  .google-btn:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #000; background: #8bd5ff; }
+  .google-btn:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
+  .google-btn:disabled { cursor: progress; opacity: 0.55; }
+  .error { margin: 18px 0 0; border: 3px solid #000; padding: 11px 14px; background: #ffb2c1; color: #000; font-size: 11px; font-weight: 700; line-height: 1.45; text-align: left; box-shadow: 3px 3px 0 #000; }
+  .footnote { margin: 22px 0 0; color: #333; font-size: 10px; font-weight: 700; line-height: 1.5; }
+  @media (max-width: 480px) { .page { padding: 18px; } .gate { padding: 28px 20px 22px; box-shadow: 8px 8px 0 #000; } }
 </style>

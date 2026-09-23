@@ -103,20 +103,22 @@
         },
     ]);
 
-    const ONGOING_STATUSES = ["pending", "active"];
+    const ONGOING_STATUSES = ["pending", "scheduled", "active"];
 
     let ongoing = $derived(transactions.filter((t) => ONGOING_STATUSES.includes(t.status)));
     let history = $derived(
         transactions
             .filter((t) => !ONGOING_STATUSES.includes(t.status))
-            .sort((a, b) => new Date(b.starts_at) - new Date(a.starts_at))
+            .sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime())
     );
 
+    /** @param {string} iso */
     function formatDateTime(iso) {
         return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
     }
 
     /** What kind of session this is — drives the label shown on each card. */
+    /** @param {{mode?: string, direction?: string}} t */
     function typeInfo(t) {
         if (t.mode === "skill") return { label: "Barter Skill", cls: "bg-pale-purple text-off-white" };
         return t.direction === "teaching"
@@ -125,20 +127,24 @@
     }
 
     /** Whether credit moves, and in which direction: +, -, or neither (barter). */
+    /** @param {{mode?: string, direction?: string, hour?: number}} t */
     function creditInfo(t) {
         if (t.mode === "skill") return { text: "Tanpa credit", cls: "bg-off-white border-2 border-pitch-black" };
         if (t.direction === "teaching") return { text: `+${t.hour} credit`, cls: "bg-cyber-lime" };
         return { text: `-${t.hour} credit`, cls: "bg-laser-pink text-off-white" };
     }
 
+    /** @type {Record<string, {label: string, cls: string}>} */
     const STATUS_MAP = {
         pending: { label: "Menunggu konfirmasi", cls: "bg-neon-yellow" },
+        scheduled: { label: "Terjadwal", cls: "bg-[#8bd5ff]" },
         active: { label: "Berlangsung", cls: "bg-electric-cyan" },
         completed: { label: "Selesai", cls: "bg-cyber-lime" },
         rejected: { label: "Ditolak", cls: "bg-laser-pink text-off-white" },
         cancelled: { label: "Dibatalkan", cls: "bg-off-white border-2 border-pitch-black" },
         expired: { label: "Kedaluwarsa", cls: "bg-off-white border-2 border-pitch-black" },
     };
+    /** @param {string} status */
     function statusInfo(status) {
         return STATUS_MAP[status] ?? { label: status, cls: "bg-off-white border-2 border-pitch-black" };
     }
@@ -269,5 +275,14 @@
     .history-row:hover {
         transform: translateY(-2px);
         box-shadow: 6px 6px 0 #000;
+    }
+
+    .transaction-card {
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .transaction-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 9px 9px 0 #000;
     }
 </style>

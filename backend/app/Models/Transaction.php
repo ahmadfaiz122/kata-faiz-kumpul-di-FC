@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $fillable = [
-        'barter_request', 'provider', 'requester', 'requester_skill_id', 'mode',
-        'hour', 'credits', 'status', 'approved_at', 'starts_at', 'ends_at', 'completed_at',
+        'barter_request', 'provider', 'requester', 'requester_skill_id', 'requester_skill_note', 'mode',
+        'hour', 'credits', 'status', 'approved_at', 'requester_approved_at', 'provider_approved_at', 'starts_at', 'ends_at', 'completed_at',
     ];
 
     protected function casts(): array
     {
         return [
             'approved_at' => 'datetime',
+            'requester_approved_at' => 'datetime',
+            'provider_approved_at' => 'datetime',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -44,5 +46,20 @@ class Transaction extends Model
     public function review()
     {
         return $this->hasOne(TransactionReview::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(TransactionReview::class);
+    }
+
+    public function conversation()
+    {
+        return $this->hasOne(Conversation::class);
+    }
+
+    public function hiddenByUsers()
+    {
+        return $this->belongsToMany(User::class, 'transaction_user_hides')->withTimestamps();
     }
 }

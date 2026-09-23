@@ -48,11 +48,11 @@ class ProposalController extends Controller
         return response()->json([
             'data' => SkillRequest::query()
                 ->where('status', 'pending')
-                ->whereNotNull('skill_category')
-                ->distinct()
-                ->orderBy('skill_category')
-                ->pluck('skill_category')
-                ->values(),
+                ->where(function ($query) {
+                    $query->whereNull('available_at')->orWhere('available_at', '>', now());
+                })
+                ->latest()
+                ->get(),
         ]);
     }
 

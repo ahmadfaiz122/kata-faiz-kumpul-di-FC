@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Profile;
+use App\Models\TransactionReview;
+use App\Models\User;
+use App\Models\Post;
+use App\Models\SkillRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -12,6 +16,44 @@ class ProfileController extends Controller
     public function show(Request $request)
     {
         return response()->json($this->profileFor($request));
+    }
+
+    public function publicShow(User $user)
+    {
+        $user->load('profile.skillRecords', 'profile.achievementRecords');
+        $profile = $user->profile;
+
+        if ($profile) {
+            $summary = $this->reviewSummary((int) $user->id);
+            $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
+            $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
+            $profile->setAttribute('rating_average', $summary['rating_average']);
+            $profile->setAttribute('reputation_score', (int) ($profile->reputation ?? 50));
+            $profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
+            $profile->setAttribute('review_count', $summary['review_count']);
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'avatar' => $user->avatar,
+            'profile' => $profile,
+            'posts' => Post::query()
+                ->where('user_id', $user->id)
+                ->with('user:id,name,avatar')
+                ->withCount(['likes', 'comments'])
+                ->latest('id')
+                ->get(),
+            'swapp_posts' => SkillRequest::query()
+                ->where('requester', $user->id)
+                ->where('status', 'pending')
+                ->where(function ($query) {
+                    $query->whereNull('available_at')->orWhere('available_at', '>', now());
+                })
+                ->with('skill:id,name,category_skills')
+                ->latest('id')
+                ->get(['id', 'requester', 'skill_id', 'skill_name', 'skill_category', 'skill_description', 'available_at', 'status', 'hour']),
+        ]);
     }
 
     public function update(Request $request)
@@ -86,6 +128,11 @@ class ProfileController extends Controller
             $profile->setAttribute('nim', $this->nimFromEmail($user['email']));
             $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
             $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
+            $summary = $this->reviewSummary((int) $user->id);
+            $profile->setAttribute('reputation_score', (int) ($profile->reputation ?? 50));
+            $profile->setAttribute('rating_average', $summary['rating_average']);
+            $profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
+            $profile->setAttribute('review_count', $summary['review_count']);
         }
 
         return [
@@ -98,12 +145,16 @@ class ProfileController extends Controller
         ];
     }
 
-    private function nimFromEmail(?string $email): ?string
+    public static function reviewSummary(int $userId): array
     {
-        if (! $email) return null;
+        $reviews = TransactionReview::query()->where('reviewed', $userId)->get(['rating', 'reputation_emoji', 'reputation']);
+        $counts = $reviews->groupBy(fn ($review) => $review->reputation_emoji ?: $review->reputation)->map->count();
+        $dominant = $counts->sortDesc()->keys()->first();
 
-        return preg_match('/^([0-9]+)@mhs\.unesa\.ac\.id$/i', trim($email), $matches)
-            ? $matches[1]
-            : null;
+        return [
+            'rating_average' => $reviews->avg('rating') !== null ? round((float) $reviews->avg('rating'), 2) : null,
+            'dominant_reputation_emoji' => $dominant,
+            'review_count' => $reviews->count(),
+        ];
     }
 }

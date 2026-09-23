@@ -9,8 +9,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionReviewController;
-use App\Http\Controllers\LeaderboardController;
-use App\Models\Category;
+use App\Http\Controllers\ConversationController;
 
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -35,6 +34,14 @@ Route::middleware('throttle:60,1')->group(function () {
                 $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
                 $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
             }
+        if ($request->boolean('details') && $user->profile) {
+            $user->profile->setAttribute('skills', $user->profile->skillRecords->pluck('name')->values());
+            $user->profile->setAttribute('achievements', $user->profile->achievementRecords->pluck('name')->values());
+            $summary = ProfileController::reviewSummary((int) $user->id);
+            $user->profile->setAttribute('reputation_score', (int) ($user->profile->reputation ?? 50));
+            $user->profile->setAttribute('rating_average', $summary['rating_average']);
+            $user->profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
+            $user->profile->setAttribute('review_count', $summary['review_count']);
         }
 
         $user['profile'] = $profile;
@@ -49,6 +56,7 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/proposals/{proposal}', [ProposalController::class, 'show']);
     Route::get('/proposals/{proposal}/file', [ProposalController::class, 'file']);
     Route::get('/leaderboard', [LeaderboardController::class, 'index']);
+    Route::get('/profiles/{user}', [ProfileController::class, 'publicShow']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show']);
@@ -78,6 +86,13 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::get('/transactions/{transaction}/materials/{skill}', [TransactionController::class, 'material']);
         Route::post('/transactions/{transaction}/approve', [TransactionController::class, 'approve']);
         Route::post('/transactions/{transaction}/review', [TransactionReviewController::class, 'store'])->middleware('throttle:10,1');
+        Route::post('/transactions/{transaction}/reject', [TransactionController::class, 'reject']);
+        Route::post('/transactions/{transaction}/cancel', [TransactionController::class, 'cancel']);
+        Route::post('/transactions/{transaction}/hide', [TransactionController::class, 'hide']);
+        Route::post('/transactions/{transaction}/review', [TransactionReviewController::class, 'store']);
+        Route::get('/conversations', [ConversationController::class, 'index']);
+        Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
+        Route::post('/conversations/{conversation}/messages', [ConversationController::class, 'store']);
         Route::post('/posts', [PostController::class, 'store']);
         Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
         Route::post('/posts/{post}/comments', [PostController::class, 'storeComment']);

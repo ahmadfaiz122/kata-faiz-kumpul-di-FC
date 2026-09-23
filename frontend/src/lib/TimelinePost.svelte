@@ -2,6 +2,8 @@
     export let type = "text";
     export let content = "";
     export let author = "Unknown user";
+    /** @type {number|null} */
+    export let authorId = null;
     export let authorAvatar = "";
     export let createdAt = "";
     export let edited = false;
@@ -32,7 +34,11 @@
             {:else}
                 <span class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-pitch-black bg-off-white text-xs">●</span>
             {/if}
-            <span class="font-mono text-[10px] font-bold sm:text-xs">{author}'s Post</span>
+            {#if authorId}
+                <a href={`/#/profile/${authorId}`} class="author-link font-mono text-[10px] font-bold sm:text-xs">{author}'s Post</a>
+            {:else}
+                <span class="font-mono text-[10px] font-bold sm:text-xs">{author}'s Post</span>
+            {/if}
         </div>
         <div class="flex gap-2">
             <span class="h-4 w-4 rounded-full border border-pitch-black bg-laser-pink"></span>
@@ -75,3 +81,8 @@
         </section>
     {/if}
 </article>
+
+<style>
+    .author-link { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .author-link:hover { color: #ff006e; }
+</style>

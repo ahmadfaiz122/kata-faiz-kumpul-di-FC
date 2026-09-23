@@ -6,7 +6,7 @@ use App\Models\Skill;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
+use App\Models\TransactionReview;
 
 class SkillController extends Controller
 {
@@ -22,9 +22,20 @@ class SkillController extends Controller
             return response()->json(['data' => []]);
         }
 
-        return response()->json([
-            'data' => $profile->skillRecords()->where('status', 'published')->orderBy('name')->get(),
-        ]);
+        $skills = $profile->skillRecords()->orderBy('name')->get();
+        $skills->each(function ($skill) {
+            $reviews = TransactionReview::query()
+                ->join('transactions', 'transaction_reviews.transaction_id', '=', 'transactions.id')
+                ->join('requests', 'transactions.barter_request', '=', 'requests.id')
+                ->where('requests.skill_id', $skill->id)
+                ->get(['transaction_reviews.rating', 'transaction_reviews.reputation_emoji', 'transaction_reviews.reputation']);
+            $counts = $reviews->groupBy(fn ($review) => $review->reputation_emoji ?: $review->reputation)->map->count();
+            $skill->setAttribute('rating_average', $reviews->avg('rating') !== null ? round((float) $reviews->avg('rating'), 2) : null);
+            $skill->setAttribute('dominant_reputation_emoji', $counts->sortDesc()->keys()->first());
+            $skill->setAttribute('review_count', $reviews->count());
+        });
+
+        return response()->json(['data' => $skills]);
     }
 
     /**
