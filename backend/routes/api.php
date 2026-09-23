@@ -10,6 +10,8 @@ use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionReviewController;
 use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\LeaderboardController;
+use App\Models\Category;
 
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -34,14 +36,14 @@ Route::middleware('throttle:60,1')->group(function () {
                 $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
                 $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
             }
-        if ($request->boolean('details') && $user->profile) {
-            $user->profile->setAttribute('skills', $user->profile->skillRecords->pluck('name')->values());
-            $user->profile->setAttribute('achievements', $user->profile->achievementRecords->pluck('name')->values());
-            $summary = ProfileController::reviewSummary((int) $user->id);
-            $user->profile->setAttribute('reputation_score', (int) ($user->profile->reputation ?? 50));
-            $user->profile->setAttribute('rating_average', $summary['rating_average']);
-            $user->profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
-            $user->profile->setAttribute('review_count', $summary['review_count']);
+        }
+
+        if ($request->boolean('details') && $profile) {
+            $summary = ProfileController::reviewSummary((int) $user['id']);
+            $profile->setAttribute('reputation_score', (int) ($profile->reputation ?? 50));
+            $profile->setAttribute('rating_average', $summary['rating_average']);
+            $profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
+            $profile->setAttribute('review_count', $summary['review_count']);
         }
 
         $user['profile'] = $profile;
@@ -73,9 +75,6 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::post('/achievements', [AchievementController::class, 'store'])->middleware('throttle:10,1');
         Route::delete('/achievements/{id}', [AchievementController::class, 'destroy']);
         Route::post('/proposals', [ProposalController::class, 'store']);
-        Route::get('/user/proposals', [ProposalController::class, 'mine']);
-        Route::post('/user/proposals/{id}', [ProposalController::class, 'update']);
-        Route::delete('/user/proposals/{id}', [ProposalController::class, 'destroy']);
         Route::get('/user/proposals', [ProposalController::class, 'mine']);
         Route::post('/user/proposals/{id}', [ProposalController::class, 'update']);
         Route::delete('/user/proposals/{id}', [ProposalController::class, 'destroy']);

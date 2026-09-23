@@ -10,9 +10,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transaction_reviews', function (Blueprint $table) {
+            $table->dropForeign(['transaction_id']);
             $table->dropUnique('transaction_reviews_transaction_id_unique');
             $table->string('reputation_emoji', 4)->nullable()->after('rating');
             $table->unique(['transaction_id', 'reviewer']);
+            $table->foreign('transaction_id')->references('id')->on('transactions')->cascadeOnDelete();
         });
 
         DB::table('transaction_reviews')->whereNull('reputation_emoji')->get()->each(function ($review) {

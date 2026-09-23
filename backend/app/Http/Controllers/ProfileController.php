@@ -128,7 +128,7 @@ class ProfileController extends Controller
             $profile->setAttribute('nim', $this->nimFromEmail($user['email']));
             $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
             $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
-            $summary = $this->reviewSummary((int) $user->id);
+            $summary = $this->reviewSummary((int) $user['id']);
             $profile->setAttribute('reputation_score', (int) ($profile->reputation ?? 50));
             $profile->setAttribute('rating_average', $summary['rating_average']);
             $profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);

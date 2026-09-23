@@ -544,6 +544,8 @@
   @media (max-width: 640px) {
     .card {
       flex-direction: column;
+      min-width: 0;
+      padding: 14px 12px 18px;
     }
 
     .divider {
@@ -551,11 +553,19 @@
       height: 2px;
       margin: 10px 0 14px;
     }
-  }
 
-  @container skillcard (min-width: 380px) and (max-width: 519.98px) {
+    .banner-stack {
+      left: 16px;
+      width: min(220px, calc(100% - 20px));
+    }
+
     .right {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
+    }
+
+    .label-meta {
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
   }
 

@@ -11,7 +11,7 @@
 
     const dispatch = createEventDispatcher();
 
-    let open = false;
+    let open = true;
 
     function toggleOpen() {
         open = !open;
@@ -65,7 +65,7 @@
 
     onMount(async () => {
         try {
-            const response = await fetch(`${backendUrl}/api/proposals/categories`);
+            const response = await fetch(`${backendUrl}/api/categories`);
             if (!response.ok) return;
             const result = await response.json();
             const serverCategories = (result.data ?? []).filter(Boolean).map(categoryView);

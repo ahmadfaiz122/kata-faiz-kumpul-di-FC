@@ -98,7 +98,7 @@
     }
 
     async function selectCategory(event) {
-        selectedCategory = String(event.detail.id ?? "");
+        selectedCategory = String(event.detail.slug ?? event.detail.name ?? "");
         await loadProposals();
     }
 
