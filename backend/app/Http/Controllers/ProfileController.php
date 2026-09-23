@@ -115,7 +115,7 @@ class ProfileController extends Controller
 
     protected function profileFor(Request $request, ?Profile $profile = null): array
     {
-        $user = $request->user()->only(['id', 'name', 'email', 'avatar', 'google_id']);
+        $summary = $this->reviewSummary((int) $user['id']);
         $profile ??= $request->user()->profile()
             ->select(['id', 'user_id', 'username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'rating', 'reputation', 'leaderboard', 'credits'])
             ->with([

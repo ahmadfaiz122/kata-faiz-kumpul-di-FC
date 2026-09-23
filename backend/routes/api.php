@@ -45,7 +45,7 @@ Route::middleware('throttle:60,1')->group(function () {
             $profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
             $profile->setAttribute('review_count', $summary['review_count']);
         }
-
+        }
         $user['profile'] = $profile;
         return response()->json($user);
     })->middleware('auth:sanctum');
