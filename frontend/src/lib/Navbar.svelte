@@ -76,15 +76,5 @@
         </a>
       </div>
     </div>
-        {/if}  
-    {/if}
-    {#if innerWidth >= 768}
-        {#each menus as menu}
-        {#if currentPage === menu.alias}
-            <a href={menu.href} class="button-lift flex bg-laser-pink h-full items-center rounded-full px-4 font-mono text-xs text-black sm:px-7 sm:text-base" style="--button-complement: #ff006e">{menu.name}</a>
-        {:else}
-            <a use:link href={menu.alias ? `/${menu.alias}` : '/'} class="button-lift flex h-full items-center rounded-full px-4 font-mono text-xs text-black sm:px-7 sm:text-base" style="--button-complement: #ff006e">{menu.name}</a>
         {/if}
-        {/each}
-    {/if}
-</nav>
+    </div>
