@@ -88,12 +88,17 @@
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
+<div class="pointer-events-none absolute -left-20 -top-20 h-44 w-44 rounded-full border-2 border-pitch-black bg-[#ffe477] sm:h-60 sm:w-60 lg:h-72 lg:w-72"></div>
+    <div class="pointer-events-none absolute -right-14 top-24 hidden h-20 w-20 rotate-12 border-2 border-pitch-black bg-electric-cyan sm:block sm:h-28 sm:w-28 lg:top-32"></div>
+    <div class="pointer-events-none absolute -right-16 bottom-10 h-40 w-40 rounded-full border-2 border-pitch-black bg-laser-pink/90 sm:h-56 sm:w-56"></div>
+    <div class="pointer-events-none absolute bottom-24 -left-2.5 hidden h-16 w-16 rotate-6 border-2 border-pitch-black bg-cyber-lime sm:block sm:h-20 sm:w-20"></div>
+    
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+        <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
             <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
         </a>
         <Navbar />
-        <div class="justify-self-end">
+        <div class=" justify-self-end">
             <ProfileDropdown />
         </div>
     </header>

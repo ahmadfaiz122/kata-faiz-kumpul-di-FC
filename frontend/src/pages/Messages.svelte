@@ -125,8 +125,13 @@
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
+    <div class="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full border-2 border-pitch-black bg-electric-cyan sm:h-60 sm:w-60 lg:h-72 lg:w-72"></div>
+    <div class="pointer-events-none absolute -left-14 top-28 hidden h-20 w-20 rotate-12 border-2 border-pitch-black bg-neon-yellow sm:block sm:h-28 sm:w-28"></div>
+    <div class="pointer-events-none absolute -bottom-14 -right-10 h-36 w-36 rounded-full border-2 border-pitch-black bg-pale-purple sm:h-48 sm:w-48"></div>
+    <div class="pointer-events-none absolute bottom-40 left-3 hidden h-14 w-14 -rotate-6 border-2 border-pitch-black bg-laser-pink lg:block"></div>
+
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+        <a href="/#/" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
             <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
         </a>
         <Navbar />
@@ -234,28 +239,6 @@
             </section>
         </div>
 
-        <section class="mt-10" aria-labelledby="credit-history-title">
-            <div class="mb-4 flex items-center justify-between border-b-3 border-pitch-black pb-3">
-                <h2 id="credit-history-title" class="font-mono text-xl font-bold uppercase sm:text-2xl">Riwayat Credit</h2>
-                <span class="font-mono text-[10px] font-bold uppercase">{creditLedger.length} aktivitas</span>
-            </div>
-            {#if creditLedger.length === 0}
-                <p class="border-2 border-pitch-black bg-off-white p-4 font-mono text-xs">Belum ada aktivitas credit.</p>
-            {:else}
-                <div class="grid gap-3 sm:grid-cols-2">
-                    {#each creditLedger as entry}
-                        <article class="border-2 border-pitch-black bg-off-white p-4 shadow-[4px_4px_0_#000]">
-                            <div class="flex items-start justify-between gap-3">
-                                <span class="font-mono text-xs font-bold uppercase">{entry.type.replaceAll("_", " ")}</span>
-                                <span class="font-mono text-sm font-bold {entry.amount > 0 ? 'text-green-700' : 'text-laser-pink'}">{entry.amount > 0 ? '+' : ''}{entry.amount}</span>
-                            </div>
-                            <p class="mt-2 font-archivo text-sm">{entry.description}</p>
-                            <p class="mt-2 font-mono text-[10px]">Saldo setelah: {entry.balance_after}</p>
-                        </article>
-                    {/each}
-                </div>
-            {/if}
-        </section>
     </section>
 </main>
 

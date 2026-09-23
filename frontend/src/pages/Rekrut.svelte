@@ -4,6 +4,7 @@
     import Index from "../lib/profileComponents/Index.svelte";
     import indexImage1 from "../assets/star.webp";
     import indexImage2 from "../assets/stats.webp";
+    import logo from "../assets/logo.webp";
     import { onMount } from "svelte";
     import { push } from "svelte-spa-router";
 
@@ -156,9 +157,13 @@
     <div class="pointer-events-none absolute -right-11.25 top-0 h-24 w-24 rounded-full border-2 border-pitch-black bg-[#2fc7b8]"></div>
     <div class="relative mx-auto max-w-255">
         <header class="dashboard-enter relative z-30 flex items-center justify-between border-t border-pitch-black pt-5">
-            <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
-            <Navbar />
+            <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
+        </a>
+        <Navbar />
+        <div class=" justify-self-end">
             <ProfileDropdown />
+        </div>
         </header>
         <a href="/#/swapp" class="mb-6 mt-12 inline-flex items-center gap-2 font-mono text-xs uppercase transition-transform hover:-translate-x-1">
             <span aria-hidden="true" class="text-lg">&larr;</span>

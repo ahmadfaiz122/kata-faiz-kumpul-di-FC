@@ -41,7 +41,7 @@
         <span class="font-mono text-xs font-bold sm:text-sm md:text-base">{user.profile?.credits ?? 0}</span>
     </div>
  
-    <a href="/#/edit-profile" aria-label="Edit profile" title="Edit profile" class="flex min-w-0 shrink-0 items-center gap-1.5 rounded-full border-2 border-black bg-electric-cyan px-2 py-1.5 shadow-[3px_3px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black md:gap-4 md:px-6 md:py-3 sm:shadow-[6px_6px_0_#000]">
+    <a href="/#/profile" aria-label="Edit profile" title="Edit profile" class="flex min-w-0 shrink-0 items-center gap-1.5 rounded-full border-2 border-black bg-electric-cyan px-2 py-1.5 shadow-[3px_3px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black md:gap-4 md:px-6 md:py-3 sm:shadow-[6px_6px_0_#000]">
         <img src={user.avatar} alt={user.name} class="h-7 w-7 shrink-0 rounded-full border-2 border-black object-cover md:h-10 md:w-10">
         <span class="hidden max-w-24 truncate font-mono text-sm font-bold lg:inline-block md:max-w-none md:text-xs lg:text-xl md:font-normal">{firstName(user.name)}</span>
     </a>

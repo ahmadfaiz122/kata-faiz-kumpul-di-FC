@@ -290,9 +290,11 @@
 
 <main class="min-h-screen overflow-hidden px-5 py-7 sm:px-10 lg:px-14">
     <header class="dashboard-enter mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
+        <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
+        </a>
         <Navbar />
-        <div class="justify-self-end">
+        <div class=" justify-self-end">
             <ProfileDropdown />
         </div>
     </header>
