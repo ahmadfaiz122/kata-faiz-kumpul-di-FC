@@ -145,6 +145,13 @@ class ProfileController extends Controller
         ];
     }
 
+    protected function nimFromEmail(?string $email): ?string
+    {
+        return preg_match('/^([0-9]+)@mhs\.unesa\.ac\.id$/i', trim($email ?? ''), $matches)
+            ? $matches[1]
+            : null;
+    }
+
     public static function reviewSummary(int $userId): array
     {
         $reviews = TransactionReview::query()->where('reviewed', $userId)->get(['rating', 'reputation_emoji', 'reputation']);
