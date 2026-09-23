@@ -73,24 +73,27 @@ class ProfileController extends Controller
 
     protected function profileFor(Request $request, ?Profile $profile = null): array
     {
-        $user = $request->user()->loadMissing('profile.skillRecords', 'profile.achievementRecords');
-        $profile ??= $user->profile;
+        $user = $request->user()->only(['id', 'name', 'email', 'avatar', 'google_id']);
+        $profile ??= $request->user()->profile()
+            ->select(['id', 'user_id', 'username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'rating', 'reputation', 'leaderboard', 'credits'])
+            ->with([
+                'skillRecords:id,profile_id,category_id,name,category_skills,description,material_path,status',
+                'achievementRecords:id,profile_id,name,levels,category,description,validated_upload,certificate_path,tanggal_terbit,kadaluwarsa',
+            ])
+            ->first();
 
         if ($profile) {
-            $derivedNim = $this->nimFromEmail($user->email);
-            if ($profile->nim !== $derivedNim) {
-                $profile->forceFill(['nim' => $derivedNim])->save();
-            }
+            $profile->setAttribute('nim', $this->nimFromEmail($user['email']));
             $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
             $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
         }
 
         return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'avatar' => $user->avatar,
-            'google_id' => $user->google_id,
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'email' => $user['email'],
+            'avatar' => $user['avatar'],
+            'google_id' => $user['google_id'],
             'profile' => $profile,
         ];
     }

@@ -1,3 +1,29 @@
+<script context="module">
+    let cachedToken = null;
+    let cachedUser = null;
+    let userRequest = null;
+
+    async function loadUser(token, backendUrl) {
+        if (cachedToken === token && cachedUser) return cachedUser;
+        if (cachedToken === token && userRequest) return userRequest;
+
+        cachedToken = token;
+        userRequest = fetch(`${backendUrl}/api/user`, {
+            headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        })
+            .then((response) => response.ok ? response.json() : null)
+            .then((data) => {
+                cachedUser = data;
+                return data;
+            })
+            .finally(() => {
+                userRequest = null;
+            });
+
+        return userRequest;
+    }
+</script>
+
 <script>
     import { onMount } from "svelte";
 
@@ -12,14 +38,7 @@
         const token = localStorage.getItem("auth_token");
         if (!token) return;
 
-        const response = await fetch(`${backendUrl}/api/user`, {
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        if (response.ok) user = await response.json();
+        user = await loadUser(token, backendUrl);
     });
 </script>
 

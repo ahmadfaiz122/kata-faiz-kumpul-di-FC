@@ -14,18 +14,31 @@ use App\Models\Category;
 
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/user', function (Request $request) {
-        $user = $request->user()->load('profile:id,user_id,credits');
+        $user = $request->user()->only(['id', 'name', 'email', 'avatar', 'google_id']);
+        $profile = $request->user()->profile()
+            ->select(['id', 'user_id', 'username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'rating', 'reputation', 'leaderboard', 'credits'])
+            ->first();
 
         if ($request->boolean('details')) {
-            $user->load('profile.skillRecords', 'profile.achievementRecords');
+            $profile?->load([
+                'skillRecords:id,profile_id,category_id,name,category_skills,description,material_path,status',
+                'achievementRecords:id,profile_id,name,levels,category,description,validated_upload,certificate_path,tanggal_terbit,kadaluwarsa',
+            ]);
         }
 
-        if ($request->boolean('details') && $user->profile) {
-            $user->profile->setAttribute('skills', $user->profile->skillRecords->pluck('name')->values());
-            $user->profile->setAttribute('achievements', $user->profile->achievementRecords->pluck('name')->values());
+        if ($profile) {
+            $nim = preg_match('/^([0-9]+)@mhs\.unesa\.ac\.id$/i', trim($user['email'] ?? ''), $matches)
+                ? $matches[1]
+                : null;
+            $profile->setAttribute('nim', $nim);
+            if ($request->boolean('details')) {
+                $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
+                $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
+            }
         }
 
-        return $user;
+        $user['profile'] = $profile;
+        return response()->json($user);
     })->middleware('auth:sanctum');
 
     Route::get('/posts', [PostController::class, 'index']);

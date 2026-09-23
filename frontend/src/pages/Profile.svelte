@@ -272,19 +272,15 @@
 
             user = await response.json();
 
-            const postsResponse = await fetch(`${backendUrl}/api/user/posts`, {
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const requestOptions = { headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10000) };
+            const [postsResponse, swappResponse] = await Promise.all([
+                fetch(`${backendUrl}/api/user/posts`, requestOptions),
+                fetch(`${backendUrl}/api/user/proposals`, requestOptions),
+            ]);
             if (!postsResponse.ok) throw new Error("Post profile gagal dimuat.");
             /** @type {ProfilePost[]} */
             const profilePosts = (await postsResponse.json()).data ?? [];
             posts = profilePosts.map((/** @type {ProfilePost} */ post) => ({ ...post, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }));
-            const swappResponse = await fetch(`${backendUrl}/api/user/proposals`, {
-                headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-            });
             if (!swappResponse.ok) throw new Error("Post Swapp gagal dimuat.");
             swappPosts = (await swappResponse.json()).data ?? [];
         } catch (requestError) {
