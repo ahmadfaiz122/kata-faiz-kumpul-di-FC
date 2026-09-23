@@ -16,13 +16,20 @@
     let searchInput = $state();
     /** @type {Array<{id: number|string, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
+    let selectedCategory = $state("");
+    let activeFilters = $state([]);
     let proposalsLoading = $state(true);
     let proposalsError = $state("");
-    let credit = 0
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-    function submitSearch() {
+    async function submitSearch() {
         searchQuery = searchQuery.trim();
+        await loadProposals();
+    }
+
+    function updateSearch(event) {
+        const value = event.currentTarget.value.slice(0, 100);
+        searchQuery = value.replace(/[<>%_;`]/g, "");
     }
     let activeBar = $state("search");
     let filterOpen = $state(false)
@@ -58,25 +65,29 @@
     }
 
 
-    let visibleOffers = $derived(skillOffers.filter((offer) => {
-        const query = searchQuery.trim().toLowerCase();
-        return !query || `${offer.instructor} ${offer.category} ${offer.mentorName}`.toLowerCase().includes(query);
-    }));
+    let visibleOffers = $derived(skillOffers);
 
-    onMount(async () => {
+    async function loadProposals() {
+        proposalsLoading = true;
+        proposalsError = "";
+        const params = new URLSearchParams();
+        if (searchQuery) params.set("search", searchQuery);
+        if (selectedCategory) params.set("category", selectedCategory);
+        for (const filter of activeFilters) params.set(`${filter.key}_min`, filter.low), params.set(`${filter.key}_max`, filter.high);
+
         try {
-            const response = await fetch(`${backendUrl}/api/proposals`, { headers: { Accept: "application/json" } });
+            const response = await fetch(`${backendUrl}/api/proposals?${params}`, { headers: { Accept: "application/json" } });
             const result = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(result.message || `Server proposal mengembalikan ${response.status}.`);
-            if (!Array.isArray(result.data)) throw new Error("Format data proposal dari server tidak valid.");
-
-            skillOffers = result.data.map((/** @type {Record<string, any>} */ proposal) => ({
+            if (!response.ok) throw new Error(result.message || "Post Swapp gagal dimuat.");
+            skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
                 id: proposal.id,
                 duration: `${proposal.hour ?? 1} HOUR`,
                 mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
                 instructor: proposal.skill_name,
                 category: proposal.skill_category,
                 credits: `${proposal.hour ?? 1} kredit`,
+                rating: proposal.requester_user?.profile?.rating ?? 0,
+                reputation: proposal.requester_user?.profile?.reputation ?? 0,
                 university: proposal.city || "Community learner",
             }));
         } catch (requestError) {
@@ -84,25 +95,47 @@
         } finally {
             proposalsLoading = false;
         }
-    });
+    }
+
+    async function selectCategory(event) {
+        selectedCategory = String(event.detail.id ?? "");
+        await loadProposals();
+    }
+
+    async function applyFilters(filters) {
+        activeFilters = filters;
+        await loadProposals();
+    }
+
+    async function resetFilters() {
+        activeFilters = [];
+        await loadProposals();
+    }
+
+    onMount(loadProposals);
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
+<div class="pointer-events-none absolute -left-20 -top-20 h-44 w-44 rounded-full border-2 border-pitch-black bg-[#ffe477] sm:h-60 sm:w-60 lg:h-72 lg:w-72"></div>
+    <div class="pointer-events-none absolute -right-14 top-24 hidden h-20 w-20 rotate-12 border-2 border-pitch-black bg-electric-cyan sm:block sm:h-28 sm:w-28 lg:top-32"></div>
+    <div class="pointer-events-none absolute -right-16 bottom-10 h-40 w-40 rounded-full border-2 border-pitch-black bg-laser-pink/90 sm:h-56 sm:w-56"></div>
+    <div class="pointer-events-none absolute bottom-24 -left-2.5 hidden h-16 w-16 rotate-6 border-2 border-pitch-black bg-cyber-lime sm:block sm:h-20 sm:w-20"></div>
+    
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+        <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
             <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
         </a>
         <Navbar />
-        <div class="justify-self-end">
+        <div class=" justify-self-end">
             <ProfileDropdown />
         </div>
     </header>
 
-        <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-7xl flex-col gap-8 min-[1200px]:flex-row min-[1200px]:items-center min-[1200px]:justify-between min-[1200px]:gap-6">
+    <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+        <CategoryBar on:categorySelect={selectCategory} />
+        <div class="relative flex items-center gap-3 lg:w-100">
+                        
 
-        <CategoryBar />
-
-        <div class="relative flex items-center gap-3 min-[1200px]:flex-nowrap min-[1200px]:w-80 min-[1200px]:shrink-0 xl:w-100">
             <button
 
 
@@ -149,11 +182,7 @@
 
                 {#if activeBar === "search"}
 
-
-
-                    <input bind:this={searchInput} bind:value={searchQuery} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
-
-
+                    <input bind:this={searchInput} value={searchQuery} oninput={updateSearch} maxlength="100" onkeydown={(event) => event.key === "Enter" && submitSearch()} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Cari nama skill..." />
 
                 {/if}
 
@@ -287,13 +316,7 @@
 
 
 
-
-
-
-
-            <FilterDropdown bind:open={filterOpen} triggerEl={filterTriggerEl} />
-
-
+            <FilterDropdown bind:open={filterOpen} triggerEl={filterTriggerEl} onApply={applyFilters} onReset={resetFilters} />
 
         </div>
 

@@ -26,10 +26,10 @@
     }
 
     // ------------------------------------------------------ shared classes
-    const wrap = 'mx-auto w-full max-w-348 px-5 sm:px-10 lg:px-14';
+    const wrap = 'mx-auto w-full max-w-348 px-4 min-[360px]:px-5 sm:px-10 lg:px-14';
     const focus = 'focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-pitch-black';
     const pixel = "font-['Bitcount_Prop_Single']";
-    const h2 = 'font-anton text-[clamp(2.6rem,7vw,5.25rem)] uppercase leading-[.92]';
+    const h2 = 'font-anton text-[clamp(1.8rem,8.5vw,5.25rem)] uppercase leading-[.96]';
     const eyebrow = 'mb-2.5 font-mono text-[13px] uppercase tracking-[.06em] text-laser-pink sm:text-base';
     const box = 'border-[3px] border-black shadow-[7px_7px_0_#000]';
     const iconBox = 'grid h-15 w-15 shrink-0 place-items-center border-[3px] border-black bg-white shadow-[4px_4px_0_#000]';
@@ -183,11 +183,11 @@
         <div class={wrap}>
             <!-- header -->
             <header class="relative z-30 flex h-[100px] items-center justify-between md:grid md:h-[118px] md:grid-cols-2"> 
-            <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-18 sm:w-42">
+            <a href="/#/timeline" aria-label="Faiz home" class="h-9 w-20 transition-transform hover:-translate-y-1 min-[360px]:h-11 min-[360px]:w-28 sm:h-18 sm:w-42">
             <img src={symbol} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
             </a>
             <div class="md:justify-self-end"> 
-                {@render googleBtn('bg-electric-cyan gap-3 py-2.5 pl-3.5 pr-5 text-base shadow-[6px_6px_0_#000] sm:pr-6 sm:text-[17px]', 'h-8.5 w-8.5', true)} 
+                {@render googleBtn('bg-electric-cyan gap-2 py-2 pl-2.5 pr-3.5 text-sm shadow-[6px_6px_0_#000] min-[360px]:gap-3 min-[360px]:py-2.5 min-[360px]:pl-3.5 min-[360px]:pr-5 min-[360px]:text-base sm:pr-6 sm:text-[17px]', 'h-7 w-7 min-[360px]:h-8.5 min-[360px]:w-8.5', true)} 
             </div> 
             </header>
 
@@ -199,9 +199,9 @@
                         Platform barter skill untuk mahasiswa UNESA
                     </div>
 
-                    <h1 class="mb-7 flex flex-col items-start font-anton text-[clamp(3rem,13vw,7rem)] uppercase leading-none">
-                        <span class="-ml-1.5 inline-block -rotate-[2.2deg] whitespace-nowrap border-[3px] border-black bg-laser-pink px-5 pb-1.5 pt-2.5 text-off-white shadow-[8px_8px_0_#000] sm:px-6.5">Tukar skill,</span>
-                        <span class="ml-6 mt-3.5 inline-block rotate-[1.4deg] whitespace-nowrap border-[3px] border-black bg-[#2fc7b8] px-5 pb-1.5 pt-2.5 shadow-[8px_8px_0_#000] sm:ml-8.5 sm:px-6.5">bukan uang.</span>
+                    <h1 class="mb-7 flex flex-col items-start font-anton text-[clamp(2.1rem,13vw,7rem)] uppercase leading-none max-[359px]:text-[1.85rem]">
+                        <span class="-ml-1.5 inline-block -rotate-[2.2deg] whitespace-nowrap border-[3px] border-black bg-laser-pink px-5 pb-1.5 pt-2.5 text-off-white shadow-[8px_8px_0_#000] sm:px-6.5 max-[359px]:whitespace-normal max-[359px]:px-3">Tukar skill,</span>
+                        <span class="ml-6 mt-3.5 inline-block rotate-[1.4deg] whitespace-nowrap border-[3px] border-black bg-[#2fc7b8] px-5 pb-1.5 pt-2.5 shadow-[8px_8px_0_#000] sm:ml-8.5 sm:px-6.5 max-[359px]:ml-2 max-[359px]:whitespace-normal max-[359px]:px-3">bukan uang.</span>
                     </h1>
 
                     <p class="mb-8 max-w-150 text-lg leading-normal sm:text-[23px]">
@@ -226,15 +226,15 @@
                 </div>
 
                 <!-- right column: skill card illustration -->
-                <div aria-hidden="true" class="relative mx-auto w-full max-w-170 pb-16 pt-20 xl:pt-24">
+                <div aria-hidden="true" class="relative mx-auto w-full max-w-170 pb-4 pt-16 sm:pb-16 sm:pt-20 xl:pt-24">
                     <!-- bell -->
-                    <div class="absolute left-[24%] top-3 z-10 grid h-14 w-14 -rotate-6 place-items-center rounded-full border-[3px] border-black bg-white shadow-[5px_5px_0_#000] sm:h-16 sm:w-16">
-                        {@render icon('chat', 'h-6 w-6 sm:h-7 sm:w-7')}
-                        <em class="absolute -right-1.5 -top-1.5 grid h-6 w-6 place-items-center rounded-full border-2 border-black bg-laser-pink font-mono text-[13px] font-bold not-italic text-off-white">1</em>
+                    <div class="absolute left-2 top-2 z-10 grid h-11 w-11 -rotate-6 place-items-center rounded-full border-[3px] border-black bg-white shadow-[5px_5px_0_#000] min-[380px]:left-[24%] min-[380px]:top-3 min-[380px]:h-14 min-[380px]:w-14 sm:h-16 sm:w-16">
+                        {@render icon('chat', 'h-5 w-5 min-[380px]:h-6 min-[380px]:w-6 sm:h-7 sm:w-7')}
+                        <em class="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full border-2 border-black bg-laser-pink font-mono text-[11px] font-bold not-italic text-off-white min-[380px]:h-6 min-[380px]:w-6 min-[380px]:text-[13px]">1</em>
                     </div>
                     <!-- credit pill -->
-                    <div class="absolute right-0 top-6 z-10 flex rotate-[5deg] items-center gap-2.5 rounded-full border-[3px] border-black bg-neon-yellow py-2.5 pl-3.5 pr-5 font-mono text-xl font-bold shadow-[6px_6px_0_#000] sm:text-2xl">
-                        <span class="grid h-9 w-9 place-items-center rounded-full border-[3px] border-black bg-white sm:h-10.5 sm:w-10.5">{@render icon('db', 'h-5 w-5 sm:h-[22px] sm:w-[22px]')}</span>
+                    <div class="absolute right-0 top-3 z-10 flex rotate-[5deg] items-center gap-1.5 rounded-full border-[3px] border-black bg-neon-yellow py-1.5 pl-2 pr-3 font-mono text-sm font-bold shadow-[6px_6px_0_#000] min-[380px]:top-6 min-[380px]:gap-2.5 min-[380px]:py-2.5 min-[380px]:pl-3.5 min-[380px]:pr-5 min-[380px]:text-xl sm:text-2xl">
+                        <span class="grid h-6 w-6 place-items-center rounded-full border-[3px] border-black bg-white min-[380px]:h-9 min-[380px]:w-9 sm:h-10.5 sm:w-10.5">{@render icon('db', 'h-3.5 w-3.5 min-[380px]:h-5 min-[380px]:w-5 sm:h-[22px] sm:w-[22px]')}</span>
                         +1 kredit
                     </div>
 
@@ -243,10 +243,10 @@
                         <!-- left: duration + skill -->
                         <div class="relative pb-4 pt-1 sm:border-r-[3px] sm:border-black sm:pr-5">
                             <span class="absolute left-0 top-0 z-10 grid h-9.5 w-9.5 place-items-center rounded-full border-[3px] border-black bg-[#f5c518]">{@render icon('clock', 'h-[18px] w-[18px]')}</span>
-                            <div class="{pixel} ml-4 mt-8 -rotate-3 border-[3px] border-black bg-[#e8265f] px-5 py-3 text-[clamp(1.9rem,3vw,3.6rem)] font-silk font-bold uppercase leading-none text-white shadow-[5px_5px_0_#000] sm:pl-8.5">1 hour</div>
-                            <div class="{pixel} relative z-10 -mt-2.5 ml-6 inline-block -rotate-3 bg-[#0b0b0b] px-4 py-1 text-[15px] uppercase tracking-[.14em] text-white">learning</div>
-                            <div class="{pixel} -mt-1 ml-9 -rotate-3 border-[3px] border-black bg-[#3fd6c4] px-5 py-3 text-[clamp(2.2rem,8vw,4.4rem)] font-silk font-bold uppercase leading-none shadow-[5px_5px_0_#000] sm:pl-8.5">php</div>
-                            <p class="{pixel} mt-6 flex items-center gap-1 text-[13px] tracking-[.1em]">{@render icon('ne', 'h-3.5 w-3.5')} UNESA</p>
+                            <div class="{pixel} ml-3 mt-8 -rotate-3 border-[3px] border-black bg-[#e8265f] px-3.5 py-3 text-[clamp(1.35rem,7vw,3.6rem)] font-silk font-bold uppercase leading-none text-white shadow-[5px_5px_0_#000] min-[380px]:ml-4 min-[380px]:px-5 sm:pl-8.5">1 hour</div>
+                            <div class="{pixel} relative z-10 -mt-2.5 ml-5 inline-block -rotate-3 bg-[#0b0b0b] px-3 py-1 text-[13px] uppercase tracking-[.1em] text-white min-[380px]:ml-6 min-[380px]:px-4 min-[380px]:text-[15px] min-[380px]:tracking-[.14em]">learning</div>
+                            <div class="{pixel} -mt-1 ml-7 -rotate-3 border-[3px] border-black bg-[#3fd6c4] px-3.5 py-3 text-[clamp(1.6rem,9vw,4.4rem)] font-silk font-bold uppercase leading-none shadow-[5px_5px_0_#000] min-[380px]:ml-9 min-[380px]:px-5 sm:pl-8.5">php</div>
+                            <p class="{pixel} mt-6 flex items-center gap-1 text-[13px] tracking-[.1em]">{@render icon('ne', 'h-3.5 w-3.5')} Bogor</p>
                         </div>
 
                         <!-- right: details -->
@@ -270,7 +270,7 @@
                     </div>
 
                     <!-- rating sticker -->
-                    <div class="absolute bottom-2 left-0 z-10 w-40 -rotate-5 border-[3px] border-black bg-[#ffe477] px-4 py-3 text-center shadow-[6px_6px_0_#000] sm:w-44">
+                    <div class="relative z-10 mx-auto mt-4 w-40 -rotate-2 border-[3px] border-black bg-[#ffe477] px-4 py-3 text-center shadow-[6px_6px_0_#000] sm:absolute sm:bottom-2 sm:left-0 sm:mx-0 sm:mt-0 sm:w-44 sm:-rotate-5">
                         {@render icon('star', 'mx-auto h-6 w-6 fill-white')}
                         <b class="block font-mono text-2xl leading-tight">4.9/5</b>
                         <span class="font-mono text-[13px]">rating mentor</span>
@@ -291,22 +291,16 @@
                 <p class="max-w-108 pb-2 text-lg lg:text-xl">Dari bimbel tugas sampai desain poster. Pilih kategori, lihat siapa yang mengajar, lalu ajukan sesi.</p>
             </div>
 
-            <div class="relative grid grid-cols-2 gap-x-4 gap-y-9 border-[3px] border-black bg-white py-9 pl-11 pr-5 shadow-[7px_7px_0_#000] sm:grid-cols-3 lg:grid-cols-6 lg:pl-[60px] lg:pr-10">
-                <div aria-hidden="true" class="absolute inset-y-0 left-0 w-[22px] border-r-[3px] border-black bg-neon-yellow"></div>
+            <div class="grid grid-cols-2 place-items-center gap-x-4 gap-y-9 border-[3px] border-black bg-white px-4 py-9 shadow-[7px_7px_0_#000] sm:grid-cols-3 sm:px-8 lg:grid-cols-6 lg:px-10">
                 {#each categories as cat}
                     <div class="flex flex-col items-center gap-1.5 text-center">
-                        <div class="mb-2 grid h-24 w-24 place-items-center rounded-full border-[3px] border-black shadow-[4px_4px_0_#000] lg:h-26 lg:w-26 {cat.bg}">
-                            <svg viewBox="0 0 64 64" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="h-16 w-16 lg:h-[70px] lg:w-[70px]" aria-hidden="true">{@html catIcons[cat.key]}</svg>
+                        <div class="mb-2 grid h-20 w-20 place-items-center rounded-full border-[3px] border-black shadow-[4px_4px_0_#000] min-[380px]:h-24 min-[380px]:w-24 lg:h-26 lg:w-26 {cat.bg}">
+                            <svg viewBox="0 0 64 64" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="h-13 w-13 min-[380px]:h-16 min-[380px]:w-16 lg:h-[70px] lg:w-[70px]" aria-hidden="true">{@html catIcons[cat.key]}</svg>
                         </div>
-                        <b class="text-xl leading-tight">{cat.name}</b>
-                        <small class="max-w-37.5 text-sm leading-snug text-black/75">{cat.hint}</small>
+                        <b class="text-base leading-tight min-[380px]:text-xl">{cat.name}</b>
+                        <small class="max-w-37.5 text-xs leading-snug text-black/75 min-[380px]:text-sm">{cat.hint}</small>
                     </div>
                 {/each}
-                <div aria-hidden="true" class="absolute right-3.5 top-1/2 hidden -translate-y-1/2 flex-col gap-2.5 lg:flex">
-                    <i class="block h-[15px] w-[15px] border-2 border-black bg-neon-yellow"></i>
-                    <i class="block h-[15px] w-[15px] border-2 border-black bg-laser-pink"></i>
-                    <i class="block h-[15px] w-[15px] border-2 border-black bg-[#4ade80]"></i>
-                </div>
             </div>
         </div>
     </section>
@@ -317,9 +311,9 @@
             <h2 class="{h2} mb-12 lg:mb-14">Freelance mahal.<br />Minta tolong gratis, nggak enak.</h2>
 
             <div class="grid gap-10 lg:grid-cols-2 lg:gap-14">
-                <div class="{box} bg-off-white p-8 lg:-rotate-[.8deg] lg:px-10 lg:pb-10 lg:pt-9">
-                    <h3 class="mb-5 flex items-center gap-3.5 font-anton text-5xl uppercase leading-none">
-                        {@render icon('x', 'h-11 w-11 text-laser-pink')} Tanpa LetSo
+                <div class="{box} bg-off-white p-5 sm:p-8 lg:-rotate-[.8deg] lg:px-10 lg:pb-10 lg:pt-9">
+                    <h3 class="mb-5 flex flex-wrap items-center gap-3 font-anton text-3xl uppercase leading-none sm:gap-3.5 sm:text-5xl">
+                        {@render icon('x', 'h-8 w-8 text-laser-pink sm:h-11 sm:w-11')} Tanpa LetSo
                     </h3>
                     <ul class="grid gap-[18px]">
                         {#each without as line}
@@ -331,9 +325,9 @@
                     </ul>
                 </div>
 
-                <div class="{box} bg-neon-yellow p-8 lg:rotate-[.8deg] lg:px-10 lg:pb-10 lg:pt-9">
-                    <h3 class="mb-5 flex items-center gap-3.5 font-anton text-5xl uppercase leading-none">
-                        {@render icon('check', 'h-11 w-11')} Dengan LetSo
+                <div class="{box} bg-neon-yellow p-5 sm:p-8 lg:rotate-[.8deg] lg:px-10 lg:pb-10 lg:pt-9">
+                    <h3 class="mb-5 flex flex-wrap items-center gap-3 font-anton text-3xl uppercase leading-none sm:gap-3.5 sm:text-5xl">
+                        {@render icon('check', 'h-8 w-8 sm:h-11 sm:w-11')} Dengan LetSo
                     </h3>
                     <ul class="grid gap-[18px]">
                         {#each withLetso as line}
@@ -374,11 +368,11 @@
     <!-- ============================== CREDIT ============================ -->
     <section class="border-y-4 border-black bg-electric-cyan py-20 lg:pb-24 lg:pt-[90px]">
         <div class={wrap}>
-            <h2 class="mb-10 font-anton text-[clamp(3.5rem,11vw,10rem)] uppercase leading-[.86] sm:whitespace-nowrap lg:mb-14">
-                1 jam<span class="mx-[.12em] text-white [text-shadow:6px_6px_0_#000]">=</span>1 kredit
+            <h2 class="mb-10 font-anton text-[clamp(2.4rem,11vw,10rem)] uppercase leading-[.9] max-[359px]:text-[2.1rem] max-[359px]:leading-[1.08] sm:whitespace-nowrap lg:mb-14">
+                1 jam<span class="mx-[.12em] text-white [text-shadow:2px_2px_0_#000] sm:[text-shadow:6px_6px_0_#000]">=</span>1 kredit
             </h2>
 
-            <div class="grid items-center gap-12 lg:grid-cols-[560px_1fr] lg:gap-[70px]">
+            <div class="grid items-center gap-12 xl:grid-cols-[560px_1fr] xl:gap-[70px]">
                 <div>
                     <p class="mb-8 max-w-130 text-xl sm:text-[23px]">Mengajar menambah kredit, belajar mengurangi kredit. Semua tercatat di riwayat, jadi saldo kamu tidak bisa diubah sembarangan.</p>
 
@@ -394,11 +388,11 @@
 
                                 <div class="{box} overflow-hidden bg-off-white">
 
-                    <div class="flex items-baseline justify-between border-b-[3px] border-black px-6 pb-3.5 pt-6 sm:px-8">
+                    <div class="flex flex-wrap items-baseline justify-between gap-2 border-b-[3px] border-black px-4 pb-3 pt-5 sm:px-8 sm:pb-3.5 sm:pt-6">
 
-                        <h3 class="font-anton text-4xl uppercase leading-none sm:text-[44px]">Riwayat Transaksi</h3>
+                        <h3 class="font-anton text-2xl uppercase leading-none min-[380px]:text-3xl sm:text-4xl lg:text-[44px]">Riwayat Transaksi</h3>
 
-                        <span class="font-mono text-[13px] font-bold">{ledger.length} AKTIVITAS</span>
+                        <span class="font-mono text-[10px] font-bold min-[380px]:text-[13px]">{ledger.length} AKTIVITAS</span>
 
                     </div>
 
@@ -406,35 +400,35 @@
 
                     {#each ledger as row}
 
-                        <div class="grid grid-cols-[52px_1fr_auto] items-center gap-4 border-b-2 border-black px-6 py-4 last:border-b-0 sm:px-8">
+                        <div class="flex flex-wrap items-start gap-3 border-b-2 border-black px-4 py-4 last:border-b-0 sm:flex-nowrap sm:gap-4 sm:px-8">
 
-                            <span class="grid h-13 w-13 shrink-0 place-items-center rounded-xl border-[3px] border-black {txnStyles[row.type].badge}">{@render icon(txnStyles[row.type].icon, 'h-6 w-6')}</span>
+                            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl border-[3px] border-black {txnStyles[row.type].badge} sm:h-13 sm:w-13">{@render icon(txnStyles[row.type].icon, 'h-5 w-5 sm:h-6 sm:w-6')}</span>
 
 
 
-                            <div class="min-w-0">
+                            <div class="min-w-0 flex-1">
 
                                 <div class="flex flex-wrap items-center gap-2">
 
-                                    <b class="text-[18px] leading-tight sm:text-[19px]">{row.title}</b>
+                                    <b class="text-[15px] leading-tight sm:text-[18px] lg:text-[19px]">{row.title}</b>
 
-                                    <span class="border-2 border-black {txnStyles[row.type].badge} px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wide">{txnStyles[row.type].label}</span>
+                                    <span class="border-2 border-black {txnStyles[row.type].badge} px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide sm:text-[10px]">{txnStyles[row.type].label}</span>
 
                                 </div>
 
-                                <p class="mt-1 truncate text-[14px] leading-snug text-black/70">{row.type === 'barter' ? `Barter dengan ${row.partner} · ditukar ${row.swapFor}` : `Bersama ${row.partner}`}</p>
+                                <p class="mt-1 truncate text-[12px] leading-snug text-black/70 sm:text-[14px]">{row.type === 'barter' ? `Barter dengan ${row.partner} · ditukar ${row.swapFor}` : `Bersama ${row.partner}`}</p>
 
-                                <p class="mt-0.5 font-mono text-[12px] text-black/45">{row.date}</p>
+                                <p class="mt-0.5 font-mono text-[10px] text-black/45 sm:text-[12px]">{row.date}</p>
 
                             </div>
 
 
 
-                            <div class="flex flex-col items-end gap-2">
+                            <div class="flex w-full shrink-0 flex-row items-center justify-between gap-2 pl-14 sm:w-auto sm:flex-col sm:items-end sm:pl-0">
 
-                                <span class="whitespace-nowrap border-[3px] border-black px-3 py-1 font-mono text-[13px] font-bold {row.delta > 0 ? 'bg-neon-yellow' : row.delta < 0 ? 'bg-laser-pink text-off-white' : 'bg-off-white'}">{row.delta > 0 ? `+${row.delta} credit` : row.delta < 0 ? `${row.delta} credit` : 'Tanpa credit'}</span>
+                                <span class="whitespace-nowrap border-[3px] border-black px-2.5 py-1 font-mono text-[11px] font-bold sm:px-3 sm:text-[13px] {row.delta > 0 ? 'bg-neon-yellow' : row.delta < 0 ? 'bg-laser-pink text-off-white' : 'bg-off-white'}">{row.delta > 0 ? `+${row.delta} credit` : row.delta < 0 ? `${row.delta} credit` : 'Tanpa credit'}</span>
 
-                                <span class="whitespace-nowrap border-2 border-black bg-neon-yellow px-2.5 py-0.5 font-mono text-[11px] font-bold uppercase shadow-[2px_2px_0_#000]">Selesai</span>
+                                <span class="whitespace-nowrap border-2 border-black bg-neon-yellow px-2 py-0.5 font-mono text-[10px] font-bold uppercase shadow-[2px_2px_0_#000] sm:px-2.5 sm:text-[11px]">Selesai</span>
 
                             </div>
 
@@ -466,21 +460,21 @@
                     <div class="mb-5 flex items-center gap-3.5">
                         <span class={iconBox}>{@render icon('star', 'h-8 w-8')}</span>
                     </div>
-                    <h3 class="mb-3 font-anton text-[clamp(2.4rem,4vw,3.5rem)] uppercase leading-[.92]">Rating dan reputasi</h3>
+                    <h3 class="mb-3 font-anton lg:text-[clamp(1.7rem,6.5vw,3rem)] xl:text-[clamp(1.7rem,6.5vw,3.5rem)] uppercase leading-[.92]">Rating dan reputasi</h3>
                     <p class="mb-5 max-w-85 text-lg leading-snug">Setiap sesi dinilai dua arah. Rating dan skor reputasi tampil di profilmu, jadi mudah tahu siapa yang layak dipercaya.</p>
-                    <div class="mt-auto flex items-center gap-1.5" aria-hidden="true">
+                    <div class="mt-auto flex flex-wrap items-center gap-x-1.5 gap-y-2" aria-hidden="true">
                         {#each [1, 2, 3, 4] as s}
-                            {@render icon('star', 'h-8.5 w-8.5 fill-white stroke-[1.8]')}
+                            {@render icon('star', 'h-6 w-6 fill-white stroke-[1.8] min-[380px]:h-8.5 min-[380px]:w-8.5')}
                         {/each}
-                        {@render icon('star', 'h-8.5 w-8.5 fill-off-white stroke-[1.8] opacity-45')}
-                        <span class="ml-2.5 border-[3px] border-black bg-white px-2.5 py-1 font-mono text-sm font-bold shadow-[3px_3px_0_#000]">Reputasi 100</span>
+                        {@render icon('star', 'h-6 w-6 fill-off-white stroke-[1.8] opacity-45 min-[380px]:h-8.5 min-[380px]:w-8.5')}
+                        <span class="ml-1.5 border-[3px] border-black bg-white px-2.5 py-1 font-mono text-xs font-bold shadow-[3px_3px_0_#000] min-[380px]:ml-2.5 min-[380px]:text-sm">Reputasi 100</span>
                     </div>
                 </article>
 
                 <!-- leaderboard -->
                 <article id="leaderboard" class="{box} flex min-h-[440px] scroll-mt-4 flex-col bg-[#2fc7b8] p-7">
                     <div class="mb-5"><span class={iconBox}>{@render icon('trophy', 'h-8 w-8')}</span></div>
-                    <h3 class="mb-3 font-anton text-[clamp(2.4rem,4vw,3.5rem)] uppercase leading-[.92]">Leaderboard dan badge</h3>
+                    <h3 class="mb-3 font-anton lg:text-[clamp(1.7rem,6.5vw,3rem)] xl:text-[clamp(1.7rem,6.5vw,3.5rem)] uppercase leading-[.92]">Leaderboard dan badge</h3>
                     <p class="mb-5 max-w-85 text-lg leading-snug">Makin banyak jam kontribusi, makin tinggi levelmu. Pantau kontributor terbanyak di kampus.</p>
                     <div class="mt-auto flex h-[92px] items-end gap-2.5 font-anton text-[34px] leading-none" aria-hidden="true">
                         <div class="grid h-[66px] flex-1 place-items-start justify-center border-[3px] border-black bg-laser-pink pt-1.5 text-off-white shadow-[4px_4px_0_#000]">2</div>
@@ -492,7 +486,7 @@
                 <!-- two-way confirmation -->
                 <article class="{box} flex min-h-[440px] flex-col bg-laser-pink p-7 text-off-white">
                     <div class="mb-5 text-black"><span class={iconBox}>{@render icon('shield', 'h-8 w-8')}</span></div>
-                    <h3 class="mb-3 font-anton text-[clamp(2.4rem,4vw,3.5rem)] text-black uppercase leading-[.92]">Konfirmasi dua arah</h3>
+                    <h3 class="mb-3 font-anton lg:text-[clamp(1.7rem,6.5vw,3rem)] xl:text-[clamp(1.7rem,6.5vw,3.5rem)] text-black uppercase leading-[.92]">Konfirmasi dua arah</h3>
                     <p class="mb-5 max-w-85 text-lg leading-snug">Kredit tidak berpindah sebelum pengajar dan pelajar sama-sama bilang sesi sudah selesai.</p>
                     <div class="mt-auto flex items-center gap-3" aria-hidden="true">
                         <div class="flex flex-col items-center gap-1.5 font-mono text-xs font-bold">
@@ -510,9 +504,9 @@
                 <!-- campus verification -->
                 <article class="{box} flex min-h-[440px] flex-col bg-neon-yellow p-7">
                     <div class="mb-5"><span class={iconBox}>{@render icon('shield', 'h-8 w-8')}</span></div>
-                    <h3 class="mb-3 font-anton text-[clamp(2.4rem,4vw,3.5rem)] uppercase leading-[.92]">Verifikasi kampus</h3>
+                    <h3 class="mb-3 font-anton lg:text-[clamp(1.7rem,6.5vw,3rem)] xl:text-[clamp(1.7rem,6.5vw,3.5rem)] uppercase leading-[.92]">Verifikasi kampus</h3>
                     <p class="mb-5 max-w-85 text-lg leading-snug">Hanya mahasiswa asli yang bisa masuk. Login lewat Google dengan email kampus.</p>
-                    <div class="mt-auto border-[3px] border-black bg-white px-4 py-3.5 font-mono text-[17px] font-bold shadow-[5px_5px_0_#000] sm:text-[19px]">
+                    <div class="mt-auto border-[3px] border-black bg-white px-4 py-3.5 font-mono text-sm font-bold shadow-[5px_5px_0_#000] [overflow-wrap:anywhere] min-[380px]:text-[17px] sm:text-[19px]">
                         nim<em class="bg-laser-pink px-1 not-italic text-off-white">@mhs.unesa.ac.id</em>
                     </div>
                 </article>
@@ -520,7 +514,7 @@
                 <!-- chat: discussion and scheduling happen on WhatsApp -->
                 <article class="{box} flex min-h-[440px] flex-col bg-electric-cyan p-7">
                     <div class="mb-5"><span class={iconBox}>{@render whatsapp('h-8 w-8 text-[#25d366]')}</span></div>
-                    <h3 class="mb-3 font-anton text-[clamp(2.4rem,4vw,3.5rem)] uppercase leading-[.92]">Chat dan jadwal</h3>
+                    <h3 class="mb-3 font-anton lg:text-[clamp(1.7rem,6.5vw,3rem)] xl:text-[clamp(1.7rem,6.5vw,3.5rem)] uppercase leading-[.92]">Chat dan jadwal</h3>
                     <p class="mb-5 max-w-85 text-lg leading-snug">Diskusi dan sepakati jadwal langsung lewat WhatsApp. Pilih online atau offline di aplikasi chat yang sudah kamu pakai tiap hari.</p>
 
                     <!-- WhatsApp-style conversation -->
@@ -558,7 +552,7 @@
                 <!-- timeline -->
                 <article class="{box} flex min-h-[440px] flex-col bg-[#ffa174] p-7">
                     <div class="mb-5"><span class={iconBox}>{@render icon('people', 'h-8 w-8')}</span></div>
-                    <h3 class="mb-3 font-anton text-[clamp(2.4rem,4vw,3.5rem)] uppercase leading-[.92]">Timeline komunitas</h3>
+                    <h3 class="mb-3 font-anton lg:text-[clamp(1.7rem,6.5vw,3rem)] xl:text-[clamp(1.7rem,6.5vw,3.5rem)] uppercase leading-[.92]">Timeline komunitas</h3>
                     <p class="mb-5 max-w-85 text-lg leading-snug">Bagikan yang sedang kamu pelajari dan temukan teman barter.</p>
                     <div class="mt-auto border-[3px] border-black bg-off-white shadow-[5px_5px_0_#000]" aria-hidden="true">
                         <div class="flex items-center justify-between border-b-[3px] border-black bg-[#2fc7b8] px-2.5 py-1 font-mono text-[11px] font-bold">
@@ -632,13 +626,13 @@
                     <span><b>Budi</b> siap ngajar PHP. 1 kredit, 1 jam.</span>
                 </div>
 
-                <h2 class="relative z-10 mb-8 max-w-250 font-anton text-[clamp(2.6rem,7.2vw,6.5rem)] uppercase leading-[.92] [text-shadow:5px_5px_0_#000]">
+                <h2 class="relative z-10 mb-8 max-w-250 font-anton text-[clamp(1.9rem,9vw,6.5rem)] uppercase leading-[.96] [text-shadow:5px_5px_0_#000]">
                     Satu jam dari kamu,<br />satu jam buat kamu.
                 </h2>
                 <p class="relative z-10 mb-9 max-w-140 text-xl sm:text-[22px]">Masuk dengan email kampus, pasang skill pertamamu, dan rekrut mentor hari ini.</p>
 
                 <div class="relative z-10">
-                    {@render googleBtn('bg-white text-black gap-3.5 py-3.5 pl-4 pr-7 text-lg shadow-[8px_8px_0_#000] sm:pr-8.5 sm:text-[23px]', 'h-9 w-9 bg-neon-yellow sm:h-11 sm:w-11')}
+                    {@render googleBtn('bg-white text-black gap-3.5 py-3.5 pl-4 pr-7 text-lg shadow-[8px_8px_0_#000] sm:pr-8.5 sm:text-[23px]', 'h-9 w-9 bg-neon-yellow sm:h-11 sm:w-11', true)}
                     <p class="mt-6 font-mono text-sm">Khusus mahasiswa UNESA · @mhs.unesa.ac.id</p>
                 </div>
             </div>

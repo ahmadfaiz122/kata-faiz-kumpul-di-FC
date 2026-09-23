@@ -1,6 +1,7 @@
 <script>
     import { editPage } from "../lib/sharedvar.svelte.js";
     import { onMount } from "svelte";
+    import logo from "../assets/logo.webp";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import TimelinePost from "../lib/TimelinePost.svelte";
@@ -132,10 +133,19 @@
 </script>
 
 <main class="min-h-screen bg-[#d8d8d8] px-5 py-6 sm:px-10 lg:px-14">
+<div class="pointer-events-none absolute -right-20 -top-16 h-44 w-44 rounded-full border-2 border-pitch-black bg-laser-pink sm:h-60 sm:w-60 lg:h-72 lg:w-72"></div>
+    <div class="pointer-events-none absolute -left-10 top-40 hidden h-24 w-24 -rotate-12 border-2 border-pitch-black bg-[#ffe477] sm:block sm:h-32 sm:w-32"></div>
+    <div class="pointer-events-none absolute -bottom-16 -left-14 h-40 w-40 rounded-full border-2 border-pitch-black bg-electric-cyan sm:h-52 sm:w-52"></div>
+    <div class="pointer-events-none absolute bottom-32 right-4 hidden h-14 w-14 rotate-6 border-2 border-pitch-black bg-cyber-lime lg:block"></div>
+    
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
+        <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
+        </a>
         <Navbar />
-        <div class="justify-self-end dashboard-enter"><ProfileDropdown /></div>
+        <div class=" justify-self-end dashboard-enter">
+            <ProfileDropdown />
+        </div>
     </header>
 
     <div class="mx-auto mt-14 grid max-w-320 gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">

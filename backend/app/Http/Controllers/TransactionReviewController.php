@@ -6,7 +6,7 @@ use App\Models\Transaction;
 use App\Models\TransactionReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class TransactionReviewController extends Controller
 {
@@ -24,9 +24,20 @@ class TransactionReviewController extends Controller
 
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'reputation' => ['required', Rule::in(['sad', 'flat', 'smile'])],
+            'reputation' => ['required', 'numeric', 'min:1', 'max:100'],
             'comment' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $recentReviewExists = TransactionReview::query()
+            ->where('reviewer', $request->user()->id)
+            ->where('reviewed', $transaction->provider)
+            ->where('created_at', '>=', now()->subDays(7))
+            ->exists();
+        if ($recentReviewExists) {
+            throw ValidationException::withMessages([
+                'review' => 'Rating untuk partner yang sama hanya dapat diberikan sekali dalam 7 hari.',
+            ]);
+        }
 
         $review = DB::transaction(function () use ($request, $transaction, $validated) {
             $review = TransactionReview::create([
@@ -37,9 +48,9 @@ class TransactionReviewController extends Controller
             ]);
 
             $providerProfile = $transaction->providerUser()->firstOrFail()->profile()->firstOrCreate([]);
-            $providerProfile->increment('reputation', 1);
             $providerProfile->update([
                 'rating' => TransactionReview::where('reviewed', $transaction->provider)->avg('rating'),
+                'reputation' => TransactionReview::where('reviewed', $transaction->provider)->avg('reputation'),
             ]);
 
             return $review;

@@ -180,12 +180,17 @@
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
+<div class="pointer-events-none absolute -left-16 -top-20 h-40 w-40 rounded-full border-2 border-pitch-black bg-pale-purple sm:h-56 sm:w-56 lg:h-68 lg:w-68"></div>
+    <div class="pointer-events-none absolute -right-20 top-10 h-48 w-48 rounded-full border-2 border-pitch-black bg-neon-yellow sm:h-64 sm:w-64"></div>
+    <div class="pointer-events-none absolute bottom-6 left-8 hidden h-16 w-16 rotate-12 border-2 border-pitch-black bg-laser-pink sm:block"></div>
+    <div class="pointer-events-none absolute -right-10 bottom-40 hidden h-20 w-20 -rotate-6 border-2 border-pitch-black bg-electric-cyan lg:block"></div>
+
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
-        <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36">
+        <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
             <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
         </a>
         <Navbar />
-        <div class="justify-self-end">
+        <div class=" justify-self-end">
             <ProfileDropdown />
         </div>
     </header>

@@ -4,13 +4,14 @@
     import Index from "../lib/profileComponents/Index.svelte";
     import indexImage1 from "../assets/star.webp";
     import indexImage2 from "../assets/stats.webp";
+    import logo from "../assets/logo.webp";
     import { onMount } from "svelte";
     import { push } from "svelte-spa-router";
 
     /** @type {{ id?: string }} */
     export let params = {};
 
-    let profile = { name: "", email: "", photo: "", city: "" };
+    let profile = { name: "", email: "", photo: "", city: "", rating: 0, reputation: 0 };
     let skillName = "";
     let skillCategory = "";
     let skillDescription = "";
@@ -68,6 +69,8 @@
                 email: data.email ?? "",
                 photo: data.requester_user?.avatar ?? "",
                 city: data.city ?? "",
+                rating: data.requester_user?.profile?.rating ?? 0,
+                reputation: data.requester_user?.profile?.reputation ?? 0,
             };
             skills = data.requester_user?.profile?.skill_records ?? [];
             achievements = data.requester_user?.profile?.achievement_records ?? [];
@@ -156,9 +159,13 @@
     <div class="pointer-events-none absolute -right-11.25 top-0 h-24 w-24 rounded-full border-2 border-pitch-black bg-[#2fc7b8]"></div>
     <div class="relative mx-auto max-w-255">
         <header class="dashboard-enter relative z-30 flex items-center justify-between border-t border-pitch-black pt-5">
-            <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
-            <Navbar />
+            <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
+            <img src={logo} alt="Faiz logo" class="h-full w-full scale-[1.2] object-contain">
+        </a>
+        <Navbar />
+        <div class=" justify-self-end">
             <ProfileDropdown />
+        </div>
         </header>
         <a href="/#/swapp" class="mb-6 mt-12 inline-flex items-center gap-2 font-mono text-xs uppercase transition-transform hover:-translate-x-1">
             <span aria-hidden="true" class="text-lg">&larr;</span>
@@ -237,8 +244,8 @@
                                     {@const accent = accentClasses[i % accentClasses.length]}
                                     {@const yearAccent = yearClasses[i % yearClasses.length]}
                                     {@const levelAccent = LevelClasses[i % LevelClasses.length]}
-                                    {@const issuedYear = achievement.tanggal_terbit
-                                        ? "20" + String(achievement.tanggal_terbit).slice(0, 2)
+                                    {@const issuedDate = achievement.tanggal_terbit
+                                        ? new Intl.DateTimeFormat("id-ID", { month: "short", year: "numeric" }).format(new Date(achievement.tanggal_terbit))
                                         : "----"}
                                     {@const description = achievement.description || "Informasi prestasi belum tersedia. Pastikan bahwa frontend ini terconnect ke backend dengan benar"}
 
@@ -265,7 +272,7 @@
                                                             Nasional
                                                         </span>
                                                         <span class={`shrink-0 self-start border-2 border-pitch-black ${yearAccent} px-3 py-1 font-mono text-[11px] font-bold shadow-[3px_3px_0_#000]`}>
-                                                            {issuedYear}
+                                                            {issuedDate}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -288,9 +295,9 @@
                 </div>
                 
         <div>
-            <div class="grid gap-10 grid-cols-2 justify-center mt-15">
-                <Index photo={indexImage1} index="4.5/5.0" title="Rating" color="neon-yellow" />
-                <Index photo={indexImage2} index="100" title="Reputation" color="laser-pink" />
+            <div class="grid gap-10 sm:grid-cols-2 justify-center mt-15">
+                <Index photo={indexImage1} index={`${Number(profile.rating).toFixed(1)}/5.0`} title="Rating" color="neon-yellow" />
+                <Index photo={indexImage2} index={`${Math.round(Number(profile.reputation))}/100`} title="Reputation" color="laser-pink" />
             </div>
         </div>
     </section>

@@ -32,6 +32,7 @@ class Profile extends Model
             'achievements' => 'array',
             'social_media' => 'array',
             'rating' => 'decimal:2',
+            'reputation' => 'decimal:2',
         ];
     }
 
