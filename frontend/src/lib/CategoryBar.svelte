@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher } from 'svelte';
+    import { onMount } from 'svelte';
     import { slide } from 'svelte/transition';
     import businessIcon from '../assets/category/business.svg';
     import educationIcon from '../assets/category/edu.svg';
@@ -29,44 +30,35 @@
         if (event.key === 'Escape') closeMenu();
     }
 
-    const categories = [
-        {
-            name: 'Education',
-            color: 'bg-[#ffa174]',
-            icon: educationIcon,
-            complement: '#00d9ff'
-        },
-        {
-            name: 'Technology',
-            color: 'bg-laser-pink',
-            icon: technologyIcon,
-            complement: '#00d9ff'
-        },
-        {
-            name: 'Business',
-            color: 'bg-[#9b82e6]',
-            icon: businessIcon,
-            complement: '#ccff00'
-        },
-        {
-            name: 'Language',
-            color: 'bg-[#40b8d0]',
-            icon: languageIcon,
-            complement: '#ff006e'
-        },
-        {
-            name: 'Art',
-            color: 'bg-[#ffe477]',
-            icon: artIcon,
-            complement: '#ff006e'
-        },
-        {
-            name: 'Writing',
-            color: 'bg-[#ffa174]',
-            icon: writingIcon,
-            complement: '#00d9ff'
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const categoryStyles = {
+        education: { color: 'bg-[#ffa174]', icon: educationIcon, complement: '#00d9ff' },
+        technology: { color: 'bg-laser-pink', icon: technologyIcon, complement: '#00d9ff' },
+        business: { color: 'bg-[#9b82e6]', icon: businessIcon, complement: '#ccff00' },
+        language: { color: 'bg-[#40b8d0]', icon: languageIcon, complement: '#ff006e' },
+        art: { color: 'bg-[#ffe477]', icon: artIcon, complement: '#ff006e' },
+        writing: { color: 'bg-[#ffa174]', icon: writingIcon, complement: '#00d9ff' }
+    };
+    const fallbackCategoryNames = ['Education', 'Technology', 'Business', 'Language', 'Art', 'Writing'].map((name, index) => ({ id: index + 1, name, slug: name.toLowerCase() }));
+    let categories = fallbackCategoryNames.map(categoryView);
+
+    function categoryView(category) {
+        const name = typeof category === 'string' ? category : category.name;
+        const key = name.toLowerCase();
+        return { ...category, name, ...(categoryStyles[key] ?? { color: 'bg-neon-yellow', icon: technologyIcon, complement: '#00d9ff' }) };
+    }
+
+    onMount(async () => {
+        try {
+            const response = await fetch(`${backendUrl}/api/proposals/categories`);
+            if (!response.ok) return;
+            const result = await response.json();
+            const serverCategories = (result.data ?? []).filter(Boolean).map(categoryView);
+            if (serverCategories.length > 0) categories = serverCategories;
+        } catch {
+            // Keep the default categories visible when the API is unavailable.
         }
-    ];
+    });
 
 </script>
 

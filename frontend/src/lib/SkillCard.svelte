@@ -8,11 +8,35 @@
   export let category = "Design";
   export let credits = "2 kredit";
   export let ctaLabel = "Rekrut";
+  export let rating = 0;
+  export let reputation = 0;
 
   /** @param {string} name */
   function firstName(name) {
     return name?.trim().split(/\s+/)[0] || "Anonymous";
   }
+
+  /** @param {string} text */
+  function textSizeClass(text) {
+    const length = text?.length || 0;
+    return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
+  }
+
+ /** @param {string} text */
+ function skillFontSize(text) {
+  const length = text?.length || 0;
+  const maxSize = 40;
+  const minSize = 15;
+  const startShrinkAt = 3;   // chars before shrinking kicks in
+  const fullyShrunkAt = 14;  // chars at which minSize is reached
+
+  if (length <= startShrinkAt) return maxSize;
+  if (length >= fullyShrunkAt) return minSize;
+
+  const ratio = (length - startShrinkAt) / (fullyShrunkAt - startShrinkAt);
+  return Math.round(maxSize - ratio * (maxSize - minSize));
+}
+
 
   /** @param {unknown} value */
   function formatCredits(value) {
@@ -147,18 +171,19 @@
     <!-- DIVIDER -->
     <div class="divider" aria-hidden="true"></div>
 
-    <!-- RIGHT SIDE -->
-    <div class="right">
-      <div class="box box-yellow">
-        <div class="box-yellow-row">
-          <span class="label-sm">Master</span>
-          <svg viewBox="0 0 24 24" class="mini-arrow" fill="none" aria-hidden="true">
-            <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.2" stroke-linecap="round" />
-            <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </div>
-        <span class="fit label-lg" title={firstName(mentorName)} use:fit={{ text: firstName(mentorName), min: 10 }}>{firstName(mentorName)}</span>
+  <!-- RIGHT SIDE -->
+  <div class="right">
+    <div class="box box-yellow">
+      <div class="box-yellow-row">
+        <span class="label-sm">Master</span>
+        <svg viewBox="0 0 24 24" class="mini-arrow" fill="none">
+          <line x1="5" y1="19" x2="19" y2="5" stroke="black" stroke-width="2.2" stroke-linecap="round" />
+          <polyline points="8,5 19,5 19,16" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
       </div>
+      <span class="label-lg {textSizeClass(firstName(mentorName))}" title={firstName(mentorName)}>{firstName(mentorName)}</span>
+      <span class="label-meta">Rating {Number(rating).toFixed(1)} · Reputasi {Math.round(Number(reputation))}/100</span>
+    </div>
 
       <div class="box box-white">
         <div class="icon-tile icon-purple" aria-hidden="true">
@@ -219,8 +244,9 @@
     flex-direction: column;
     gap: 14px;
     width: 100%;
-    height: 100%;
-    padding: 16px 16px 22px;
+    max-width: none;
+    min-height: 245px;
+    height: auto;
     background: #EDEAE2;
     border: 3px solid #0A0A0A;
     border-radius: 26px;
@@ -277,6 +303,13 @@
     z-index: 20;
   }
 
+  .banner-stack {
+    position: absolute;
+    top: 26px;
+    left: 24px;
+    width: 220px;
+  }
+
   .banner {
     position: relative;
     display: flex;
@@ -294,7 +327,7 @@
   .duration-text {
     transform: skewX(9deg);
     color: #F3EFE6;
-    font-size: 42px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 1px;
@@ -323,14 +356,14 @@
   .banner-teal {
     background: #3FD6C4;
     transform: skewX(-9deg) rotate(-1deg);
-    padding: clamp(10px, 5.5cqw, 16px) clamp(16px, 8.5cqw, 26px);
+    padding: 13px 20px;
     margin-top: -6px;
     z-index: 10;
   }
   .name-text {
     transform: skewX(9deg);
     color: #0A0A0A;
-    font-size: 40px;
+    font-size: 31px;
     font-weight: 700;
     line-height: 1;
     text-shadow: 3px 3px 0 rgba(10, 10, 10, 0.25);
@@ -424,12 +457,19 @@
     letter-spacing: 0.3px;
   }
   .label-lg {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 700;
     color: #0A0A0A;
     line-height: 1.15;
   }
-  .credit-value { font-size: 13px; }
+
+  .label-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: 9px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
 
   .box-cta {
     display: flex;
@@ -474,6 +514,45 @@
     .box-cta { transition: none; }
   }
 
+  /* Keep the original horizontal card composition on desktop/tablet. */
+  @media (min-width: 641px) {
+    .card {
+      flex-direction: row;
+      gap: 0;
+      min-height: 281px;
+      padding: 18px 16px 26px;
+    }
+
+    .left {
+      flex: 1 1 auto;
+      min-height: 185px;
+    }
+
+    .divider {
+      width: 2px;
+      height: auto;
+      margin: 4px 18px;
+    }
+
+    .right {
+      flex: 0 0 205px;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto minmax(48px, 1fr) auto auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .card {
+      flex-direction: column;
+    }
+
+    .divider {
+      width: auto;
+      height: 2px;
+      margin: 10px 0 14px;
+    }
+  }
+
   @container skillcard (min-width: 380px) and (max-width: 519.98px) {
     .right {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -489,7 +568,12 @@
     }
 
     .left {
-      flex: 1 1 0;
+      min-height: 185px;
+    }
+
+    .banner-stack {
+      transform: scale(0.82);
+      transform-origin: top left;
     }
 
     .divider {
@@ -503,4 +587,24 @@
       grid-template-rows: auto minmax(48px, 1fr) auto auto;
     }
   }
+
+  @media (max-width: 380px) {
+    .card {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .banner-stack {
+      transform: scale(0.7);
+    }
+
+    .left {
+      min-height: 188px;
+    }
+
+    .bottom-actions {
+      grid-template-columns: 1fr;
+    }
+  }
+
 </style>

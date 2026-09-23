@@ -3,6 +3,7 @@
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import logo from "../assets/logo.webp";
+    import { alertError, alertSuccess } from "../lib/alerts.js";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let receivedMessages = $state([]);
@@ -88,12 +89,14 @@
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
             error = result.message || "Review gagal dikirim.";
+            await alertError("Review gagal dikirim", error);
             return;
         }
         reviewTransactionId = null;
         reviewRating = 0;
         reviewReputation = "";
         reviewComment = "";
+        await alertSuccess("Review tersimpan", "Rating dan reputasi provider telah diperbarui.");
         await loadTransactions();
     }
 
@@ -223,7 +226,7 @@
                                 {#if reviewTransactionId === message.id}
                                     <div class="mt-3 grid gap-2 border-t-2 border-pitch-black pt-3">
                                         <label class="font-mono text-xs">Rating (1-5)<input bind:value={reviewRating} type="number" min="1" max="5" class="border-2 border-pitch-black px-2 py-1" /></label>
-                                        <label class="font-mono text-xs">Reputation<select bind:value={reviewReputation} class="border-2 border-pitch-black px-2 py-1"><option value="">Pilih</option><option value="sad">Sedih</option><option value="flat">Flat</option><option value="smile">Senyum</option></select></label>
+                                        <label class="font-mono text-xs">Reputasi (1-100)<input bind:value={reviewReputation} type="number" min="1" max="100" class="border-2 border-pitch-black px-2 py-1" /></label>
                                         <textarea bind:value={reviewComment} placeholder="Komentar (opsional)" class="border-2 border-pitch-black px-2 py-1 font-mono text-xs"></textarea>
                                         <button type="button" onclick={() => submitReview(message)} class="border-2 border-pitch-black bg-cyber-lime px-3 py-2 font-mono text-xs font-bold">Kirim review</button>
                                     </div>

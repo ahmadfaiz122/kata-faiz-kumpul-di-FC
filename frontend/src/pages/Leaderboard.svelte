@@ -3,19 +3,33 @@
     import logo from "../assets/logo.webp";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
+    import { onMount } from "svelte";
 
     editPage("Leaderboard");
-    const podium = [
-        { name: "Kastama", score: "4.9/5", reputation: "80/100", transactions: 10, color: "bg-laser-pink", height: "h-65", order: "order-1", rank: "bg-gray-700" },
-        { name: "Kastama", score: "4.9/5", reputation: "80/100", transactions: 10, color: "bg-neon-yellow", height: "h-80", order: "order-2", rank: "bg-yellow-700" },
-        { name: "Kastama", score: "4.9/5", reputation: "80/100", transactions: 10, color: "bg-electric-cyan", height: "h-58", order: "order-3", rank: "bg-cyan-700" }
-    ];
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    let users = $state([]);
+    let loading = $state(true);
+    let error = $state("");
 
-    const users = [
-        { name: "ReinZal Kinas Pratama", score: "4.9/5 Rating  |  80/100 Reputation  |  10 Transaction", color: "bg-neon-yellow" },
-        { name: "Ibna Clevaro Syarif", score: "4.8/5 Rating  |  76/100 Reputation  |  8 Transaction", color: "bg-laser-pink" },
-        { name: "Alya Putri", score: "4.7/5 Rating  |  72/100 Reputation  |  7 Transaction", color: "bg-electric-cyan" }
-    ];
+    onMount(async () => {
+        try {
+            const response = await fetch(`${backendUrl}/api/leaderboard`, { headers: { Accept: "application/json" } });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || "Leaderboard gagal dimuat.");
+            users = result.data || [];
+        } catch (requestError) {
+            error = requestError instanceof Error ? requestError.message : "Leaderboard gagal dimuat.";
+        } finally {
+            loading = false;
+        }
+    });
+
+    let podium = $derived(users.slice(0, 3).map((person, index) => ({
+        ...person,
+        order: index === 0 ? "order-2" : index === 1 ? "order-1" : "order-3",
+        height: index === 0 ? "h-80" : index === 1 ? "h-65" : "h-58",
+        color: index === 0 ? "bg-neon-yellow" : index === 1 ? "bg-laser-pink" : "bg-electric-cyan",
+    })));
 </script>
 
 <main class="min-h-screen overflow-hidden bg-[#ffa174] px-5 py-6 sm:px-10 lg:px-14">
@@ -31,8 +45,15 @@
 
     <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 max-w-320 text-center">
         <h1 class="font-mono text-4xl font-bold tracking-[0.16em] sm:text-5xl">LEADERBOARDS</h1>
-        <p class="font-mono text-lg tracking-[0.2em] sm:text-xl">(by Rating)</p>
+        <p class="font-mono text-lg tracking-[0.2em] sm:text-xl">(Composite Score)</p>
 
+        {#if loading}
+            <p class="mt-10 font-mono text-sm">Memuat leaderboard...</p>
+        {:else if error}
+            <p class="mt-10 font-mono text-sm text-laser-pink">{error}</p>
+        {:else if users.length === 0}
+            <p class="mt-10 font-mono text-sm">Belum ada user dengan minimal 3 transaksi selesai.</p>
+        {/if}
         <div class="mx-auto mt-5 flex max-w-175 items-end justify-center gap-2 sm:gap-4">
             {#each podium as person}
                 <div class="{person.order} flex w-1/3 max-w-44 flex-col items-center">
@@ -60,7 +81,7 @@
         </div>
                     {/if}
                         <div class="font-mono text-center font-bold">
-                            <p class="text-base sm:text-2xl">{person.reputation}</p>
+                            <p class="text-base sm:text-2xl">{Math.round(person.reputation)}/100</p>
                             <p class="text-[10px] sm:text-sm">Reputation</p>
                             <p class="mt-4 text-base sm:text-2xl">{person.transactions}</p>
                             <p class="text-[10px] sm:text-sm">Transaction</p>
@@ -72,13 +93,16 @@
     </section>
 
     <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-320 space-y-7 pb-10">
-        {#each users as user, index}
-            <article class="flex min-h-24 items-center gap-4 border-2 border-pitch-black px-5 py-4 shadow-[7px_7px_0_#000] {user.color} sm:gap-6 sm:px-10">
-                <span class="font-mono text-2xl font-bold sm:block">0{index + 4}</span>
-                <div class="h-16 w-16 shrink-0 border-2 border-pitch-black bg-off-white shadow-[4px_4px_0_#000] sm:h-20 sm:w-20"></div>
+        {#each users.slice(3) as user, index}
+            {@const rowColor = index % 3 === 0 ? "bg-neon-yellow" : index % 3 === 1 ? "bg-laser-pink" : "bg-electric-cyan"}
+            <article class="flex min-h-24 items-center gap-4 border-2 border-pitch-black px-5 py-4 shadow-[7px_7px_0_#000] {rowColor} sm:gap-6 sm:px-10">
+                <span class="font-mono text-2xl font-bold sm:block">{String(index + 4).padStart(2, "0")}</span>
+                <div class="h-16 w-16 shrink-0 overflow-hidden border-2 border-pitch-black bg-off-white shadow-[4px_4px_0_#000] sm:h-20 sm:w-20">
+                    {#if user.avatar}<img src={user.avatar} alt={user.name} class="h-full w-full object-cover" />{/if}
+                </div>
                 <div class="min-w-0 flex-1 font-mono">
                     <h2 class="truncate text-sm font-bold tracking-widest sm:text-lg">{user.name}</h2>
-                    <div class="mt-1 border-t-2 border-pitch-black pt-2 text-[10px] font-bold sm:text-sm">★{user.score}</div>
+                    <div class="mt-1 border-t-2 border-pitch-black pt-2 text-[10px] font-bold sm:text-sm">Score {user.score} · Rating {user.rating}/5 · Reputasi {Math.round(user.reputation)}/100 · {user.transactions} transaksi</div>
                 </div>
             </article>
         {/each}

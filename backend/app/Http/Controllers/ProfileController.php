@@ -23,7 +23,6 @@ class ProfileController extends Controller
             'alias' => ['sometimes', 'nullable', 'string', 'max:100'],
             'bio' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
-            'nim' => ['sometimes', 'nullable', 'string', 'max:50'],
             'linkedin' => ['sometimes', 'nullable', 'url', 'max:255'],
             'github' => ['sometimes', 'nullable', 'url', 'max:255'],
             'instagram' => ['sometimes', 'nullable', 'url', 'max:255'],
@@ -46,10 +45,12 @@ class ProfileController extends Controller
         $user->fill(array_intersect_key($validated, array_flip(['name', 'email', 'avatar'])));
         $user->save();
 
-        $profile = $user->profile()->updateOrCreate([], array_intersect_key(
+        $profilePayload = array_intersect_key(
             $validated,
-            array_flip(['username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'skills', 'achievements'])
-        ));
+            array_flip(['username', 'alias', 'bio', 'linkedin', 'github', 'instagram', 'skills', 'achievements'])
+        );
+        $profilePayload['nim'] = $this->nimFromEmail($user->email);
+        $profile = $user->profile()->updateOrCreate([], $profilePayload);
 
         if (array_key_exists('skills', $validated)) {
             $profile->skillRecords()->delete();
@@ -72,21 +73,37 @@ class ProfileController extends Controller
 
     protected function profileFor(Request $request, ?Profile $profile = null): array
     {
-        $user = $request->user()->loadMissing('profile.skillRecords', 'profile.achievementRecords');
-        $profile ??= $user->profile;
+        $user = $request->user()->only(['id', 'name', 'email', 'avatar', 'google_id']);
+        $profile ??= $request->user()->profile()
+            ->select(['id', 'user_id', 'username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'rating', 'reputation', 'leaderboard', 'credits'])
+            ->with([
+                'skillRecords:id,profile_id,category_id,name,category_skills,description,material_path,status',
+                'achievementRecords:id,profile_id,name,levels,category,description,validated_upload,certificate_path,tanggal_terbit,kadaluwarsa',
+            ])
+            ->first();
 
         if ($profile) {
+            $profile->setAttribute('nim', $this->nimFromEmail($user['email']));
             $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
             $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
         }
 
         return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'avatar' => $user->avatar,
-            'google_id' => $user->google_id,
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'email' => $user['email'],
+            'avatar' => $user['avatar'],
+            'google_id' => $user['google_id'],
             'profile' => $profile,
         ];
+    }
+
+    private function nimFromEmail(?string $email): ?string
+    {
+        if (! $email) return null;
+
+        return preg_match('/^([0-9]+)@mhs\.unesa\.ac\.id$/i', trim($email), $matches)
+            ? $matches[1]
+            : null;
     }
 }

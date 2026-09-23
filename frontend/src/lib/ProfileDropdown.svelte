@@ -1,3 +1,29 @@
+<script context="module">
+    let cachedToken = null;
+    let cachedUser = null;
+    let userRequest = null;
+
+    async function loadUser(token, backendUrl) {
+        if (cachedToken === token && cachedUser) return cachedUser;
+        if (cachedToken === token && userRequest) return userRequest;
+
+        cachedToken = token;
+        userRequest = fetch(`${backendUrl}/api/user`, {
+            headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        })
+            .then((response) => response.ok ? response.json() : null)
+            .then((data) => {
+                cachedUser = data;
+                return data;
+            })
+            .finally(() => {
+                userRequest = null;
+            });
+
+        return userRequest;
+    }
+</script>
+
 <script>
     import { onMount } from "svelte";
 
@@ -12,14 +38,7 @@
         const token = localStorage.getItem("auth_token");
         if (!token) return;
 
-        const response = await fetch(`${backendUrl}/api/user`, {
-            headers: {
-                Accept: "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        if (response.ok) user = await response.json();
+        user = await loadUser(token, backendUrl);
     });
 </script>
 
@@ -40,10 +59,44 @@
         </svg>
         <span class="font-mono text-xs font-bold sm:text-sm md:text-base">{user.profile?.credits ?? 0}</span>
     </div>
- 
-    <a href="/#/profile" aria-label="Edit profile" title="Edit profile" class="flex min-w-0 shrink-0 items-center gap-1.5 rounded-full border-2 border-black bg-electric-cyan px-2 py-1.5 shadow-[3px_3px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black md:gap-4 md:px-6 md:py-3 sm:shadow-[6px_6px_0_#000]">
-        <img src={user.avatar} alt={user.name} class="h-7 w-7 shrink-0 rounded-full border-2 border-black object-cover md:h-10 md:w-10">
-        <span class="hidden max-w-24 truncate font-mono text-sm font-bold lg:inline-block md:max-w-none md:text-xs lg:text-xl md:font-normal">{firstName(user.name)}</span>
+
+    <a href="/#/profile" aria-label="Buka profile" title="Buka profile" class="flex items-center gap-2 rounded-full border-2 border-black bg-electric-cyan px-3 py-2 shadow-[6px_6px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black sm:gap-4 sm:px-6 sm:py-3">
+        <img src={user.avatar} alt={user.name} class="h-10 w-10 rounded-full border-2 border-black object-cover">
+        <span class="font-mono text-sm font-bold md:text-xl md:font-normal">{firstName(user.name)}</span>
     </a>
 </div>
+{:else}
+<a href="/#/login" class="button-lift border-2 border-black bg-laser-pink px-5 py-3 font-mono text-sm font-bold text-black shadow-[5px_5px_0_#000] transition-transform hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black">Login</a>
 {/if}
+
+<style>
+    @media (max-width: 767px) {
+        .profile-actions {
+            gap: 0.25rem;
+            max-width: 100%;
+        }
+
+        .profile-message,
+        .profile-credit,
+        .profile-user {
+            height: 2.75rem;
+            width: 2.75rem;
+        }
+
+        .profile-credit,
+        .profile-user {
+            justify-content: center;
+            padding: 0;
+        }
+
+        .profile-credit svg,
+        .profile-user span {
+            display: none;
+        }
+
+        .profile-user img {
+            height: 2.15rem;
+            width: 2.15rem;
+        }
+    }
+</style>
