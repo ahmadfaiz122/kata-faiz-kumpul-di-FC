@@ -514,6 +514,45 @@
     .box-cta { transition: none; }
   }
 
+  /* Keep the original horizontal card composition on desktop/tablet. */
+  @media (min-width: 641px) {
+    .card {
+      flex-direction: row;
+      gap: 0;
+      min-height: 281px;
+      padding: 18px 16px 26px;
+    }
+
+    .left {
+      flex: 1 1 auto;
+      min-height: 185px;
+    }
+
+    .divider {
+      width: 2px;
+      height: auto;
+      margin: 4px 18px;
+    }
+
+    .right {
+      flex: 0 0 205px;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto minmax(48px, 1fr) auto auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .card {
+      flex-direction: column;
+    }
+
+    .divider {
+      width: auto;
+      height: 2px;
+      margin: 10px 0 14px;
+    }
+  }
+
   @container skillcard (min-width: 380px) and (max-width: 519.98px) {
     .right {
       grid-template-columns: repeat(2, minmax(0, 1fr));

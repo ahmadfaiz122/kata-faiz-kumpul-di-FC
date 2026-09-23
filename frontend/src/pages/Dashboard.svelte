@@ -18,6 +18,8 @@
     let skillOffers = $state([]);
     let selectedCategory = $state("");
     let activeFilters = $state([]);
+    let proposalsLoading = $state(true);
+    let proposalsError = $state("");
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
     async function submitSearch() {
@@ -66,25 +68,33 @@
     let visibleOffers = $derived(skillOffers);
 
     async function loadProposals() {
+        proposalsLoading = true;
+        proposalsError = "";
         const params = new URLSearchParams();
         if (searchQuery) params.set("search", searchQuery);
         if (selectedCategory) params.set("category", selectedCategory);
         for (const filter of activeFilters) params.set(`${filter.key}_min`, filter.low), params.set(`${filter.key}_max`, filter.high);
 
-        const response = await fetch(`${backendUrl}/api/proposals?${params}` , { headers: { Accept: "application/json" } });
-        if (!response.ok) return;
-        const result = await response.json();
-        skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
-            id: proposal.id,
-            duration: `${proposal.hour ?? 1} HOUR`,
-            mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
-            instructor: proposal.skill_name,
-            category: proposal.skill_category,
-            credits: `${proposal.hour ?? 1} kredit`,
-            rating: proposal.requester_user?.profile?.rating ?? 0,
-            reputation: proposal.requester_user?.profile?.reputation ?? 0,
-            university: proposal.city || "Community learner",
-        }));
+        try {
+            const response = await fetch(`${backendUrl}/api/proposals?${params}`, { headers: { Accept: "application/json" } });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || "Post Swapp gagal dimuat.");
+            skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
+                id: proposal.id,
+                duration: `${proposal.hour ?? 1} HOUR`,
+                mentorName: proposal.requester_user?.name ?? proposal.full_name ?? "Anonymous",
+                instructor: proposal.skill_name,
+                category: proposal.skill_category,
+                credits: `${proposal.hour ?? 1} kredit`,
+                rating: proposal.requester_user?.profile?.rating ?? 0,
+                reputation: proposal.requester_user?.profile?.reputation ?? 0,
+                university: proposal.city || "Community learner",
+            }));
+        } catch (requestError) {
+            proposalsError = requestError instanceof Error ? requestError.message : "Post Swapp gagal dimuat.";
+        } finally {
+            proposalsLoading = false;
+        }
     }
 
     async function selectCategory(event) {
