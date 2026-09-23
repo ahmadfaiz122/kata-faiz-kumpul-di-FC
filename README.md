@@ -155,14 +155,4 @@ All endpoints are prefixed with `/api` and (for endpoints that require login) ar
 | Transactions & Credits | `GET/POST /api/transactions`, `POST /api/transactions/{id}/approve`, `GET /api/credits/ledger` |
 | Leaderboard | `GET /api/leaderboard` |
 
-## Security
 
-- Email domain validation is performed on the server (`GoogleAuthController`), not only via the `hd` parameter on the Google redirect.
-- The Sanctum token is sent as `Authorization: Bearer <token>`; `supports_credentials` in CORS is set to `false` since cookie-based auth is not used.
-- All `/api` routes are protected by the `throttle:60,1` rate limit, with upload/review endpoints (`/skills`, `/achievements`, `/transactions/{id}/review`) additionally limited to `throttle:10,1`.
-
-## Known Issues
-
-- `POST /api/transactions/{transaction}/reject` and `POST /api/transactions/{transaction}/cancel` already exist in `TransactionController` and are already called by `Messages.svelte`, but are not yet registered in `routes/api.php` — the reject/cancel buttons in the UI will 404 until these routes are added.
-- `Transaksi.svelte` and the weekly leaderboard widget in `Timeline.svelte` still use static/mock data and are not yet connected to the relevant backend endpoints.
-- `CategoryBar1.svelte` is an old version of `CategoryBar.svelte` that is no longer used by any route but is still present in the repo.
