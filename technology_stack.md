@@ -1,4 +1,4 @@
-# Technology Stack — SkillSwapp
+# Technology Stack — LetSo
 
 This document summarizes **all the technologies and frameworks** used in this repository. This repository consists of two separate applications (frontend and backend) that communicate via a REST API.
 
