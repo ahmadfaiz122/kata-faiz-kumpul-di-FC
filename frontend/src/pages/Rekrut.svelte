@@ -173,13 +173,13 @@
     <p class="font-mono text-sm text-laser-pink">{error}</p>
 {:else}
 <h1 class="font-mono text-xl font-bold sm:text-2xl">Informasi Pengajar</h1>
-<div class="mt-6 grid gap-7 sm:grid-cols-[120px_1fr]">
+<div class="flex flex-row items-start gap-4 sm:gap-7 mt-7">
     <div class="flex flex-col items-center gap-3">
         <div class="flex h-28 w-28 items-center justify-center border-2 border-pitch-black bg-off-white shadow-[5px_5px_0_#000]">
         {#if profile.photo}<img src={profile.photo} alt="Profile preview" class="h-full w-full object-cover" />{/if}
         </div>
    </div>
-   <div class="ml-5 sm:ml-7">
+   <div class="ml-2 sm:ml-7">
         <h1 class="max-w-140 font-anton leading-none md:text-5xl text-2xl">{profile.name}</h1>
         <div class="mt-3 flex flex-wrap items-center gap-3 font-archivo text-xs sm:text-sm">
             <p>{profile.email}</p>

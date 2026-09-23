@@ -61,4 +61,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Profile::class);
     }
+
+    public function creditLedger()
+    {
+        return $this->hasMany(CreditLedger::class);
+    }
 }

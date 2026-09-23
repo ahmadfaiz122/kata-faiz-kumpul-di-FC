@@ -18,6 +18,9 @@ class TransactionReviewController extends Controller
         if ($transaction->status !== 'completed') {
             return response()->json(['message' => 'Review tersedia setelah sesi satu jam selesai.'], 422);
         }
+        if ($transaction->review()->exists()) {
+            return response()->json(['message' => 'Review untuk transaksi ini sudah dikirim.'], 422);
+        }
 
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:5'],

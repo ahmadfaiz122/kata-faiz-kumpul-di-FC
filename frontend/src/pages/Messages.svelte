@@ -14,6 +14,7 @@
     let reviewRating = $state(0);
     let reviewReputation = $state("");
     let reviewComment = $state("");
+    let creditLedger = $state([]);
 
     function messageFor(transaction, direction) {
         const otherUser = direction === "received" ? transaction.requester : transaction.provider;
@@ -23,8 +24,8 @@
             name: otherUser?.name || "Pengguna Swapp",
             subject: transaction.mode === "credit" ? "Permintaan belajar dengan credit" : "Permintaan barter skill",
             preview: direction === "received"
-                ? `${transaction.requester_skill?.name || "Requester"} mengajukan transaksi.`
-                : transaction.status === "active" ? "Provider sudah menyetujui transaksi." : "Menunggu persetujuan provider.",
+                ? transaction.status === "pending" ? `${transaction.requester_skill?.name || "Requester"} mengajukan transaksi.` : `Status transaksi: ${transaction.status}.`
+                : transaction.status === "active" ? "Provider sudah menyetujui transaksi." : `Status transaksi: ${transaction.status}.`,
             time: transaction.starts_at ? new Date(transaction.starts_at).toLocaleString("id-ID") : "Terjadwal",
             unread: transaction.status === "pending",
             color: direction === "received" ? "bg-electric-cyan" : "bg-laser-pink",
@@ -32,12 +33,17 @@
     }
 
     async function loadTransactions() {
-        const response = await fetch(`${backendUrl}/api/transactions`, {
-            headers: { Accept: "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token")}` },
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.message || "Transaksi gagal dimuat.");
+        const headers = { Accept: "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token")}` };
+        const [transactionsResponse, ledgerResponse] = await Promise.all([
+            fetch(`${backendUrl}/api/transactions`, { headers }),
+            fetch(`${backendUrl}/api/credits/ledger`, { headers }),
+        ]);
+        const result = await transactionsResponse.json().catch(() => ({}));
+        const ledgerResult = await ledgerResponse.json().catch(() => ({}));
+        if (!transactionsResponse.ok) throw new Error(result.message || "Transaksi gagal dimuat.");
+        if (!ledgerResponse.ok) throw new Error(ledgerResult.message || "Riwayat credit gagal dimuat.");
         const transactions = result.data || [];
+        creditLedger = ledgerResult.data?.data || [];
         receivedMessages = transactions.filter((item) => item.is_provider).map((item) => messageFor(item, "received"));
         sentMessages = transactions.filter((item) => !item.is_provider).map((item) => messageFor(item, "sent"));
     }
@@ -51,6 +57,20 @@
         const result = await response.json().catch(() => ({}));
         if (!response.ok) {
             error = result.message || "Transaksi gagal disetujui.";
+            return;
+        }
+        await loadTransactions();
+    }
+
+    async function updateTransaction(message, action) {
+        error = "";
+        const response = await fetch(`${backendUrl}/api/transactions/${message.id}/${action}`, {
+            method: "POST",
+            headers: { Accept: "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token")}` },
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            error = result.message || "Status transaksi gagal diperbarui.";
             return;
         }
         await loadTransactions();
@@ -124,15 +144,19 @@
             <h1 class="font-anton text-5xl uppercase leading-none sm:text-6xl">Messages</h1>
             <p class="mt-4 max-w-2xl text-base leading-relaxed sm:text-lg">Percakapan seputar skill, barter, dan sesi belajar kamu.</p>
         </div>
+        {#if error}
+            <p role="alert" class="mb-6 border-2 border-pitch-black bg-[#ffd6df] px-4 py-3 font-mono text-xs">{error}</p>
+        {/if}
 
         <div class="grid gap-10 lg:grid-cols-2">
             <section aria-labelledby="received-title">
                 <div class="mb-4 flex items-center justify-between border-b-3 border-pitch-black pb-3">
                     <h2 id="received-title" class="font-mono text-xl font-bold uppercase sm:text-2xl">Received</h2>
-                    <span class="bg-laser-pink px-2 py-1 font-mono text-[10px] font-bold uppercase">1 unread</span>
+                    <span class="bg-laser-pink px-2 py-1 font-mono text-[10px] font-bold uppercase">{receivedMessages.filter((message) => message.unread).length} unread</span>
                 </div>
                 {#if loading}<p class="font-mono text-sm">Memuat transaksi...</p>{/if}
                 <div class="grid gap-4">
+                    {#if !loading && receivedMessages.length === 0}<p class="border-2 border-pitch-black bg-off-white p-4 font-mono text-xs">Belum ada request masuk.</p>{/if}
                     {#each receivedMessages as message}
                         <div class="message-card {message.color} text-left">
                             <div class="flex items-start gap-3">
@@ -149,11 +173,14 @@
                             </div>
                             {#if message.transaction.status === "pending"}
                                 <button type="button" onclick={() => approveTransaction(message)} class="mt-4 border-2 border-pitch-black bg-cyber-lime px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Approve transaksi</button>
+                                <button type="button" onclick={() => updateTransaction(message, "reject")} class="ml-2 mt-4 border-2 border-pitch-black bg-pale-red px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Tolak</button>
                             {:else if message.transaction.status === "active"}
                                 <a href={message.transaction.whatsapp_url || "#"} target="_blank" rel="noreferrer" class="mt-4 inline-block border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Buka WhatsApp</a>
                                 {#each message.transaction.materials || [] as material}
                                     <button type="button" onclick={() => downloadMaterial(material)} class="ml-2 mt-4 inline-block border-2 border-pitch-black bg-electric-cyan px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Materi: {material.name}</button>
                                 {/each}
+                            {:else if message.transaction.status === "rejected" || message.transaction.status === "cancelled" || message.transaction.status === "expired"}
+                                <span class="mt-4 inline-block border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-xs font-bold uppercase">{message.transaction.status}</span>
                             {/if}
                         </div>
                     {/each}
@@ -166,6 +193,7 @@
                     <span class="font-mono text-[10px] font-bold uppercase">{sentMessages.length} messages</span>
                 </div>
                 <div class="grid gap-4">
+                    {#if !loading && sentMessages.length === 0}<p class="border-2 border-pitch-black bg-off-white p-4 font-mono text-xs">Belum ada transaksi yang kamu ajukan.</p>{/if}
                     {#each sentMessages as message}
                         <div class="message-card {message.color} text-left">
                             <div class="flex items-start gap-3">
@@ -185,6 +213,10 @@
                                     <button type="button" onclick={() => downloadMaterial(material)} class="ml-2 mt-4 inline-block border-2 border-pitch-black bg-electric-cyan px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Materi: {material.name}</button>
                                 {/each}
                             {:else if message.transaction.status === "completed" && !message.transaction.review}
+                                <a href={message.transaction.whatsapp_url || "#"} target="_blank" rel="noreferrer" class="mt-4 inline-block border-2 border-pitch-black bg-white px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Akses transaksi</a>
+                                {#each message.transaction.materials || [] as material}
+                                    <button type="button" onclick={() => downloadMaterial(material)} class="ml-2 mt-4 inline-block border-2 border-pitch-black bg-electric-cyan px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Materi: {material.name}</button>
+                                {/each}
                                 <button type="button" onclick={() => reviewTransactionId = message.id} class="mt-4 border-2 border-pitch-black bg-neon-yellow px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Beri review</button>
                                 {#if reviewTransactionId === message.id}
                                     <div class="mt-3 grid gap-2 border-t-2 border-pitch-black pt-3">
@@ -194,12 +226,39 @@
                                         <button type="button" onclick={() => submitReview(message)} class="border-2 border-pitch-black bg-cyber-lime px-3 py-2 font-mono text-xs font-bold">Kirim review</button>
                                     </div>
                                 {/if}
+                            {:else if message.transaction.status === "pending"}
+                                <button type="button" onclick={() => updateTransaction(message, "cancel")} class="mt-4 border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-xs font-bold shadow-[3px_3px_0_#000]">Batalkan request</button>
+                            {:else if message.transaction.status === "rejected" || message.transaction.status === "cancelled" || message.transaction.status === "expired"}
+                                <span class="mt-4 inline-block border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-xs font-bold uppercase">{message.transaction.status}</span>
                             {/if}
                         </div>
                     {/each}
                 </div>
             </section>
         </div>
+
+        <section class="mt-10" aria-labelledby="credit-history-title">
+            <div class="mb-4 flex items-center justify-between border-b-3 border-pitch-black pb-3">
+                <h2 id="credit-history-title" class="font-mono text-xl font-bold uppercase sm:text-2xl">Riwayat Credit</h2>
+                <span class="font-mono text-[10px] font-bold uppercase">{creditLedger.length} aktivitas</span>
+            </div>
+            {#if creditLedger.length === 0}
+                <p class="border-2 border-pitch-black bg-off-white p-4 font-mono text-xs">Belum ada aktivitas credit.</p>
+            {:else}
+                <div class="grid gap-3 sm:grid-cols-2">
+                    {#each creditLedger as entry}
+                        <article class="border-2 border-pitch-black bg-off-white p-4 shadow-[4px_4px_0_#000]">
+                            <div class="flex items-start justify-between gap-3">
+                                <span class="font-mono text-xs font-bold uppercase">{entry.type.replaceAll("_", " ")}</span>
+                                <span class="font-mono text-sm font-bold {entry.amount > 0 ? 'text-green-700' : 'text-laser-pink'}">{entry.amount > 0 ? '+' : ''}{entry.amount}</span>
+                            </div>
+                            <p class="mt-2 font-archivo text-sm">{entry.description}</p>
+                            <p class="mt-2 font-mono text-[10px]">Saldo setelah: {entry.balance_after}</p>
+                        </article>
+                    {/each}
+                </div>
+            {/if}
+        </section>
     </section>
 </main>
 

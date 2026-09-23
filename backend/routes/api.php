@@ -55,7 +55,11 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::get('/user/proposals', [ProposalController::class, 'mine']);
         Route::post('/user/proposals/{id}', [ProposalController::class, 'update']);
         Route::delete('/user/proposals/{id}', [ProposalController::class, 'destroy']);
+        Route::get('/user/proposals', [ProposalController::class, 'mine']);
+        Route::post('/user/proposals/{id}', [ProposalController::class, 'update']);
+        Route::delete('/user/proposals/{id}', [ProposalController::class, 'destroy']);
         Route::get('/transactions', [TransactionController::class, 'index']);
+        Route::get('/credits/ledger', [TransactionController::class, 'ledger']);
         Route::post('/transactions', [TransactionController::class, 'store']);
         Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
         Route::get('/transactions/{transaction}/materials/{skill}', [TransactionController::class, 'material']);

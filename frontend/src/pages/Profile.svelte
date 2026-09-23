@@ -26,7 +26,7 @@
     let editingPostId = null;
     let editContent = "";
     let savingPost = false;
-    /** @type {Array<{id: number|string, full_name?: string, email?: string, phone?: string, city?: string, skill_name?: string, skill_category?: string, skill_description?: string, proposal_path?: string}>} */
+    /** @type {Array<{id: number|string, full_name?: string, email?: string, phone?: string, city?: string, skill_name?: string, skill_category?: string, skill_description?: string, proposal_path?: string, hour?: number}>} */
     let swappPosts = [];
     /** @type {number|string|null} */
     let editingSwappId = null;
@@ -296,14 +296,14 @@
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-7 sm:px-10 lg:px-14">
-    <header class="dashboard-enter mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+    <header class="dashboard-enter mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
         <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
         <Navbar />
         <div class="justify-self-end">
             <ProfileDropdown />
         </div>
     </header>
-    <div class="mx-auto mt-14 max-w-320">
+    <div class="mx-auto mt-14 max-w-7xl">
         <div class="mb-5 flex justify-end">
             <button type="button" onclick={logout} class="button-lift border-2 border-pitch-black bg-laser-pink px-5 py-2 font-mono text-xs font-bold text-off-white shadow-[4px_4px_0_#000]" style="--button-complement: #00d9ff">Logout <span aria-hidden="true">→</span></button>
         </div>
@@ -329,7 +329,7 @@
 
         <section class="dashboard-enter dashboard-enter-delay-2 mt-5 grid gap-7 lg:grid-cols-[minmax(280px,1fr)_minmax(0,2fr)]">
             <div class="flex min-h-40 flex-col justify-center bg-[#ffa174] px-8 py-7 shadow-[10px_10px_0_#000]">
-                <span class="font-anton text-6xl leading-none text-[#3d6cff] h-[30px] mb-3">“</span>
+                <span class="font-anton text-6xl leading-none text-[#3d6cff] h-7.5 mb-3">“</span>
                 <p class="font-mono text-sm font-bold">You can also call me by</p>
                 <p class="mt-1 font-anton text-3xl uppercase">{user.profile?.alias || user.profile?.username || user.name}</p>
             </div>
