@@ -39,13 +39,28 @@
         art: { color: 'bg-[#ffe477]', icon: artIcon, complement: '#ff006e' },
         writing: { color: 'bg-[#ffa174]', icon: writingIcon, complement: '#00d9ff' }
     };
+    const categoryAliases = {
+        education: 'education',
+        edukasi: 'education',
+        technology: 'technology',
+        teknologi: 'technology',
+        business: 'business',
+        bisnis: 'business',
+        language: 'language',
+        bahasa: 'language',
+        art: 'art',
+        seni: 'art',
+        writing: 'writing',
+        menulis: 'writing'
+    };
     const fallbackCategoryNames = ['Education', 'Technology', 'Business', 'Language', 'Art', 'Writing'].map((name, index) => ({ id: index + 1, name, slug: name.toLowerCase() }));
     let categories = fallbackCategoryNames.map(categoryView);
 
     function categoryView(category) {
         const name = typeof category === 'string' ? category : category.name;
-        const key = name.toLowerCase();
-        return { ...category, name, ...(categoryStyles[key] ?? { color: 'bg-neon-yellow', icon: technologyIcon, complement: '#00d9ff' }) };
+        const sourceKey = String(category?.slug ?? name).toLowerCase().trim().replace(/\s+/g, '-');
+        const key = categoryAliases[sourceKey] ?? categoryAliases[name.toLowerCase().trim()] ?? sourceKey;
+        return { ...category, name, ...(categoryStyles[key] ?? { color: 'bg-neon-yellow', icon: artIcon, complement: '#ff006e' }) };
     }
 
     onMount(async () => {
