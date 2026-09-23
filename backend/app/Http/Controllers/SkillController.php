@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Skill;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class SkillController extends Controller
 {
@@ -22,7 +23,7 @@ class SkillController extends Controller
         }
 
         return response()->json([
-            'data' => $profile->skillRecords()->orderBy('name')->get(),
+            'data' => $profile->skillRecords()->where('status', 'published')->orderBy('name')->get(),
         ]);
     }
 
@@ -35,15 +36,20 @@ class SkillController extends Controller
         $validated = $request->validate([
             'id' => ['sometimes', 'nullable', 'integer'],
             'name' => ['required', 'string', 'max:100'],
-            'category_skills' => ['required', 'string', 'max:100'],
+            'category_id' => ['required', 'integer', 'exists:categories,id'],
             'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
-            'material' => ['required_without:id', 'sometimes', 'file', 'mimes:pdf', 'max:20480'],
+            'material' => ['required_without:id', 'sometimes', 'file', 'mimes:pdf', 'max:5120'],
         ]);
 
         // Ensure the user has a profile to attach skills to.
         $profile = $request->user()->profile()->firstOrCreate([]);
 
+        if ($request->hasFile('material')) {
+            $this->validateMaterial($request->file('material'));
+        }
+
         $payload = collect($validated)->except(['id', 'material'])->toArray();
+        $payload['status'] = 'published';
 
         if ($request->hasFile('material')) {
             $payload['material_path'] = $request->getSchemeAndHttpHost() . Storage::url(
@@ -71,6 +77,34 @@ class SkillController extends Controller
             ['data' => $skill->fresh()],
             $skill->wasRecentlyCreated ? 201 : 200
         );
+    }
+
+    private function validateMaterial(UploadedFile $file): void
+    {
+        $originalName = $file->getClientOriginalName();
+        if (
+            basename($originalName) !== $originalName
+            || preg_match('/[\x00-\x1F]/', $originalName)
+            || strpbrk($originalName, "/\\") !== false
+            || strlen($originalName) > 180
+        ) {
+            throw ValidationException::withMessages(['material' => 'Nama file materi tidak valid.']);
+        }
+
+        $path = $file->getRealPath();
+        $mime = @((new \finfo(FILEINFO_MIME_TYPE))->file($path));
+        if ($mime !== 'application/pdf') {
+            throw ValidationException::withMessages(['material' => 'Materi harus berupa file PDF asli.']);
+        }
+
+        $contents = @file_get_contents($path);
+        if ($contents === false || ! str_starts_with($contents, '%PDF-') || ! str_contains(substr($contents, -2048), '%%EOF')) {
+            throw ValidationException::withMessages(['material' => 'File PDF rusak atau tidak dapat dibuka.']);
+        }
+
+        if (preg_match('/\/(?:JavaScript|JS|OpenAction|AA|Launch|RichMedia|EmbeddedFile)\b/i', $contents)) {
+            throw ValidationException::withMessages(['material' => 'PDF dengan action aktif atau konten tertanam tidak diizinkan.']);
+        }
     }
 
     /**

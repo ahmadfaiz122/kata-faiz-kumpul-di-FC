@@ -23,7 +23,6 @@ class ProfileController extends Controller
             'alias' => ['sometimes', 'nullable', 'string', 'max:100'],
             'bio' => ['sometimes', 'nullable', 'string', 'max:2000'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
-            'nim' => ['sometimes', 'nullable', 'string', 'max:50'],
             'linkedin' => ['sometimes', 'nullable', 'url', 'max:255'],
             'github' => ['sometimes', 'nullable', 'url', 'max:255'],
             'instagram' => ['sometimes', 'nullable', 'url', 'max:255'],
@@ -46,10 +45,12 @@ class ProfileController extends Controller
         $user->fill(array_intersect_key($validated, array_flip(['name', 'email', 'avatar'])));
         $user->save();
 
-        $profile = $user->profile()->updateOrCreate([], array_intersect_key(
+        $profilePayload = array_intersect_key(
             $validated,
-            array_flip(['username', 'alias', 'bio', 'nim', 'linkedin', 'github', 'instagram', 'skills', 'achievements'])
-        ));
+            array_flip(['username', 'alias', 'bio', 'linkedin', 'github', 'instagram', 'skills', 'achievements'])
+        );
+        $profilePayload['nim'] = $this->nimFromEmail($user->email);
+        $profile = $user->profile()->updateOrCreate([], $profilePayload);
 
         if (array_key_exists('skills', $validated)) {
             $profile->skillRecords()->delete();
@@ -76,6 +77,10 @@ class ProfileController extends Controller
         $profile ??= $user->profile;
 
         if ($profile) {
+            $derivedNim = $this->nimFromEmail($user->email);
+            if ($profile->nim !== $derivedNim) {
+                $profile->forceFill(['nim' => $derivedNim])->save();
+            }
             $profile->setAttribute('skills', $profile->skillRecords->pluck('name')->values());
             $profile->setAttribute('achievements', $profile->achievementRecords->pluck('name')->values());
         }
@@ -88,5 +93,14 @@ class ProfileController extends Controller
             'google_id' => $user->google_id,
             'profile' => $profile,
         ];
+    }
+
+    private function nimFromEmail(?string $email): ?string
+    {
+        if (! $email) return null;
+
+        return preg_match('/^([0-9]+)@mhs\.unesa\.ac\.id$/i', trim($email), $matches)
+            ? $matches[1]
+            : null;
     }
 }

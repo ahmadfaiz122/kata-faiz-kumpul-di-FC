@@ -12,6 +12,7 @@
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import TimelinePost from "../lib/TimelinePost.svelte";
     import logo from "../assets/logo.webp";
+    import { alertError, alertSuccess, confirmAction } from "../lib/alerts.js";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, user?: {name?: string, avatar?: string}, comments?: Array<{content: string, user?: {name?: string}}>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}} ProfilePost */
@@ -155,7 +156,8 @@
 
     /** @param {number} postId */
     async function deletePost(postId) {
-        if (!window.confirm("Hapus post ini?")) return;
+        const confirmation = await confirmAction("Hapus post ini?", "Data ini tidak dapat dikembalikan.");
+        if (!confirmation.isConfirmed) return;
 
         error = "";
         try {
@@ -169,8 +171,10 @@
             const data = await response.json();
             if (!response.ok) throw new Error(data.message ?? "Post gagal dihapus.");
             posts = posts.filter((post) => post.id !== postId);
+            await alertSuccess("Post dihapus");
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Post gagal dihapus.";
+            await alertError("Post gagal dihapus", error);
         }
     }
 
@@ -222,7 +226,8 @@
 
     /** @param {number|string} proposalId @param {string} proposalName */
     async function deleteSwapp(proposalId, proposalName) {
-        if (!window.confirm(`Hapus post Swapp "${proposalName}"? Data ini tidak dapat dikembalikan.`)) return;
+        const confirmation = await confirmAction(`Hapus post Swapp "${proposalName}"?`, "Data ini tidak dapat dikembalikan.");
+        if (!confirmation.isConfirmed) return;
         swappError = "";
         try {
             const response = await fetch(`${backendUrl}/api/user/proposals/${proposalId}`, {
@@ -232,8 +237,10 @@
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.message ?? "Post Swapp gagal dihapus.");
             swappPosts = swappPosts.filter((item) => String(item.id) !== String(proposalId));
+            await alertSuccess("Post Swapp dihapus");
         } catch (requestError) {
             swappError = requestError instanceof Error ? requestError.message : "Post Swapp gagal dihapus.";
+            await alertError("Post Swapp gagal dihapus", swappError);
         }
     }
 
@@ -314,8 +321,8 @@
         <section class="dashboard-enter dashboard-enter-delay-1 mt-7 grid gap-7 lg:grid-cols-[minmax(280px,1fr)_minmax(0,2fr)]">
             <Bio user={user} />
             <div class="grid gap-5 sm:grid-cols-3">
-                <Index photo={indexImage1} index="4.5/5.0" title="Rating" color="neon-yellow" />
-                <Index photo={indexImage2} index="100" title="Reputation" color="laser-pink" />
+                <Index photo={indexImage1} index={`${Number(user.profile?.rating ?? 0).toFixed(1)}/5.0`} title="Rating" color="neon-yellow" />
+                <Index photo={indexImage2} index={`${Math.round(Number(user.profile?.reputation ?? 0))}/100`} title="Reputation" color="laser-pink" />
                 <Index photo={indexImage3} index="10000/10000" title="Leaderboard Rank" color="electric-cyan" />
             </div>
         </section>
@@ -333,7 +340,7 @@
             <h2 class="inline-block bg-pitch-black px-10 py-1 font-mono text-sm font-bold text-off-white">Skills</h2>
             <div class="mt-4 flex flex-wrap gap-3">
                 {#each user.profile?.skill_records || [] as skill}
-                    <div class="border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-sm shadow-[3px_3px_0_#000]"><span>{skill.name}</span>{#if skill.material_path}<a href={skill.material_path} target="_blank" rel="noreferrer" class="mt-1 block text-[10px] underline">Buka materi PDF ↗</a>{/if}</div>
+                    <div class="min-w-40 max-w-60 border-2 border-pitch-black bg-off-white px-3 py-2 font-mono text-sm shadow-[3px_3px_0_#000]"><span class="font-bold">{skill.name}</span>{#if skill.category_skills}<span class="mt-1 block text-[10px] text-pitch-black/60">{skill.category_skills}</span>{/if}{#if skill.material_path}<a href={skill.material_path} target="_blank" rel="noreferrer" class="mt-1 block text-[10px] underline">Buka materi PDF ↗</a>{/if}</div>
                 {/each}
             </div>
         </section>

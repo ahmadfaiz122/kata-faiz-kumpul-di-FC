@@ -10,7 +10,11 @@ class Achievement extends Model
 
     protected function casts(): array
     {
-        return ['validated_upload' => 'boolean'];
+        return [
+            'validated_upload' => 'boolean',
+            'tanggal_terbit' => 'date:Y-m-d',
+            'kadaluwarsa' => 'date:Y-m-d',
+        ];
     }
 
     public function profile()

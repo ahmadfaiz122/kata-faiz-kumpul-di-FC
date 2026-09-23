@@ -8,17 +8,51 @@ use Illuminate\Support\Facades\Storage;
 
 class ProposalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
+    {
+        $query = SkillRequest::query()
+            ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
+            ->where('status', 'pending')
+            ->whereHas('skill', fn ($skill) => $skill->where('status', 'published'))
+            ->where(function ($query) {
+                $query->whereNull('created_at')->orWhere('created_at', '>=', now()->subDay());
+            });
+
+        if ($request->filled('search')) {
+            $query->where('skill_name', 'like', '%' . $request->string('search') . '%');
+        }
+        if ($request->filled('category')) {
+            $query->where('skill_category', $request->string('category'));
+        }
+        if ($request->filled('credit_min')) {
+            $query->where('hour', '>=', (int) $request->input('credit_min'));
+        }
+        if ($request->filled('credit_max')) {
+            $query->where('hour', '<=', (int) $request->input('credit_max'));
+        }
+
+        $query->whereHas('requesterUser.profile', function ($profile) use ($request) {
+            if ($request->filled('rating_min')) $profile->where('rating', '>=', (float) $request->input('rating_min'));
+            if ($request->filled('rating_max')) $profile->where('rating', '<=', (float) $request->input('rating_max'));
+            if ($request->filled('reputasi_min')) $profile->where('reputation', '>=', (int) $request->input('reputasi_min'));
+            if ($request->filled('reputasi_max')) $profile->where('reputation', '<=', (int) $request->input('reputasi_max'));
+        });
+
+        return response()->json([
+            'data' => $query->latest()->get(),
+        ]);
+    }
+
+    public function categories()
     {
         return response()->json([
             'data' => SkillRequest::query()
-                ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
                 ->where('status', 'pending')
-                ->where(function ($query) {
-                    $query->whereNull('created_at')->orWhere('created_at', '>=', now()->subDay());
-                })
-                ->latest()
-                ->get(),
+                ->whereNotNull('skill_category')
+                ->distinct()
+                ->orderBy('skill_category')
+                ->pluck('skill_category')
+                ->values(),
         ]);
     }
 

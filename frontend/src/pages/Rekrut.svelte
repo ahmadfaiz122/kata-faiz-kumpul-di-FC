@@ -10,7 +10,7 @@
     /** @type {{ id?: string }} */
     export let params = {};
 
-    let profile = { name: "", email: "", photo: "", city: "" };
+    let profile = { name: "", email: "", photo: "", city: "", rating: 0, reputation: 0 };
     let skillName = "";
     let skillCategory = "";
     let skillDescription = "";
@@ -68,6 +68,8 @@
                 email: data.email ?? "",
                 photo: data.requester_user?.avatar ?? "",
                 city: data.city ?? "",
+                rating: data.requester_user?.profile?.rating ?? 0,
+                reputation: data.requester_user?.profile?.reputation ?? 0,
             };
             skills = data.requester_user?.profile?.skill_records ?? [];
             achievements = data.requester_user?.profile?.achievement_records ?? [];
@@ -237,8 +239,8 @@
                                     {@const accent = accentClasses[i % accentClasses.length]}
                                     {@const yearAccent = yearClasses[i % yearClasses.length]}
                                     {@const levelAccent = LevelClasses[i % LevelClasses.length]}
-                                    {@const issuedYear = achievement.tanggal_terbit
-                                        ? "20" + String(achievement.tanggal_terbit).slice(0, 2)
+                                    {@const issuedDate = achievement.tanggal_terbit
+                                        ? new Intl.DateTimeFormat("id-ID", { month: "short", year: "numeric" }).format(new Date(achievement.tanggal_terbit))
                                         : "----"}
                                     {@const description = achievement.description || "Informasi prestasi belum tersedia. Pastikan bahwa frontend ini terconnect ke backend dengan benar"}
 
@@ -265,7 +267,7 @@
                                                             Nasional
                                                         </span>
                                                         <span class={`shrink-0 self-start border-2 border-pitch-black ${yearAccent} px-3 py-1 font-mono text-[11px] font-bold shadow-[3px_3px_0_#000]`}>
-                                                            {issuedYear}
+                                                            {issuedDate}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -289,8 +291,8 @@
                 
         <div>
             <div class="grid gap-10 sm:grid-cols-2 justify-center mt-15">
-                <Index photo={indexImage1} index="4.5/5.0" title="Rating" color="neon-yellow" />
-                <Index photo={indexImage2} index="100" title="Reputation" color="laser-pink" />
+                <Index photo={indexImage1} index={`${Number(profile.rating).toFixed(1)}/5.0`} title="Rating" color="neon-yellow" />
+                <Index photo={indexImage2} index={`${Math.round(Number(profile.reputation))}/100`} title="Reputation" color="laser-pink" />
             </div>
         </div>
     </section>

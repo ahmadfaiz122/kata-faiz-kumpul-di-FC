@@ -16,11 +16,18 @@
     let searchInput = $state();
     /** @type {Array<{id: number|string, duration: string, mentorName: string, instructor: string, category: string, credits: string, university: string}>} */
     let skillOffers = $state([]);
-    let credit = 0
+    let selectedCategory = $state("");
+    let activeFilters = $state([]);
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-    function submitSearch() {
+    async function submitSearch() {
         searchQuery = searchQuery.trim();
+        await loadProposals();
+    }
+
+    function updateSearch(event) {
+        const value = event.currentTarget.value.slice(0, 100);
+        searchQuery = value.replace(/[<>%_;`]/g, "");
     }
     let activeBar = $state("search");
     let filterOpen = $state(false)
@@ -56,15 +63,16 @@
     }
 
 
-    let visibleOffers = $derived(skillOffers.filter((offer) => {
-        const query = searchQuery.trim().toLowerCase();
-        return !query || `${offer.instructor} ${offer.category} ${offer.mentorName}`.toLowerCase().includes(query);
-    }));
+    let visibleOffers = $derived(skillOffers);
 
-    onMount(async () => {
-        const response = await fetch(`${backendUrl}/api/proposals`, { headers: { Accept: "application/json" } });
+    async function loadProposals() {
+        const params = new URLSearchParams();
+        if (searchQuery) params.set("search", searchQuery);
+        if (selectedCategory) params.set("category", selectedCategory);
+        for (const filter of activeFilters) params.set(`${filter.key}_min`, filter.low), params.set(`${filter.key}_max`, filter.high);
+
+        const response = await fetch(`${backendUrl}/api/proposals?${params}` , { headers: { Accept: "application/json" } });
         if (!response.ok) return;
-
         const result = await response.json();
         skillOffers = (result.data ?? []).map((/** @type {Record<string, any>} */ proposal) => ({
             id: proposal.id,
@@ -73,9 +81,28 @@
             instructor: proposal.skill_name,
             category: proposal.skill_category,
             credits: `${proposal.hour ?? 1} kredit`,
+            rating: proposal.requester_user?.profile?.rating ?? 0,
+            reputation: proposal.requester_user?.profile?.reputation ?? 0,
             university: proposal.city || "Community learner",
         }));
-    });
+    }
+
+    async function selectCategory(event) {
+        selectedCategory = String(event.detail.id ?? "");
+        await loadProposals();
+    }
+
+    async function applyFilters(filters) {
+        activeFilters = filters;
+        await loadProposals();
+    }
+
+    async function resetFilters() {
+        activeFilters = [];
+        await loadProposals();
+    }
+
+    onMount(loadProposals);
 </script>
 
 <main class="min-h-screen overflow-hidden px-5 py-6 sm:px-10 lg:px-14">
@@ -90,7 +117,7 @@
     </header>
 
     <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-        <CategoryBar />
+        <CategoryBar on:categorySelect={selectCategory} />
         <div class="relative flex items-center gap-3 lg:w-100">
                         
 
@@ -118,7 +145,7 @@
 
                 {#if activeBar === "search"}
 
-                    <input bind:this={searchInput} bind:value={searchQuery} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Lagi penasaran sama apa nih?" />
+                    <input bind:this={searchInput} value={searchQuery} oninput={updateSearch} maxlength="100" onkeydown={(event) => event.key === "Enter" && submitSearch()} onfocus={() => searchFocused = true} onblur={() => searchFocused = false} class="mx-auto whitespace-nowrap relative z-10 min-w-0 flex-1 bg-transparent font-archivo text-sm font-bold text-pitch-black outline-none placeholder:text-pitch-black" placeholder="Cari nama skill..." />
 
                 {/if}
 
@@ -188,7 +215,7 @@
 
 
 
-            <FilterDropdown bind:open={filterOpen} triggerEl={filterTriggerEl} />
+            <FilterDropdown bind:open={filterOpen} triggerEl={filterTriggerEl} onApply={applyFilters} onReset={resetFilters} />
 
         </div>
 

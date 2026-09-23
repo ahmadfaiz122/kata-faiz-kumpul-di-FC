@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
     import Router from "svelte-spa-router";
     import Dashboard from "./pages/Dashboard.svelte";
     import Profile from "./pages/Profile.svelte";
@@ -22,6 +23,32 @@
       "/rekrut" : Rekrut,
       "/messages" : Messages,
     }
+
+    const pageTitles = {
+      "/": "Letso | Beranda",
+      "/timeline": "Letso | Beranda",
+      "/swapp": "Letso | Swapp",
+      "/leaderboard": "Letso | Leaderboard",
+      "/profile": "Letso | Profil",
+      "/login": "Letso | Login",
+      "/edit-profile": "Letso | Edit Profil",
+      "/add-proposal": "Letso | Tambah Proposal",
+      "/rekrut": "Letso | Rekrut",
+      "/messages": "Letso | Pesan",
+    };
+
+    function updatePageTitle() {
+      const path = window.location.hash.replace(/^#/, "").split("?")[0] || "/";
+      const route = path.replace(/\/\d+$/, "");
+      document.title = pageTitles[route] ?? "Letso";
+    }
+
+    onMount(() => {
+      updatePageTitle();
+      window.addEventListener("hashchange", updatePageTitle);
+
+      return () => window.removeEventListener("hashchange", updatePageTitle);
+    });
 </script>
 
 <Router {routes} />

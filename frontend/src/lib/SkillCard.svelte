@@ -8,6 +8,8 @@
   export let category = "Design";
   export let credits = "2 kredit";
   export let ctaLabel = "Rekrut";
+  export let rating = 0;
+  export let reputation = 0;
 
   /** @param {string} name */
   function firstName(name) {
@@ -20,6 +22,7 @@
     return length > 18 ? "text-extra-compact" : length > 12 ? "text-compact" : "";
   }
 
+ /** @param {string} text */
  function skillFontSize(text) {
   const length = text?.length || 0;
   const maxSize = 40;
@@ -101,6 +104,7 @@
         </svg>
       </div>
       <span class="label-lg {textSizeClass(firstName(mentorName))}" title={firstName(mentorName)}>{firstName(mentorName)}</span>
+      <span class="label-meta">Rating {Number(rating).toFixed(1)} · Reputasi {Math.round(Number(reputation))}/100</span>
     </div>
 
     <div class="box box-white">
@@ -151,7 +155,7 @@
     position: relative;
     width: 100%;
     max-width: none;
-    min-height: 281px;
+    min-height: 245px;
     height: auto;
     background: #EDEAE2;
     border: 3px solid #0A0A0A;
@@ -198,7 +202,7 @@
     position: absolute;
     top: 26px;
     left: 24px;
-    width: 260px;
+    width: 220px;
   }
 
   .banner {
@@ -219,7 +223,7 @@
     display: inline-block;
     transform: skewX(9deg);
     color: #F3EFE6;
-    font-size: 42px;
+    font-size: 32px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 1px;
@@ -248,7 +252,7 @@
   .banner-teal {
     background: #3FD6C4;
     transform: skewX(-9deg) rotate(-1deg);
-    padding: 16px 26px;
+    padding: 13px 20px;
     margin-top: -6px;
     z-index: 10;
   }
@@ -256,7 +260,7 @@
     display: inline-block;
     transform: skewX(9deg);
     color: #0A0A0A;
-    font-size: 40px;
+    font-size: 31px;
     font-weight: 700;
     line-height: 1;
     text-shadow: 3px 3px 0 rgba(10,10,10,0.25);
@@ -356,7 +360,7 @@
     letter-spacing: 0.3px;
   }
   .label-lg {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 700;
     color: #0A0A0A;
     line-height: 1.15;
@@ -364,6 +368,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .label-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: 9px;
+    line-height: 1.2;
+    white-space: nowrap;
   }
 
   .box-cta {
@@ -418,7 +430,7 @@
     }
 
     .left {
-      min-height: 214px;
+      min-height: 185px;
     }
 
     .banner-stack {
