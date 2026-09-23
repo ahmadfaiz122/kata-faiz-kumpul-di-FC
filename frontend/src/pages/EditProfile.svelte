@@ -14,7 +14,15 @@
     let activeModal = $state("");
     let skillName = $state("");
     let skillCategory = $state("");
-    let skillCategories = $state([]);
+    const seededCategories = [
+        { id: 1, name: "Education" },
+        { id: 2, name: "Technology" },
+        { id: 3, name: "Business" },
+        { id: 4, name: "Language" },
+        { id: 5, name: "Art" },
+        { id: 6, name: "Writing" },
+    ];
+    let skillCategories = $state(seededCategories);
     const skillSuggestions = {
         Technology: ["Frontend Development", "Backend Development", "QA Analyst", "DevOps", "Data Engineering"],
         Education: ["Mathematics", "Academic Writing", "Public Speaking"],
@@ -90,7 +98,11 @@
             };
             skills = stored.skill_records || [];
             achievements = stored.achievement_records || [];
-            if (categoryResponse.ok) skillCategories = (await categoryResponse.json()).data || [];
+            if (categoryResponse.ok) {
+                const categoryData = await categoryResponse.json();
+                const serverCategories = Array.isArray(categoryData.data) ? categoryData.data : [];
+                if (serverCategories.length > 0) skillCategories = serverCategories;
+            }
         } catch (requestError) {
             error = requestError instanceof Error ? requestError.message : "Gagal mengambil data profile.";
         } finally {
