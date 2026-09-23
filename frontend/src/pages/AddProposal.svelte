@@ -25,6 +25,11 @@
     let submitted = false;
     let submitting = false;
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+    const localDateTime = () => {
+        const date = new Date();
+        date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+        return date.toISOString().slice(0, 16);
+    };
 
     onMount(async () => {
         const token = localStorage.getItem("auth_token");
@@ -238,7 +243,7 @@
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase sm:col-span-2">
                             Jadwal mulai sesi
-                            <input bind:value={availableAt} required type="datetime-local" min={new Date().toISOString().slice(0, 16)} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            <input bind:value={availableAt} required type="datetime-local" min={localDateTime()} class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
                             <span class="font-mono text-[10px] normal-case text-pitch-black/60">Request yang belum disetujui provider akan hilang setelah 1 hari.</span>
                         </label>
                     </div>

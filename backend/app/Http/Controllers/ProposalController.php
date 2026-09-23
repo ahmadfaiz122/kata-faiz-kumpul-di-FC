@@ -15,7 +15,7 @@ class ProposalController extends Controller
                 ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
                 ->where('status', 'pending')
                 ->where(function ($query) {
-                    $query->whereNull('created_at')->orWhere('created_at', '>=', now()->subDay());
+                    $query->whereNull('available_at')->orWhere('available_at', '>', now());
                 })
                 ->latest()
                 ->get(),

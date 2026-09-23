@@ -29,6 +29,7 @@
     let showPaymentModal = false;
     let paymentMethod = "";
     let selectedSkillId = "";
+    let requesterSkillNote = "";
     /** @type {Array<{id: number|string, name: string, category_skills?: string}>} */
     let mySkills = [];
     let mySkillsLoading = false;
@@ -104,6 +105,7 @@
         confirmError = "";
         paymentMethod = "";
         selectedSkillId = "";
+        requesterSkillNote = "";
         showPaymentModal = true;
     }
 
@@ -124,6 +126,11 @@
             return;
         }
 
+        if (paymentMethod === "skill" && !requesterSkillNote.trim()) {
+            confirmError = "Jelaskan skill yang ingin kamu tawarkan.";
+            return;
+        }
+
         confirming = true;
         try {
             const response = await fetch(`${backendUrl}/api/transactions`, {
@@ -137,6 +144,7 @@
                     proposal_id: Number(params?.id),
                     mode: paymentMethod,
                     requester_skill_id: paymentMethod === "skill" ? Number(selectedSkillId) : null,
+                    requester_skill_note: paymentMethod === "skill" ? requesterSkillNote.trim() : null,
                 }),
             });
             const data = await response.json().catch(() => ({}));
@@ -364,6 +372,10 @@
                                         <option value={skill.id}>{skill.name}</option>
                                     {/each}
                                 </select>
+                                <label class="mt-4 grid gap-2 font-archivo text-sm font-bold" for="offer-skill-note">
+                                    Jelaskan tawaran skill kamu
+                                    <textarea id="offer-skill-note" bind:value={requesterSkillNote} maxlength="1000" rows="4" placeholder="Contoh: Saya bisa membantu membuat layout dashboard selama 1 jam." class="modal-input"></textarea>
+                                </label>
                             {/if}
                         </label>
                     </div>

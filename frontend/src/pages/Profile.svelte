@@ -15,7 +15,7 @@
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     /** @typedef {{id: number, content: string, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, user?: {name?: string, avatar?: string}, comments?: Array<{content: string, user?: {name?: string}}>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}} ProfilePost */
-    /** @type {{id: number, name?: string, profile?: {alias?: string, username?: string, skills?: string[], skill_records?: Array<{name: string, category_skills?: string, material_path?: string}>, achievements?: string[], achievement_records?: Array<{name: string, description?: string, levels?: string, tanggal_terbit?: number, kadaluwarsa?: number, certificate_path?: string}>}}|null} */
+    /** @type {{id: number, name?: string, profile?: {alias?: string, username?: string, rating_average?: number|string|null, reputation?: number, reputation_score?: number, skills?: string[], skill_records?: Array<{name: string, category_skills?: string, material_path?: string}>, achievements?: string[], achievement_records?: Array<{name: string, description?: string, levels?: string, tanggal_terbit?: number, kadaluwarsa?: number, certificate_path?: string}>}}|null} */
     let user = null;
     /** @type {ProfilePost[]} */
     let posts = [];
@@ -314,8 +314,8 @@
         <section class="dashboard-enter dashboard-enter-delay-1 mt-7 grid gap-7 lg:grid-cols-[minmax(280px,1fr)_minmax(0,2fr)]">
             <Bio user={user} />
             <div class="grid gap-5 sm:grid-cols-3">
-                <Index photo={indexImage1} index="4.5/5.0" title="Rating" color="neon-yellow" />
-                <Index photo={indexImage2} index="100" title="Reputation" color="laser-pink" />
+                <Index photo={indexImage1} index={`${user.profile?.rating_average ?? "0.00"}/5.0`} title="Rating" color="neon-yellow" />
+                <Index photo={indexImage2} index={`${user.profile?.reputation_score ?? user.profile?.reputation ?? 50}/100`} title="Reputation" color="laser-pink" />
                 <Index photo={indexImage3} index="10000/10000" title="Leaderboard Rank" color="electric-cyan" />
             </div>
         </section>

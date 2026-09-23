@@ -8,7 +8,8 @@
     editPage("Beranda");
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
-    /** @type {Array<{id: number, content: string, user?: {name?: string, avatar?: string}, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, comments?: Array<object>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}>} */
+    /** @typedef {{id: number, content: string, user?: {id?: number, name?: string, avatar?: string}, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, comments?: Array<{content: string, user?: {name?: string}}>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}} TimelinePostData */
+    /** @type {TimelinePostData[]} */
     let posts = [];
     let content = "";
     let loading = true;
@@ -22,7 +23,7 @@
             const response = await fetch(`${backendUrl}/api/posts`);
             if (!response.ok) throw new Error("Feed tidak dapat dimuat.");
             const data = await response.json();
-            posts = (data.data ?? []).map((post) => ({ ...post, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }));
+            posts = (/** @type {TimelinePostData[]} */ (data.data ?? [])).map((post) => ({ ...post, comments: [], commentsOpen: false, commentText: "", likeLoading: false, commentLoading: false }));
         } catch (exception) {
             error = exception instanceof Error ? exception.message : "Feed tidak dapat dimuat.";
         } finally {
@@ -34,6 +35,7 @@
         return { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("auth_token") ?? ""}` };
     }
 
+    /** @param {TimelinePostData} post */
     async function toggleLike(post) {
         if (post.likeLoading) return;
         const liked = post.liked_by_user ?? false;
@@ -55,6 +57,7 @@
         }
     }
 
+    /** @param {TimelinePostData} post */
     async function toggleComments(post) {
         if (post.commentsOpen) {
             posts = posts.map((item) => item.id === post.id ? { ...item, commentsOpen: false } : item);
@@ -70,10 +73,13 @@
         }
     }
 
+    /** @param {TimelinePostData} post @param {Event} event */
     function updateCommentText(post, event) {
-        posts = posts.map((item) => item.id === post.id ? { ...item, commentText: event.currentTarget.value } : item);
+        const input = /** @type {HTMLInputElement} */ (event.currentTarget);
+        posts = posts.map((item) => item.id === post.id ? { ...item, commentText: input.value } : item);
     }
 
+    /** @param {TimelinePostData} post */
     async function submitComment(post) {
         const text = post.commentText?.trim();
         if (!text || post.commentLoading) return;
@@ -122,6 +128,7 @@
         return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(date));
     }
 
+    /** @param {TimelinePostData} post */
     function isEdited(post) {
         return Boolean(post.updated_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime());
     }
@@ -132,13 +139,13 @@
 </script>
 
 <main class="min-h-screen bg-[#d8d8d8] px-5 py-6 sm:px-10 lg:px-14">
-    <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
+            <header class="dashboard-enter relative z-30 mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-4">
         <a href="/#/timeline" aria-label="Faiz home" class="h-11 w-28 transition-transform hover:-translate-y-1 sm:h-14 sm:w-36"><img src="src/assets/logo.webp" alt="Faiz Logo" class="h-full w-full scale-[1.2] object-contain" /></a>
         <Navbar />
         <div class="justify-self-end dashboard-enter"><ProfileDropdown /></div>
     </header>
 
-    <div class="mx-auto mt-14 grid max-w-320 gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">
+    <div class="mx-auto mt-14 grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">
         <section>
             <form class="border-2 border-pitch-black bg-off-white p-4 shadow-[6px_6px_0_#000]" on:submit|preventDefault={submitPost}>
                 <label for="post-content" class="font-mono text-xs font-bold">Lagi penasaran sama apa nih?</label>
@@ -158,7 +165,7 @@
                     <p class="font-mono text-xs font-bold">Belum ada post. Jadilah yang pertama berbagi.</p>
                 {:else}
                     {#each posts as post, index}
-                        <div class="dashboard-enter" style="animation-delay: {index * 100}ms"><TimelinePost content={post.content} author={post.user?.name ?? "Unknown user"} authorAvatar={post.user?.avatar ?? ""} createdAt={formatDate(post.created_at)} edited={isEdited(post)} liked={post.liked_by_user ?? false} likesCount={post.likes_count ?? 0} commentsCount={post.comments_count ?? 0} comments={post.comments ?? []} commentsOpen={post.commentsOpen ?? false} commentText={post.commentText ?? ""} likeLoading={post.likeLoading ?? false} commentLoading={post.commentLoading ?? false} onToggleLike={() => toggleLike(post)} onToggleComments={() => toggleComments(post)} onCommentInput={(event) => updateCommentText(post, event)} onSubmitComment={() => submitComment(post)} /></div>
+                        <div class="dashboard-enter" style="animation-delay: {index * 100}ms"><TimelinePost content={post.content} author={post.user?.name ?? "Unknown user"} authorId={post.user?.id ?? null} authorAvatar={post.user?.avatar ?? ""} createdAt={formatDate(post.created_at)} edited={isEdited(post)} liked={post.liked_by_user ?? false} likesCount={post.likes_count ?? 0} commentsCount={post.comments_count ?? 0} comments={post.comments ?? []} commentsOpen={post.commentsOpen ?? false} commentText={post.commentText ?? ""} likeLoading={post.likeLoading ?? false} commentLoading={post.commentLoading ?? false} onToggleLike={() => toggleLike(post)} onToggleComments={() => toggleComments(post)} onCommentInput={(event) => updateCommentText(post, event)} onSubmitComment={() => submitComment(post)} /></div>
                     {/each}
                 {/if}
             </div>

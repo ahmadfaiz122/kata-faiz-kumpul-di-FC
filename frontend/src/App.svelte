@@ -11,6 +11,8 @@
     import Messages from "./pages/Messages.svelte";
     import LandingPage from "./pages/LandingPage.svelte";
     import Transaksi from "./pages/Transaksi.svelte";
+    import Chat from "./pages/Chat.svelte";
+    import PublicProfile from "./pages/PublicProfile.svelte";
     const routes = {
       "/" : Timeline,
       "/swapp" : Dashboard,
@@ -25,6 +27,8 @@
       "/messages" : Messages,
       "/landing" : LandingPage,
       "/transaksi" : Transaksi,
+      "/chat/:id" : Chat,
+      "/profile/:id" : PublicProfile,
     }
 </script>
 

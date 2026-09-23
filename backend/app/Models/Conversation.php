@@ -4,12 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TransactionReview extends Model
+class Conversation extends Model
 {
-    protected $fillable = ['transaction_id', 'reviewer', 'reviewed', 'rating', 'reputation_emoji', 'reputation', 'comment'];
+    protected $fillable = ['transaction_id'];
 
     public function transaction()
     {
         return $this->belongsTo(Transaction::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
     }
 }
