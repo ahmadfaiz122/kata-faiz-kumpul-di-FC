@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Transaction;
+use App\Models\CreditLedger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +29,13 @@ class ConversationController extends Controller
                 if ($transaction->status === 'scheduled') {
                     $this->activateIfDue($transaction);
                 } else {
-                    $transaction->update(['status' => 'completed', 'completed_at' => now()]);
+                    DB::transaction(function () use ($transaction) {
+                        $locked = Transaction::query()->lockForUpdate()->findOrFail($transaction->id);
+                        if ($locked->status === 'active' && $locked->ends_at?->lte(now())) {
+                            $locked->transitionTo('completed', null, 'Sesi berakhir sesuai jadwal.');
+                            $locked->update(['completed_at' => now()]);
+                        }
+                    });
                 }
             });
 
@@ -52,7 +59,13 @@ class ConversationController extends Controller
     {
         $transaction = $conversation->transaction;
         if ($transaction->status === 'active' && $transaction->ends_at?->lte(now())) {
-            $transaction->update(['status' => 'completed', 'completed_at' => now()]);
+            DB::transaction(function () use ($transaction) {
+                $locked = Transaction::query()->lockForUpdate()->findOrFail($transaction->id);
+                if ($locked->status === 'active' && $locked->ends_at?->lte(now())) {
+                    $locked->transitionTo('completed', null, 'Sesi berakhir sesuai jadwal.');
+                    $locked->update(['completed_at' => now()]);
+                }
+            });
             $transaction->refresh();
         }
         $this->authorizeParticipant($transaction, $request->user()->id);
@@ -119,7 +132,11 @@ class ConversationController extends Controller
                 $requesterProfile = $requester->profile()->lockForUpdate()->firstOrCreate([]);
                 $providerProfile = $provider->profile()->lockForUpdate()->firstOrCreate([]);
                 if ((int) $requesterProfile->credits < (int) $locked->credits) {
-                    $locked->update(['status' => 'issue_reported']);
+                    $locked->transitionTo('issue_reported', null, 'Saldo tidak mencukupi saat sesi dimulai.');
+                    return;
+                }
+                if (CreditLedger::query()->where('transaction_id', $locked->id)->where('type', 'spent')->exists()) {
+                    $locked->transitionTo('active', null, 'Sesi diaktifkan setelah settlement sebelumnya.');
                     return;
                 }
                 $requesterBalance = (int) $requesterProfile->credits;
@@ -130,7 +147,8 @@ class ConversationController extends Controller
                 $provider->creditLedger()->create(['transaction_id' => $locked->id, 'amount' => $locked->credits, 'balance_after' => $providerBalance + $locked->credits, 'type' => 'earned', 'description' => 'Credit diperoleh saat sesi dimulai.']);
             }
 
-            $locked->update(['status' => 'active', 'ends_at' => $locked->starts_at->copy()->addHour()]);
+            $locked->transitionTo('active', null, 'Sesi dimulai sesuai jadwal.');
+            $locked->update(['ends_at' => $locked->starts_at->copy()->addHour()]);
         });
     }
 

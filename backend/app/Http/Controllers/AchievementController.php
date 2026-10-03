@@ -54,9 +54,8 @@ class AchievementController extends Controller
         $payload = collect($validated)->except(['id', 'certificate'])->toArray();
 
         if ($request->hasFile('certificate')) {
-            $payload['certificate_path'] = $request->getSchemeAndHttpHost() . Storage::url(
-                $request->file('certificate')->store('certificates', 'public')
-            );
+            $storedPath = $request->file('certificate')->store('certificates', 'public');
+            $payload['certificate_path'] = '/storage/' . ltrim($storedPath, '/');
             $payload['validated_upload'] = true;
         }
 
