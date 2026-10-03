@@ -106,26 +106,33 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Hanya pemilik skill yang dapat menyetujui transaksi ini.'], 403);
         }
 
-        $transaction = DB::transaction(function () use ($transaction) {
+        $transaction = DB::transaction(function () use ($transaction, $request) {
             $transaction = Transaction::query()->lockForUpdate()->findOrFail($transaction->id);
             if ($transaction->status !== 'pending') {
-                return $transaction;
+                abort(response()->json(['message' => 'Transaksi ini sudah diproses.'], 422));
             }
             if ($transaction->barterRequest()->whereNotNull('available_at')->where('available_at', '<=', now())->exists()) {
-                $transaction->update(['status' => 'expired']);
+                $transaction->transitionTo('expired', $request->user()->id, 'Proposal kedaluwarsa sebelum disetujui.');
                 abort(response()->json(['message' => 'Proposal ini sudah kedaluwarsa.'], 422));
             }
 
             if ($transaction->mode === 'credit') {
                 $requesterProfile = $transaction->requesterUser()->firstOrFail()->profile()->firstOrCreate([]);
-                if ((int) $requesterProfile->credits < (int) $transaction->credits) {
+                $requesterProfile = $requesterProfile->newQuery()->lockForUpdate()->findOrFail($requesterProfile->id);
+                $reserved = Transaction::query()
+                    ->where('requester', $transaction->requester)
+                    ->where('mode', 'credit')
+                    ->where('status', 'scheduled')
+                    ->where('transactions.id', '<>', $transaction->id)
+                    ->sum('credits');
+                if ((int) $requesterProfile->credits - (int) $reserved < (int) $transaction->credits) {
                     abort(response()->json(['message' => 'Credit requester tidak mencukupi untuk menjadwalkan sesi ini.'], 422));
                 }
             }
 
             $startsAt = $transaction->starts_at ?? now();
+            $transaction->transitionTo('scheduled', $request->user()->id, 'Provider menyetujui transaksi.');
             $transaction->forceFill([
-                'status' => 'scheduled',
                 'approved_at' => now(),
                 'provider_approved_at' => now(),
                 'starts_at' => $startsAt,
@@ -160,7 +167,13 @@ class TransactionController extends Controller
         if ($transaction->status !== 'pending') {
             return response()->json(['message' => 'Transaksi ini sudah diproses.'], 422);
         }
-        $transaction->update(['status' => 'rejected']);
+        DB::transaction(function () use ($transaction, $request) {
+            $locked = Transaction::query()->lockForUpdate()->findOrFail($transaction->id);
+            if ($locked->status !== 'pending') {
+                abort(response()->json(['message' => 'Transaksi ini sudah diproses.'], 422));
+            }
+            $locked->transitionTo('rejected', $request->user()->id, 'Provider menolak transaksi.');
+        });
         return response()->json(['message' => 'Transaksi ditolak.']);
     }
 
@@ -172,7 +185,13 @@ class TransactionController extends Controller
         if ($transaction->status !== 'pending') {
             return response()->json(['message' => 'Transaksi aktif tidak dapat dibatalkan.'], 422);
         }
-        $transaction->update(['status' => 'cancelled']);
+        DB::transaction(function () use ($transaction, $request) {
+            $locked = Transaction::query()->lockForUpdate()->findOrFail($transaction->id);
+            if ($locked->status !== 'pending') {
+                abort(response()->json(['message' => 'Transaksi aktif tidak dapat dibatalkan.'], 422));
+            }
+            $locked->transitionTo('cancelled', $request->user()->id, 'Requester membatalkan transaksi.');
+        });
         return response()->json(['message' => 'Transaksi dibatalkan.']);
     }
 
@@ -272,10 +291,16 @@ class TransactionController extends Controller
 
         $this->activateScheduledTransaction($transaction);
 
-        $query->whereNotNull('ends_at')->where('ends_at', '<=', now())->update([
-            'status' => 'completed',
-            'completed_at' => now(),
-        ]);
+        $query->whereNotNull('ends_at')->where('ends_at', '<=', now())->each(function (Transaction $expired) {
+            DB::transaction(function () use ($expired) {
+                $locked = Transaction::query()->lockForUpdate()->findOrFail($expired->id);
+                if ($locked->status !== 'active' || ! $locked->ends_at?->lte(now())) {
+                    return;
+                }
+                $locked->transitionTo('completed', null, 'Sesi berakhir sesuai jadwal.');
+                $locked->update(['completed_at' => now()]);
+            });
+        });
     }
 
     private function activateScheduledTransaction(?Transaction $transaction = null): void
@@ -297,18 +322,22 @@ class TransactionController extends Controller
                     $requesterProfile = $requester->profile()->lockForUpdate()->firstOrFail();
                     $providerProfile = $provider->profile()->lockForUpdate()->firstOrFail();
                     if ((int) $requesterProfile->credits < (int) $locked->credits) {
-                        $locked->update(['status' => 'issue_reported']);
+                        $locked->transitionTo('issue_reported', null, 'Saldo tidak mencukupi saat sesi dimulai.');
                         return;
                     }
                     $requesterBalance = (int) $requesterProfile->credits;
                     $providerBalance = (int) $providerProfile->credits;
+                    if (CreditLedger::query()->where('transaction_id', $locked->id)->where('type', 'spent')->exists()) {
+                        $locked->transitionTo('active');
+                        return;
+                    }
                     $requesterProfile->decrement('credits', $locked->credits);
                     $providerProfile->increment('credits', $locked->credits);
                     CreditLedger::create(['user_id' => $requester->id, 'transaction_id' => $locked->id, 'amount' => -$locked->credits, 'balance_after' => $requesterBalance - $locked->credits, 'type' => 'spent', 'description' => 'Credit digunakan saat sesi dimulai.']);
                     CreditLedger::create(['user_id' => $provider->id, 'transaction_id' => $locked->id, 'amount' => $locked->credits, 'balance_after' => $providerBalance + $locked->credits, 'type' => 'earned', 'description' => 'Credit diperoleh saat sesi dimulai.']);
                 }
 
-                $locked->update(['status' => 'active']);
+                $locked->transitionTo('active', null, 'Sesi dimulai sesuai jadwal.');
             });
         });
     }

@@ -14,6 +14,7 @@
     import Transaksi from "./pages/Transaksi.svelte";
     import Chat from "./pages/Chat.svelte";
     import PublicProfile from "./pages/PublicProfile.svelte";
+    import { push } from "svelte-spa-router";
     const routes = {
       "/" : Timeline,
       "/swapp" : Dashboard,
@@ -39,6 +40,7 @@
       "/leaderboard": "Letso | Leaderboard",
       "/profile": "Letso | Profil",
       "/login": "Letso | Login",
+      "/landing": "Letso | Landing",
       "/edit-profile": "Letso | Edit Profil",
       "/add-proposal": "Letso | Tambah Proposal",
       "/rekrut": "Letso | Rekrut",
@@ -49,9 +51,13 @@
       const path = window.location.hash.replace(/^#/, "").split("?")[0] || "/";
       const route = path.replace(/\/\d+$/, "");
       document.title = pageTitles[route] ?? "Letso";
-    }
+    };
 
     onMount(() => {
+      if (!window.location.hash) {
+        push("/landing");
+      }
+
       updatePageTitle();
       window.addEventListener("hashchange", updatePageTitle);
 

@@ -1,6 +1,19 @@
 <script>
 	/** @type {Array<{name: string, description?: string, levels?: string, tanggal_terbit?: number, kadaluwarsa?: number, certificate_path?: string}>} */
 	export let achievements = [];
+	const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+	function certificateUrl(value) {
+		try {
+			const url = new URL(value, backendUrl);
+			const storageIndex = url.pathname.indexOf("/storage/");
+			return storageIndex >= 0
+				? `${backendUrl.replace(/\/$/, "")}${url.pathname.slice(storageIndex)}${url.search}${url.hash}`
+				: url.toString();
+		} catch {
+			return value;
+		}
+	}
 
 	function formatDate(value) {
 		if (!value) return "-";
@@ -20,7 +33,7 @@
 					{#if achievement.description}<p class="mt-2 line-clamp-3 whitespace-pre-line font-mono text-[10px] leading-relaxed">{achievement.description}</p>{/if}
 					{#if achievement.tanggal_terbit}<p class="mt-1 font-mono text-[10px]">Terbit: {formatDate(achievement.tanggal_terbit)}</p>{/if}
 					{#if achievement.certificate_path}
-						<a href={achievement.certificate_path} target="_blank" rel="noreferrer" class="mt-3 inline-block border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-[10px] font-bold shadow-[2px_2px_0_#000]">Lihat sertifikat ↗</a>
+						<a href={certificateUrl(achievement.certificate_path)} target="_blank" rel="noreferrer" class="mt-3 inline-block border-2 border-pitch-black bg-off-white px-3 py-1 font-mono text-[10px] font-bold shadow-[2px_2px_0_#000]">Lihat sertifikat ↗</a>
 					{/if}
 				</article>
 			{/each}

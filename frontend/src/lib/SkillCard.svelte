@@ -307,13 +307,15 @@
     position: absolute;
     top: 26px;
     left: 24px;
-    width: 220px;
+    width: min(220px, calc(100% - 24px));
   }
 
   .banner {
     position: relative;
     display: flex;
     align-items: center;
+    max-width: 100%;
+    min-width: 0;
     border: 3px solid #0A0A0A;
     box-shadow: 5px 5px 0 0 #0A0A0A;
   }
@@ -327,7 +329,7 @@
   .duration-text {
     transform: skewX(9deg);
     color: #F3EFE6;
-    font-size: 32px;
+    font-size: clamp(18px, 8cqw, 32px);
     font-weight: 700;
     line-height: 1;
     letter-spacing: 1px;
@@ -363,7 +365,7 @@
   .name-text {
     transform: skewX(9deg);
     color: #0A0A0A;
-    font-size: 31px;
+    font-size: clamp(17px, 7.5cqw, 31px);
     font-weight: 700;
     line-height: 1;
     text-shadow: 3px 3px 0 rgba(10, 10, 10, 0.25);
