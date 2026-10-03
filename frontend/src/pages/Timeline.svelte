@@ -141,9 +141,9 @@
 
 <main class="min-h-screen bg-[#d8d8d8] px-5 py-6 sm:px-10 lg:px-14">
 <div class="pointer-events-none absolute -right-20 -top-16 h-44 w-44 rounded-full border-2 border-pitch-black bg-laser-pink sm:h-60 sm:w-60 lg:h-72 lg:w-72"></div>
-    <div class="pointer-events-none absolute -left-10 top-40 hidden h-24 w-24 -rotate-12 border-2 border-pitch-black bg-[#ffe477] sm:block sm:h-32 sm:w-32"></div>
-    <div class="pointer-events-none absolute -bottom-16 -left-14 h-40 w-40 rounded-full border-2 border-pitch-black bg-electric-cyan sm:h-52 sm:w-52"></div>
-    <div class="pointer-events-none absolute bottom-32 right-4 hidden h-14 w-14 rotate-6 border-2 border-pitch-black bg-cyber-lime lg:block"></div>
+    <div class="pointer-events-none absolute -z-10 -left-10 top-40 hidden h-24 w-24 -rotate-12 border-2 border-pitch-black bg-[#ffe477] sm:block sm:h-32 sm:w-32"></div>
+    <div class="pointer-events-none absolute -z-10 -bottom-16 -left-14 h-40 w-40 rounded-full border-2 border-pitch-black bg-electric-cyan sm:h-52 sm:w-52"></div>
+    <div class="pointer-events-none absolute -z-10 bottom-32 right-4 hidden h-14 w-14 rotate-6 border-2 border-pitch-black bg-cyber-lime lg:block"></div>
     
     <header class="dashboard-enter relative z-30 mx-auto grid max-w-320 grid-cols-[1fr_auto_1fr] items-center gap-4">
         <a href="/#/" aria-label="Faiz home" class="h-9 w-20 min-w-0 transition-transform hover:-translate-y-1 sm:h-11 sm:w-28 md:h-14 md:w-36">
