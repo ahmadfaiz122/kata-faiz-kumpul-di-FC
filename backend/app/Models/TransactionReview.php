@@ -6,7 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransactionReview extends Model
 {
-    protected $fillable = ['transaction_id', 'reviewer', 'reviewed', 'rating', 'reputation_emoji', 'reputation', 'comment'];
+    protected $fillable = [
+        'transaction_id',
+        'reviewer',
+        'reviewed',
+        'rating',
+        'reputation_emoji',
+        'reputation',
+        'reputation_category',
+        'reputation_delta',
+        'comment',
+    ];
 
     public function transaction()
     {
