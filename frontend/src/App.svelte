@@ -11,11 +11,12 @@
     import Rekrut from "./pages/Rekrut.svelte";
     import Messages from "./pages/Messages.svelte";
     import LandingPage from "./pages/LandingPage.svelte";
+    import Home from "./pages/Home.svelte";
     import Transaksi from "./pages/Transaksi.svelte";
     import Chat from "./pages/Chat.svelte";
     import PublicProfile from "./pages/PublicProfile.svelte";
     const routes = {
-      "/" : Timeline,
+      "/" : Home,
       "/swapp" : Dashboard,
       "/timeline" : Timeline,
       "/leaderboard" : Leaderboard,
@@ -48,7 +49,9 @@
     function updatePageTitle() {
       const path = window.location.hash.replace(/^#/, "").split("?")[0] || "/";
       const route = path.replace(/\/\d+$/, "");
-      document.title = pageTitles[route] ?? "Letso";
+      document.title = route === "/" && !localStorage.getItem("auth_token")
+        ? "Letso | Landing"
+        : pageTitles[route] ?? "Letso";
     }
 
     onMount(() => {

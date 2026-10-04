@@ -89,7 +89,7 @@ class ConversationController extends Controller
         }
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'min:1', 'max:2000'],
+            'body' => ['required', 'string', 'min:1', 'max:2000', 'regex:/\S/u'],
         ]);
 
         $message = $conversation->messages()->create([

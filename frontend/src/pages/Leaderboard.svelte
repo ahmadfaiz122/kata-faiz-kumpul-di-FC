@@ -3,6 +3,7 @@
     import logo from "../assets/logo.webp";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
+    import LoadingIndicator from "../lib/LoadingIndicator.svelte";
     import { onMount } from "svelte";
 
     editPage("Leaderboard");
@@ -48,7 +49,7 @@
         <p class="font-mono text-lg tracking-[0.2em] sm:text-xl">(Composite Score)</p>
 
         {#if loading}
-            <p class="mt-10 font-mono text-sm">Memuat leaderboard...</p>
+            <div class="mx-auto mt-10 max-w-md"><LoadingIndicator message="Memuat leaderboard..." /></div>
         {:else if error}
             <p class="mt-10 font-mono text-sm text-laser-pink">{error}</p>
         {:else if users.length === 0}

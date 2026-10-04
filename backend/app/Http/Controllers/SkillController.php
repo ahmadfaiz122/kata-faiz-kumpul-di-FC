@@ -46,9 +46,9 @@ class SkillController extends Controller
     {
         $validated = $request->validate([
             'id' => ['sometimes', 'nullable', 'integer'],
-            'name' => ['required', 'string', 'max:100'],
+            'name' => ['required', 'string', 'max:100', 'regex:/\S/u'],
             'category_id' => ['required', 'integer', 'exists:categories,id'],
-            'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:1000', 'regex:/\S/u'],
             'material' => ['required_without:id', 'sometimes', 'file', 'mimes:pdf', 'max:5120'],
         ]);
 

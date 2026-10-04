@@ -59,20 +59,31 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:255', 'regex:/\S/u'],
             'avatar' => ['sometimes', 'nullable', 'image', 'max:2048'],
-            'username' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'alias' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'bio' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'username' => ['sometimes', 'nullable', 'string', 'max:50', 'regex:/\S/u'],
+            'alias' => ['sometimes', 'nullable', 'string', 'max:100', 'regex:/\S/u'],
+            'bio' => ['sometimes', 'nullable', 'string', 'max:2000', 'regex:/\S/u'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users')->ignore($request->user()->id)],
             'linkedin' => ['sometimes', 'nullable', 'url', 'max:255'],
             'github' => ['sometimes', 'nullable', 'url', 'max:255'],
             'instagram' => ['sometimes', 'nullable', 'url', 'max:255'],
             'skills' => ['sometimes', 'array'],
-            'skills.*' => ['string', 'max:100'],
+            'skills.*' => ['string', 'max:100', 'regex:/\S/u'],
             'achievements' => ['sometimes', 'array'],
-            'achievements.*' => ['string', 'max:255'],
+            'achievements.*' => ['string', 'max:255', 'regex:/\S/u'],
         ]);
+
+        foreach (['name', 'username', 'alias', 'bio', 'linkedin', 'github', 'instagram'] as $field) {
+            if (array_key_exists($field, $validated) && is_string($validated[$field])) {
+                $validated[$field] = trim($validated[$field]);
+            }
+        }
+        foreach (['skills', 'achievements'] as $field) {
+            if (array_key_exists($field, $validated)) {
+                $validated[$field] = array_map('trim', $validated[$field]);
+            }
+        }
 
         $user = $request->user();
         if ($request->hasFile('avatar')) {
