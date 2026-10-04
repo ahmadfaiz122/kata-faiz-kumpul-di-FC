@@ -4,6 +4,7 @@
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import logo from "../assets/logo.webp";
+    import LoadingIndicator from "../lib/LoadingIndicator.svelte";
 
     /** @type {{ params?: { id?: string } }} */
     let { params = {} } = $props();
@@ -100,7 +101,7 @@
 
         <section class="mt-8 border-4 border-pitch-black bg-off-white p-4 shadow-[7px_7px_0_#000] sm:p-6" aria-label="Percakapan transaksi">
             <div class="chat-window">
-                {#if loading}<p class="font-mono text-xs">Memuat chat...</p>{/if}
+                {#if loading}<LoadingIndicator message="Memuat chat..." />{/if}
                 {#if !loading && messages.length === 0}<p class="font-mono text-xs">Belum ada pesan.</p>{/if}
                 {#each messages as message}
                     <article class="chat-bubble {message.is_mine ? 'chat-bubble-mine' : ''}">

@@ -11,12 +11,13 @@
     import Rekrut from "./pages/Rekrut.svelte";
     import Messages from "./pages/Messages.svelte";
     import LandingPage from "./pages/LandingPage.svelte";
+    import Home from "./pages/Home.svelte";
     import Transaksi from "./pages/Transaksi.svelte";
     import Chat from "./pages/Chat.svelte";
     import PublicProfile from "./pages/PublicProfile.svelte";
     import { push } from "svelte-spa-router";
     const routes = {
-      "/" : Timeline,
+      "/" : Home,
       "/swapp" : Dashboard,
       "/timeline" : Timeline,
       "/leaderboard" : Leaderboard,

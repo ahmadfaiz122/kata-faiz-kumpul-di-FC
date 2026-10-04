@@ -55,8 +55,9 @@ class PostController extends Controller
     public function storeComment(Request $request, Post $post): JsonResponse
     {
         $validated = $request->validate([
-            'content' => ['required', 'string', 'max:1000'],
+            'content' => ['required', 'string', 'max:1000', 'regex:/\S/u'],
         ]);
+        $validated['content'] = trim($validated['content']);
 
         $comment = $post->comments()->create([
             ...$validated,
@@ -70,8 +71,9 @@ class PostController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'content' => ['required', 'string', 'max:2000'],
+            'content' => ['required', 'string', 'max:2000', 'regex:/\S/u'],
         ]);
+        $validated['content'] = trim($validated['content']);
 
         $post = $request->user()->posts()->create($validated);
         $post->load('user:id,name,avatar');
@@ -99,8 +101,9 @@ class PostController extends Controller
         Gate::forUser($request->user())->authorize('update', $post);
 
         $validated = $request->validate([
-            'content' => ['required', 'string', 'max:2000'],
+            'content' => ['required', 'string', 'max:2000', 'regex:/\S/u'],
         ]);
+        $validated['content'] = trim($validated['content']);
 
         $post->update($validated);
         $post->load('user:id,name,avatar');

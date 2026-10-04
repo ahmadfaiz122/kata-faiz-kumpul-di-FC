@@ -5,6 +5,7 @@
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import { alertError, alertSuccess, confirmAction } from "../lib/alerts.js";
+    import LoadingIndicator from "../lib/LoadingIndicator.svelte";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let saved = false;
@@ -458,7 +459,7 @@
         </header>
 
         {#if loading}
-            <p class="py-20 text-center font-mono text-sm">Memuat profile...</p>
+            <div class="py-16"><LoadingIndicator message="Memuat profile..." /></div>
         {:else}
         <div class="mt-10">
             <a href="/#/profile" aria-label="Kembali ke profile" title="Kembali ke profile" class="button-lift inline-flex h-11 w-11 items-center justify-center border-2 border-pitch-black bg-off-white text-xl font-bold shadow-[4px_4px_0_#000]">←</a>
@@ -480,7 +481,7 @@
                             <label class="grid gap-1 font-mono text-[10px]">Full Name<input bind:value={profile.name} class="form-input" /></label>
                             <label class="grid gap-1 font-mono text-[10px]">Username<input bind:value={profile.username} class="form-input" /></label>
                         </div>
-                        <label class="grid gap-1 font-mono text-[10px]">About<textarea bind:value={profile.bio} placeholder="Story about yourself..." rows="5" class="form-input resize-none"></textarea></label>
+                        <label class="grid gap-1 font-mono text-[10px]">About<textarea bind:value={profile.bio} maxlength="2000" placeholder="Story about yourself..." rows="5" class="form-input resize-none"></textarea></label>
                         <div class="grid gap-4 sm:grid-cols-2">
                             <label class="grid gap-1 font-mono text-[10px]">Email<input type="email" bind:value={profile.email} class="form-input" /></label>
                             <label class="grid gap-1 font-mono text-[10px]">NIM<input value={profile.nim} readonly placeholder="Diambil dari email kampus" class="form-input cursor-not-allowed bg-[#e8e8e8]" /></label>

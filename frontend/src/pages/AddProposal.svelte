@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import { push } from "svelte-spa-router";
+    import LoadingIndicator from "../lib/LoadingIndicator.svelte";
     import Navbar from "../lib/Navbar.svelte";
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import logo from "../assets/logo.webp";
@@ -229,7 +230,7 @@
                     <div class="mt-5 grid gap-5 sm:grid-cols-2">
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Nama lengkap
-                            <input bind:value={fullName} required type="text" placeholder="Nama kamu" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            <input bind:value={fullName} required type="text" maxlength="255" placeholder="Nama kamu" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Email
@@ -244,7 +245,7 @@
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase">
                             Kota domisili
-                            <input bind:value={city} required type="text" placeholder="Kota kamu" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
+                            <input bind:value={city} required type="text" maxlength="100" placeholder="Kota kamu" class="border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]" />
                         </label>
                         <label class="flex flex-col gap-2 font-mono text-xs uppercase sm:col-span-2">
                             Jadwal mulai sesi
@@ -277,7 +278,7 @@
                     <legend class="font-anton text-3xl uppercase">Deskripsi skill</legend>
                     <label class="mt-5 flex flex-col gap-2 font-mono text-xs uppercase">
                         Skill yang kamu tawarkan
-                        <textarea bind:value={skillDescription} required rows="6" placeholder="Ceritakan skill, pengalaman, dan bentuk barter yang kamu inginkan..." class="resize-y border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]"></textarea>
+                        <textarea bind:value={skillDescription} required maxlength="5000" rows="6" placeholder="Ceritakan skill, pengalaman, dan bentuk barter yang kamu inginkan..." class="resize-y border-2 border-pitch-black bg-white px-4 py-3 font-archivo text-base normal-case outline-none transition-shadow focus:shadow-[4px_4px_0_#ccff00]"></textarea>
                     </label>
                 </fieldset>
 
@@ -295,7 +296,7 @@
                     <p role="alert" class="mt-5 border-2 border-pale-red bg-[#ffd6df] px-4 py-3 font-mono text-xs">{error}</p>
                 {/if}
 
-                <button type="submit" disabled={submitting} class="button-lift mt-8 w-full border-2 border-pitch-black bg-neon-yellow px-6 py-4 font-mono text-sm uppercase shadow-[5px_5px_0_#000] disabled:cursor-wait disabled:opacity-60" style="--button-complement: #ff006e">{submitting ? "Mengirim..." : "Kirim proposal"} <span aria-hidden="true">&rarr;</span></button>
+                <button type="submit" disabled={submitting} class="button-lift mt-8 w-full border-2 border-pitch-black bg-neon-yellow px-6 py-4 font-mono text-sm uppercase shadow-[5px_5px_0_#000] disabled:cursor-wait disabled:opacity-60" style="--button-complement: #ff006e">{#if submitting}<LoadingIndicator message="Mengirim..." compact />{:else}Kirim proposal <span aria-hidden="true">&rarr;</span>{/if}</button>
             </form>
         {/if}
     </section>

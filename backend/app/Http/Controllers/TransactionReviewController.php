@@ -6,6 +6,7 @@ use App\Models\Transaction;
 use App\Models\TransactionReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class TransactionReviewController extends Controller
@@ -25,8 +26,9 @@ class TransactionReviewController extends Controller
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'reputation_category' => ['required', Rule::in(['very_bad', 'needs_improvement', 'neutral', 'good', 'excellent'])],
-            'comment' => ['nullable', 'string', 'max:1000'],
+            'comment' => ['nullable', 'string', 'max:1000', 'regex:/\S/u'],
         ]);
+        $validated['comment'] = isset($validated['comment']) ? trim($validated['comment']) : null;
 
         $reputationMap = [
             'very_bad' => ['emoji' => '😞', 'delta' => -2],

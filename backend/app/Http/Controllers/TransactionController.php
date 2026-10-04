@@ -51,7 +51,7 @@ class TransactionController extends Controller
             'proposal_id' => ['required', 'integer', 'exists:requests,id'],
             'mode' => ['required', Rule::in(['credit', 'skill'])],
             'requester_skill_id' => ['nullable', 'integer'],
-            'requester_skill_note' => ['required_if:mode,skill', 'nullable', 'string', 'max:1000'],
+            'requester_skill_note' => ['required_if:mode,skill', 'nullable', 'string', 'max:1000', 'regex:/\S/u'],
         ]);
 
         $proposal = SkillRequest::query()->with('skill')->findOrFail($validated['proposal_id']);

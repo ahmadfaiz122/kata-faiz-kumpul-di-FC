@@ -10,6 +10,11 @@ class ProposalController extends Controller
 {
     public function index(Request $request)
     {
+        $request->validate([
+            'search' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:100'],
+        ]);
+
         $query = SkillRequest::query()
             ->with('requesterUser:id,name,avatar','requesterUser.profile.skillRecords','requesterUser.profile.achievementRecords')
             ->where('status', 'pending')
@@ -68,13 +73,13 @@ class ProposalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => ['required', 'string', 'max:255'],
+            'full_name' => ['required', 'string', 'max:255', 'regex:/\S/u'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['required', 'regex:/\A08[0-9]{8,12}\z/'],
-            'city' => ['required', 'string', 'max:100'],
+            'city' => ['required', 'string', 'max:100', 'regex:/\S/u'],
             'skill_id' => ['required', 'integer'],
             'available_at' => ['required', 'date', 'after_or_equal:now'],
-            'skill_description' => ['required', 'string', 'max:5000'],
+            'skill_description' => ['required', 'string', 'max:5000', 'regex:/\S/u'],
             'proposal_file' => ['required', 'file', 'mimes:pdf', 'max:5120'],
         ], [
             'phone.regex' => 'Nomor WhatsApp harus diawali 08 dan berisi 10 sampai 14 angka.',
@@ -131,14 +136,14 @@ class ProposalController extends Controller
         }
 
         $validated = $request->validate([
-            'full_name' => ['required', 'string', 'max:255'],
+            'full_name' => ['required', 'string', 'max:255', 'regex:/\S/u'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:50'],
-            'city' => ['required', 'string', 'max:100'],
+            'phone' => ['required', 'regex:/\A08[0-9]{8,12}\z/'],
+            'city' => ['required', 'string', 'max:100', 'regex:/\S/u'],
             'skill_id' => ['sometimes', 'nullable', 'integer'],
-            'skill_name' => ['required', 'string', 'max:100'],
-            'skill_category' => ['required', 'string', 'max:100'],
-            'skill_description' => ['required', 'string', 'max:5000'],
+            'skill_name' => ['required', 'string', 'max:100', 'regex:/\S/u'],
+            'skill_category' => ['required', 'string', 'max:100', 'regex:/\S/u'],
+            'skill_description' => ['required', 'string', 'max:5000', 'regex:/\S/u'],
             'proposal_file' => ['sometimes', 'file', 'mimes:pdf', 'max:5120'],
         ]);
 

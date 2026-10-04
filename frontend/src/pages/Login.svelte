@@ -1,6 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { push } from 'svelte-spa-router';
+  import LoadingIndicator from '../lib/LoadingIndicator.svelte';
 
   // Set VITE_API_URL di file .env frontend, contoh: VITE_API_URL=http://localhost:8000
   const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -59,7 +60,7 @@
         <path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.4C29.4 34.8 26.8 36 24 36c-5.3 0-9.7-3.1-11.3-8l-6.5 5C9.8 39.8 16.4 44 24 44z"/>
         <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.4C39.9 37 44 31.5 44 24c0-1.3-.1-2.7-.4-3.5z"/>
       </svg>
-      {loading ? 'Mengarahkan ke Google...' : 'Masuk dengan Google'}
+      {#if loading}<LoadingIndicator message="Mengarahkan ke Google..." compact />{:else}Masuk dengan Google{/if}
     </button>
 
     {#if error}

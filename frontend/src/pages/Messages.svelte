@@ -4,6 +4,7 @@
     import ProfileDropdown from "../lib/ProfileDropdown.svelte";
     import logo from "../assets/logo.webp";
     import { push } from "svelte-spa-router";
+    import LoadingIndicator from "../lib/LoadingIndicator.svelte";
 
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     let receivedMessages = $state([]);
@@ -272,7 +273,7 @@
                     <h2 id="received-title" class="font-mono text-xl font-bold uppercase sm:text-2xl">Received</h2>
                     <span class="bg-laser-pink px-2 py-1 font-mono text-[10px] font-bold uppercase">{receivedMessages.filter((message) => message.unread).length} unread</span>
                 </div>
-                {#if loading}<p class="font-mono text-sm">Memuat transaksi...</p>{/if}
+                {#if loading}<LoadingIndicator message="Memuat transaksi..." />{/if}
                 <div class="grid gap-4">
                     {#if !loading && receivedMessages.length === 0}<p class="border-2 border-pitch-black bg-off-white p-4 font-mono text-xs">Belum ada request masuk.</p>{/if}
                     {#each (showMoreReceived ? receivedMessages : receivedMessages.slice(0, 2)) as message}
@@ -311,7 +312,7 @@
                                         <div class="mt-3 grid gap-2 border-t-2 border-pitch-black pt-3">
                                             <fieldset class="review-fieldset"><legend>Rating (1-5)</legend><div class="rating-stars">{#each [1, 2, 3, 4, 5] as rating}<button type="button" aria-label={`Beri rating ${rating}`} class:rating-selected={Number(reviewRating) >= rating} onclick={() => reviewRating = rating}>★</button>{/each}</div></fieldset>
                                             <fieldset class="review-fieldset"><legend>Reputasi</legend><div class="reputation-options">{#each reputationOptions as option}<button type="button" class:reputation-selected={reviewReputation === option.value} onclick={() => reviewReputation = option.value}><span class="reputation-emoji">{option.emoji}</span><span>{option.label}</span><small>{option.delta > 0 ? `+${option.delta}` : option.delta}</small></button>{/each}</div></fieldset>
-                                            <textarea bind:value={reviewComment} placeholder="Komentar (opsional)" class="border-2 border-pitch-black px-2 py-1 font-mono text-xs"></textarea>
+                                            <textarea bind:value={reviewComment} maxlength="1000" placeholder="Komentar (opsional)" class="border-2 border-pitch-black px-2 py-1 font-mono text-xs"></textarea>
                                             <button type="button" onclick={() => submitReview(message)} class="border-2 border-pitch-black bg-cyber-lime px-3 py-2 font-mono text-xs font-bold">Kirim review</button>
                                         </div>
                                     {/if}
@@ -367,7 +368,7 @@
                                         <div class="mt-3 grid gap-2 border-t-2 border-pitch-black pt-3">
                                             <fieldset class="review-fieldset"><legend>Rating (1-5)</legend><div class="rating-stars">{#each [1, 2, 3, 4, 5] as rating}<button type="button" aria-label={`Beri rating ${rating}`} class:rating-selected={Number(reviewRating) >= rating} onclick={() => reviewRating = rating}>★</button>{/each}</div></fieldset>
                                             <fieldset class="review-fieldset"><legend>Reputasi</legend><div class="reputation-options">{#each reputationOptions as option}<button type="button" class:reputation-selected={reviewReputation === option.value} onclick={() => reviewReputation = option.value}><span class="reputation-emoji">{option.emoji}</span><span>{option.label}</span><small>{option.delta > 0 ? `+${option.delta}` : option.delta}</small></button>{/each}</div></fieldset>
-                                            <textarea bind:value={reviewComment} placeholder="Komentar (opsional)" class="border-2 border-pitch-black px-2 py-1 font-mono text-xs"></textarea>
+                                            <textarea bind:value={reviewComment} maxlength="1000" placeholder="Komentar (opsional)" class="border-2 border-pitch-black px-2 py-1 font-mono text-xs"></textarea>
                                             <button type="button" onclick={() => submitReview(message)} class="border-2 border-pitch-black bg-cyber-lime px-3 py-2 font-mono text-xs font-bold">Kirim review</button>
                                         </div>
                                     {/if}
@@ -427,7 +428,7 @@
                         {#if chatMeta?.ends_at}<span class="border-2 border-pitch-black bg-white px-2 py-1">Selesai: {new Date(chatMeta.ends_at).toLocaleString("id-ID")}</span>{/if}
                     </div>
                     <div class="chat-window">
-                        {#if chatLoading}<p class="font-mono text-xs">Memuat chat...</p>{/if}
+                        {#if chatLoading}<LoadingIndicator message="Memuat chat..." />{/if}
                         {#if !chatLoading && chatMessages.length === 0}<p class="font-mono text-xs">Belum ada pesan. Chat akan terbuka saat sesi dimulai.</p>{/if}
                         {#each chatMessages as chatMessage}
                             <article class="chat-bubble {chatMessage.is_mine ? 'chat-bubble-mine' : ''}">

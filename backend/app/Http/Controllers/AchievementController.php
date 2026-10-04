@@ -35,10 +35,10 @@ class AchievementController extends Controller
     {
         $validated = $request->validate([
             'id' => ['sometimes', 'nullable', 'integer'],
-            'name' => ['required', 'string', 'max:255'],
-            'levels' => ['required', 'string', 'max:100'],
-            'category' => ['sometimes','nullable', 'string', 'max:100'],
-            'description' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'name' => ['required', 'string', 'max:255', 'regex:/\S/u'],
+            'levels' => ['required', 'string', 'max:100', 'regex:/\S/u'],
+            'category' => ['sometimes','nullable', 'string', 'max:100', 'regex:/\S/u'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:1000', 'regex:/\S/u'],
             'tanggal_terbit' => ['required', 'date'],
             'kadaluwarsa' => ['required', 'date', 'after_or_equal:tanggal_terbit'],
             'certificate' => ['required_without:id', 'sometimes', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],

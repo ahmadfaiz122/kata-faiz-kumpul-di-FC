@@ -8,6 +8,7 @@
     import SkillCard from "../lib/SkillCard.svelte";
     import logo from "../assets/logo.webp";
     import FilterDropdown from "../lib/FilterDropdown.svelte";
+    import LoadingIndicator from "../lib/LoadingIndicator.svelte";
 
     editPage("Swapp");
 
@@ -131,9 +132,9 @@
         </div>
     </header>
 
-    <section class="dashboard-enter dashboard-enter-delay-1 mx-auto mt-14 flex max-w-7xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+    <section class="dashboard-enter dashboard-enter-delay-1 relative z-10 mx-auto mt-14 flex max-w-7xl flex-col gap-8 min-[1400px]:flex-row min-[1400px]:items-center min-[1400px]:justify-between">
         <CategoryBar on:categorySelect={selectCategory} />
-        <div class="relative flex items-center gap-3 lg:w-100">
+        <div class="relative flex w-full items-center gap-3 min-[1400px]:w-100 min-[1400px]:shrink-0">
                         
 
             <button
@@ -330,7 +331,7 @@
 
 
 
-    <section class="dashboard-enter dashboard-enter-delay-2 mx-auto mt-10 max-w-7xl" aria-labelledby="offers-title">
+    <section class="dashboard-enter dashboard-enter-delay-2 relative z-10 mx-auto mt-10 max-w-7xl" aria-labelledby="offers-title">
 
         <div class="mb-5 flex items-end justify-between gap-4">
 
@@ -352,7 +353,7 @@
 
             {#if proposalsLoading}
 
-                <p class="border-2 border-pitch-black bg-off-white p-5 font-mono text-xs">Memuat post Swapp...</p>
+                <LoadingIndicator message="Memuat post Swapp..." />
 
             {:else if proposalsError}
 

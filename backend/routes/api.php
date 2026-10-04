@@ -45,7 +45,7 @@ Route::middleware('throttle:60,1')->group(function () {
             $profile->setAttribute('dominant_reputation_emoji', $summary['dominant_reputation_emoji']);
             $profile->setAttribute('review_count', $summary['review_count']);
         }
-
+        
         $user['profile'] = $profile;
         return response()->json($user);
     })->middleware('auth:sanctum');
@@ -84,7 +84,6 @@ Route::middleware('throttle:60,1')->group(function () {
         Route::get('/transactions/{transaction}', [TransactionController::class, 'show']);
         Route::get('/transactions/{transaction}/materials/{skill}', [TransactionController::class, 'material']);
         Route::post('/transactions/{transaction}/approve', [TransactionController::class, 'approve']);
-        Route::post('/transactions/{transaction}/review', [TransactionReviewController::class, 'store'])->middleware('throttle:10,1');
         Route::post('/transactions/{transaction}/reject', [TransactionController::class, 'reject']);
         Route::post('/transactions/{transaction}/cancel', [TransactionController::class, 'cancel']);
         Route::post('/transactions/{transaction}/hide', [TransactionController::class, 'hide']);
