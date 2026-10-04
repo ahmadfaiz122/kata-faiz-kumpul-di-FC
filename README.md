@@ -1,3 +1,5 @@
+<img width="1600" height="800" alt="WhatsApp Image 2026-09-18 at 16 53 10" src="https://github.com/user-attachments/assets/edeb20d4-e75b-41f1-a8ae-8e308d7522cf" />
+
 # LetSo
 
 A web platform for university students to exchange skills using a **time banking credit system**. Login is restricted to campus email addresses (`@mhs.unesa.ac.id`) via Google OAuth.

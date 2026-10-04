@@ -102,7 +102,7 @@
 
         <div
             bind:this={panelEl}
-            class="relative z-[2] flex max-h-[480px] flex-col rounded-[26px] border-[3px] border-black bg-[#ede9e0] px-5 pb-4 pt-6 font-mono shadow-[9px_9px_0_0_#0a0a0a]"
+            class="relative z-[2] flex max-h-[380px] md:max-h-[480px] flex-col rounded-[26px] border-[3px] border-black bg-[#ede9e0] px-5 pb-4 pt-6 font-mono shadow-[9px_9px_0_0_#0a0a0a]"
             transition:scale={{ duration: 200, start: 0.94, opacity: 0, easing: cubicOut }}
         >
             <div class="min-h-0 flex-1 space-y-3 overflow-y-auto overflow-x-hidden pr-1">

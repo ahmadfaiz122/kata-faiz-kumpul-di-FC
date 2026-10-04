@@ -1,20 +1,12 @@
 <script>
     import symbol from "../assets/logo.webp";
-    import { onMount } from 'svelte';
-
     // ---------------------------------------------------------------- auth
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-    let loggedIn = $state(false);
     let activeNav = $state('cara-kerja');
 
-    onMount(() => {
-        loggedIn = !!localStorage.getItem('auth_token');
-    });
-
-    // Same flow as Login.svelte: Laravel -> Google -> callback -> /#/login?token=...
+    // Keep the landing page separate from authentication so the first CTA always
+    // takes the user to the frontend login route.
     function startNow() {
-        window.location.href = loggedIn ? '/#/' : `${backendUrl}/auth/google/redirect`;
+        window.location.href = '/#/login';
     }
 
     // svelte-spa-router uses the URL hash, so #anchors would change the route.
