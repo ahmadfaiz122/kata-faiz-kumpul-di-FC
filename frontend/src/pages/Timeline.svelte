@@ -12,11 +12,14 @@
     const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     /** @typedef {{id: number, content: string, user?: {id?: number, name?: string, avatar?: string}, created_at: string, updated_at?: string, likes_count?: number, comments_count?: number, liked_by_user?: boolean, comments?: Array<{content: string, user?: {name?: string}}>, commentsOpen?: boolean, commentText?: string, likeLoading?: boolean, commentLoading?: boolean}} TimelinePostData */
     /** @type {TimelinePostData[]} */
-    let posts = [];
-    let content = "";
-    let loading = true;
-    let submitting = false;
-    let error = "";
+    let posts = $state([]);
+    let content = $state("");
+    let loading = $state(true);
+    let submitting = $state(false);
+    let error = $state("");
+    let leaderboard = $state([]);
+    let leaderboardLoading = $state(true);
+    let leaderboardError = $state("");
 
     async function loadPosts() {
         loading = true;
@@ -135,9 +138,26 @@
         return Boolean(post.updated_at && new Date(post.updated_at).getTime() > new Date(post.created_at).getTime());
     }
 
-    onMount(loadPosts);
+    async function loadLeaderboard() {
+        leaderboardLoading = true;
+        leaderboardError = "";
+        try {
+            const response = await fetch(`${backendUrl}/api/leaderboard`, { headers: { Accept: "application/json" } });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || "Leaderboard gagal dimuat.");
+            leaderboard = result.data ?? [];
+        } catch (requestError) {
+            leaderboardError = requestError instanceof Error ? requestError.message : "Leaderboard gagal dimuat.";
+        } finally {
+            leaderboardLoading = false;
+        }
+    }
 
-    const leaderboard = ["Kastama", "Ibna", "Reinzal"];
+    onMount(() => {
+        loadPosts();
+        loadLeaderboard();
+    });
+
 </script>
 
 <main class="relative isolate min-h-screen overflow-x-clip bg-[#d8d8d8] px-5 py-6 sm:px-10 lg:px-14">
@@ -158,7 +178,7 @@
 
     <div class="relative z-10 mx-auto mt-14 grid min-w-0 max-w-7xl gap-8 lg:grid-cols-[minmax(0,3fr)_220px]">
         <section>
-            <form class="border-2 border-pitch-black bg-off-white p-4 shadow-[6px_6px_0_#000]" on:submit|preventDefault={submitPost}>
+            <form class="border-2 border-pitch-black bg-off-white p-4 shadow-[6px_6px_0_#000]" onsubmit={(event) => { event.preventDefault(); submitPost(); }}>
                 <label for="post-content" class="font-mono text-xs font-bold">Lagi penasaran sama apa nih?</label>
                 <textarea id="post-content" bind:value={content} maxlength="2000" rows="3" placeholder="Bagikan sesuatu yang sedang kamu pelajari..." class="mt-3 w-full resize-y border-2 border-pitch-black bg-white p-3 font-mono text-xs outline-none focus:bg-[#fff7c7]"></textarea>
                 <div class="mt-3 flex items-center justify-between gap-3">
@@ -185,11 +205,19 @@
         <aside class="dashboard-enter dashboard-enter-delay-1 space-y-8 lg:pt-5">
             <div class="min-h-70 border-2 border-pitch-black bg-[#48b3cf] p-5 shadow-[10px_10px_0_#000]">
                 <h2 class="font-mono text-sm font-bold leading-relaxed">Leaderboard<br />Minggu ini 🏆</h2>
-                <ol class="mt-8 space-y-4 font-mono text-xs font-bold">
-                    {#each leaderboard as user, index}
-                        <li class="flex justify-between border-b border-pitch-black/40 pb-2"><span>0{index + 1} {user}</span><span>{100 - index * 12}</span></li>
-                    {/each}
-                </ol>
+                {#if leaderboardLoading}
+                    <div class="mt-6"><LoadingIndicator message="Memuat ranking..." /></div>
+                {:else if leaderboardError}
+                    <p class="mt-6 font-mono text-[10px]">{leaderboardError}</p>
+                {:else if leaderboard.length === 0}
+                    <p class="mt-6 font-mono text-[10px]">Belum ada ranking.</p>
+                {:else}
+                    <ol class="mt-8 space-y-4 font-mono text-xs font-bold">
+                        {#each leaderboard.slice(0, 3) as user, index}
+                            <li class="flex justify-between gap-3 border-b border-pitch-black/40 pb-2"><span class="min-w-0 truncate">{String(index + 1).padStart(2, "0")} {user.name}</span><span class="shrink-0">{user.score}</span></li>
+                        {/each}
+                    </ol>
+                {/if}
             </div>
             <div class="h-28 border-2 border-pitch-black bg-[#48b3cf] shadow-[10px_10px_0_#000]"></div>
             <div class="h-28 border-2 border-pitch-black bg-[#48b3cf] shadow-[10px_10px_0_#000]"></div>

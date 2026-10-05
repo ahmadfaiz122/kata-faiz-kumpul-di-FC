@@ -29,7 +29,7 @@ class LeaderboardController extends Controller
         $reviews = TransactionReview::query()
             ->whereIn('transaction_id', $transactions->pluck('id'))
             ->get();
-        $globalRating = (float) ($reviews->avg('rating') ?: 0);
+        $globalRating = $this->averageNumeric($reviews, 'rating');
         $users = User::query()->with('profile')->whereIn('id', $transactions->flatMap(fn ($transaction) => [$transaction->provider, $transaction->requester])->unique())->get()->keyBy('id');
         $participantCounts = $transactions->flatMap(fn ($transaction) => [$transaction->provider, $transaction->requester])->countBy();
         $maxTransactions = max(self::MIN_TRANSACTIONS, (int) ($participantCounts->max() ?: self::MIN_TRANSACTIONS));
@@ -46,7 +46,7 @@ class LeaderboardController extends Controller
                 return null;
             }
 
-            $averageRating = (float) ($eligibleReviews->avg('rating') ?: 0);
+            $averageRating = $this->averageNumeric($eligibleReviews, 'rating');
             $reviewCount = $eligibleReviews->count();
             $weightedRating = (($reviewCount / ($reviewCount + self::BAYESIAN_MIN_REVIEWS)) * $averageRating)
                 + ((self::BAYESIAN_MIN_REVIEWS / ($reviewCount + self::BAYESIAN_MIN_REVIEWS)) * $globalRating);
@@ -68,7 +68,7 @@ class LeaderboardController extends Controller
                 'avatar' => $user->avatar,
                 'score' => round($score * 100, 2),
                 'rating' => round($weightedRating, 2),
-                'reputation' => round((float) ($eligibleReviews->avg('reputation') ?: 0), 2),
+                'reputation' => round($this->averageNumeric($eligibleReviews, 'reputation'), 2),
                 'transactions' => $transactionCount,
                 'recent_transactions' => $recentCount,
                 'unique_skills' => $uniqueSkills,
@@ -99,14 +99,23 @@ class LeaderboardController extends Controller
         });
     }
 
+    private function averageNumeric(Collection $items, string $field): float
+    {
+        if ($items->isEmpty()) {
+            return 0.0;
+        }
+
+        return $items->sum(fn ($item) => (float) ($item->{$field} ?? 0)) / $items->count();
+    }
+
     private function isSuspiciousUser(int $userId, Collection $reviews): bool
     {
         $userReviews = $reviews->where('reviewed', $userId);
         return $userReviews->groupBy('reviewer')->contains(function (Collection $partnerReviews) use ($userId, $reviews) {
-            if ($partnerReviews->count() < 3 || (float) $partnerReviews->avg('rating') < 4.5) return false;
+            if ($partnerReviews->count() < 3 || $this->averageNumeric($partnerReviews, 'rating') < 4.5) return false;
             $partnerId = (int) $partnerReviews->first()->reviewer;
             $reverse = $reviews->where('reviewer', $userId)->where('reviewed', $partnerId);
-            return $reverse->count() >= 3 && (float) $reverse->avg('rating') >= 4.5;
+            return $reverse->count() >= 3 && $this->averageNumeric($reverse, 'rating') >= 4.5;
         });
     }
 }

@@ -22,6 +22,10 @@ class ProposalController extends Controller
             ->where(function ($query) {
                 $query->whereNull('created_at')->orWhere('created_at', '>=', now()->subDay());
             });
+            
+        $query->where(function ($query) {
+            $query->whereNull('available_at')->orWhere('available_at', '>', now());
+        });
 
         if ($request->filled('search')) {
             $query->where('skill_name', 'like', '%' . $request->string('search') . '%');
